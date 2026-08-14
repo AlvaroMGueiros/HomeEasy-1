@@ -25,6 +25,7 @@ export class ListaContatoComponent implements OnInit {
   entrarSair : boolean;
   usuario : Usuario = {};
   userSubscription : Subscription;
+  isLoading = true;
 
   constructor(
     public afs : AngularFirestore, 
@@ -47,6 +48,7 @@ export class ListaContatoComponent implements OnInit {
 
     this.listaContatosSubscription = this.chatService.getContatos(this.userId).subscribe(data => {
       this.listaContatos = data;
+      this.isLoading = false;
     });
     this.userSubscription = this.usuarioService.getUsuario(this.userId).subscribe(data => {
       this.usuario = data; 

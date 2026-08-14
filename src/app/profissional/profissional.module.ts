@@ -6,12 +6,14 @@ import { ProfissionalComponent } from './profissional.component';
 import { AddprofissioanlComponent } from './addprofissioanl/addprofissioanl.component';
 import { EditarInfoComponent } from './editar-info/editar-info.component';
 import { ProfissionalRoutingModule } from './profissional.routing.module';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
     imports:[
         CommonModule,
         FormsModule,
-        ProfissionalRoutingModule
+        ProfissionalRoutingModule,
+        SharedModule
     ],
     declarations:[
         ProfissionalComponent,

@@ -4,6 +4,8 @@ import { AngularFireAuth } from '@angular/fire/auth';
 
 import { LoginServiceService } from '../../Servicos/login-service.service';
 import { Usuario } from './../../Usuarios/usuario';
+import { FeedbackType } from '../../shared/action-feedback/action-feedback.component';
+import { resolveAuthErrorMessage } from '../../shared/utils/auth-error.utils';
 
 @Component({
   selector: 'app-recuperar-senha',
@@ -14,6 +16,9 @@ export class RecuperarSenhaComponent implements OnInit {
   entrarSair : boolean;
   userId : string;
   userLogin : Usuario = {};
+  feedbackMessage = '';
+  feedbackType: FeedbackType = 'info';
+  isSubmitting = false;
 
   constructor(
     public loginservico : LoginServiceService,
@@ -28,13 +33,23 @@ export class RecuperarSenhaComponent implements OnInit {
     }else this.entrarSair = false
   }
 
-  recuperarsenha(){
-    try { 
-       this.loginservico.recuperarsenha(this.userLogin).then((success) =>{
-        alert("O e-mail de recuperação de senha foi enviado!");
-       });
-    } catch (error) { 
-      console.error(error); 
+  async resetPassword(){
+    if (this.isSubmitting) {
+      return;
+    }
+
+    this.feedbackMessage = '';
+    this.isSubmitting = true;
+
+    try {
+      await this.loginservico.recuperarsenha(this.userLogin);
+      this.feedbackType = 'success';
+      this.feedbackMessage = 'Enviamos o link de recuperação. Confira sua caixa de entrada e a pasta de spam.';
+    } catch (error) {
+      this.feedbackType = 'error';
+      this.feedbackMessage = resolveAuthErrorMessage(error.code, 'recovery');
+    } finally {
+      this.isSubmitting = false;
     }
   }
 

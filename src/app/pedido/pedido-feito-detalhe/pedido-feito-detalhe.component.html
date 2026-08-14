@@ -1,66 +1,10 @@
-<html>
-  <head>
-    <title>Pedido</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <meta charset="utf-8">  
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-  </head>
-
-  <header class="navbar navbar-expand-lg navbar-light bg-primary">
-
-    <a class="navbar-brand btn" routerLink="/home">Home Easy</a>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="btn btn-primary" [routerLink]="['/usuario', userId]" role="button">Perfil</a>
-        <a class="btn btn-primary" routerLink="/feed" role="button">Serviços</a>
-        <a class="btn btn-primary" routerLink="/sobrenos" role="button">Sobre Nós</a>
-        <a class="btn btn-primary" routerLink="/contato" role="button">Contato</a>
-        <a class="btn btn-primary" routerLink="/login" role="button" *ngIf="!entrarSair">Entrar</a>
-        <a class="btn btn-danger" (click)="sair()" role="button" *ngIf="entrarSair">Sair</a>
-      </div>
-    </div>
-   
-  </header>
- 
-  <body>
-
-    <div class="container">
-      <h2>Informações</h2>
-      <h3>Serviço: {{pedido.nome}}</h3>
-      <h3>Profissional: {{servidor.nome}}</h3>
-      <h3>Data: {{pedido.data}}</h3>
-      <h3>Preço: {{pedido.preco}}</h3>
-      <h3>Horário: {{pedido.hora}}</h3>
-      <h3>Local: {{pedido.local}}</h3>
-      <h3>Cidade: {{pedido.cidade}}</h3>
-      <h3>Estado: {{pedido.estado}}</h3>
-      <br>
-      <div *ngIf="pedido.profissionalCancelou == true">
-        <h3>{{servidor.nome}} Não Aceitou Esse Pedido!</h3>
-      </div>
-      
-      <div *ngIf="pedido.statusProfissional == true">
-        <h3>{{servidor.nome}} Aceitou Esse Pedido!</h3>
-      </div>
-      <br>
-      <div *ngIf="pedido.clienteCancelou == false && pedido.statusProfissional == true">
-        <form class="forms" #f="ngForm"> 
-          <p>Quando esse serviço for concluido, você poderá avaliá-lo!</p>
-          <div class="group" *ngIf="today >= pedido.data">
-            <input type="number" min="1" max="5" placeholder="Nota?" [(ngModel)] = "avaliacao.avaliacaoNota" name="nota" required><br>
-            <textarea rows="3"  placeholder="O que você achou desse serviço?" [(ngModel)] = "avaliacao.avaliacao" name="avaliacao" required></textarea><br>
-            <button type="submit" [disabled]="!f.valid" (click)="addAvaliacao()">Avaliar</button>
-          </div>
-        </form>
-      </div>       
-      
-      <div *ngIf="pedido.profissionalCancelou == false && pedido.statusProfissional == false">
-        <button type="button" class="alert alert-danger" (click)="cancelarPedido()">Cancelar Pedido</button>
-      </div>
-      
-    </div>
-
-
-  </body>
-
-</html>
+<app-navbar [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
+<div class="context-nav context-nav-narrow"><app-back-link [route]="['/usuario', userId, 'pedidos-feitos']" label="Voltar aos pedidos"></app-back-link></div>
+<main class="app-page"><div class="page-shell page-shell-narrow"><header class="page-heading"><div class="page-heading-copy"><span class="page-kicker">Detalhes do pedido</span><h1>{{ pedido.nome }}</h1><p>Acompanhe o status e todas as informações do atendimento.</p></div></header>
+  <section class="surface-card"><div class="detail-list"><div class="detail-item"><span>Profissional</span><strong>{{ servidor.nome }}</strong></div><div class="detail-item"><span>Valor</span><strong>R$ {{ pedido.preco }}</strong></div><div class="detail-item"><span>Data</span><strong>{{ pedido.data }}</strong></div><div class="detail-item"><span>Horário</span><strong>{{ pedido.hora }}</strong></div><div class="detail-item"><span>Endereço</span><strong>{{ pedido.local }}</strong></div><div class="detail-item"><span>Localidade</span><strong>{{ pedido.cidade }}, {{ pedido.estado }}</strong></div></div>
+    <div class="status-banner status-danger" *ngIf="pedido.profissionalCancelou == true">O profissional não aceitou este pedido.</div><div class="status-banner status-success" *ngIf="pedido.statusProfissional == true">Pedido aceito pelo profissional.</div>
+    <app-action-feedback [message]="feedbackMessage" [type]="feedbackType"></app-action-feedback>
+    <form class="form-stack" #f="ngForm" (ngSubmit)="addAvaliacao()" *ngIf="pedido.clienteCancelou == false && pedido.statusProfissional == true && today >= pedido.data" style="margin-top: 28px"><h2>Avalie o serviço</h2><div class="field-group"><label for="ratingScore">Nota de 1 a 5</label><input id="ratingScore" type="number" min="1" max="5" [(ngModel)]="avaliacao.avaliacaoNota" name="nota" required></div><div class="field-group"><label for="ratingText">Sua experiência</label><textarea id="ratingText" rows="3" [(ngModel)]="avaliacao.avaliacao" name="avaliacao" required></textarea></div><button class="button-primary" type="submit" [disabled]="!f.valid || isSubmitting">{{ isSubmitting ? 'Publicando...' : 'Publicar avaliação' }}</button></form>
+    <div *ngIf="pedido.profissionalCancelou == false && pedido.statusProfissional == false" style="margin-top: 28px"><div class="form-actions" *ngIf="!isConfirmingCancellation"><button class="button-danger" type="button" (click)="requestCancellation()">Cancelar pedido</button></div><div class="status-banner status-danger" *ngIf="isConfirmingCancellation" role="alert"><span>Esta ação não pode ser desfeita. Deseja cancelar?</span><div class="form-actions"><button class="button-secondary" type="button" (click)="dismissCancellation()">Manter pedido</button><button class="button-danger" type="button" (click)="cancelarPedido()" [disabled]="isSubmitting">{{ isSubmitting ? 'Cancelando...' : 'Confirmar cancelamento' }}</button></div></div></div>
+  </section>
+</div></main>

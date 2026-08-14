@@ -1,51 +1,30 @@
-<html>
-  <head>
-    <title>Serviços</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <meta charset="utf-8"> 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet"> 
-  </head>
+<app-navbar [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
+<main class="app-page">
+  <div class="page-shell">
+    <header class="page-heading"><div class="page-heading-copy"><span class="page-kicker">Painel profissional</span><h1>Meus serviços</h1><p>Gerencie as ofertas publicadas no seu perfil.</p></div><a class="button-primary" routerLink="/serprofissional">Adicionar serviço</a></header>
 
-  <header class="navbar navbar-expand-lg navbar-light bg-primary">
+    <app-action-feedback [message]="feedbackMessage" [type]="feedbackType"></app-action-feedback>
 
-    <a class="navbar-brand btn" routerLink="/home">Home Easy</a>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="btn btn-primary" [routerLink]="['/usuario', userId]" role="button">Perfil</a>
-        <a class="btn btn-primary" routerLink="/feed" role="button">Serviços</a>
-        <a class="btn btn-primary" routerLink="/sobrenos" role="button">Sobre Nós</a>
-        <a class="btn btn-primary" routerLink="/contato" role="button">Contato</a>
-        <a class="btn btn-primary" routerLink="/login" role="button" *ngIf="!entrarSair">Entrar</a>
-        <a class="btn btn-danger" (click)="sair()" role="button" *ngIf="entrarSair">Sair</a>
-      </div>
-    </div>
-   
-  </header>
+    <section class="entity-grid" *ngIf="servicosArray.length != 0">
+      <article class="entity-card" *ngFor="let service of servicosArray">
+        <app-service-icon [serviceName]="service.nome"></app-service-icon>
+        <h2>{{ service.nome }}</h2>
+        <p>Serviço ativo no seu perfil profissional.</p>
 
-  <body>
+        <div class="card-actions" *ngIf="!servicePendingDeletion || servicePendingDeletion.id !== service.id">
+          <a class="button-primary" [routerLink]="['/serviços', userId, 'detalhe', service.id]">Ver detalhes</a>
+          <a class="button-secondary" [routerLink]="['/serviço', service.id, 'usuario', userId, 'avaliações']">Avaliações</a>
+          <button class="button-danger" type="button" (click)="requestServiceDeletion(service)">Excluir</button>
+        </div>
 
-    <div class="container" *ngIf="servicosArray.length != 0">
-      <h2>Meus Serviços</h2>
-      <ul class="list-group list-group-horizontal ulserve">
-        <li class="list-group-item card" *ngFor="let serve of servicosArray">
-          <div class="card" style="width: 15rem;">
-            <div class="card-body">
-              <h5 class="card-title">{{ serve.nome }}</h5>
-              <a clas="secondary-content">
-                <i  *ngIf="!servicoEstado" (click)="mostrarBotaoDeletar($event, serve)" class="fa fa-cog"></i>
-                <i *ngIf="servicoEstado" (click)="limparBotao()" class="fa fa-compress"></i>
-              </a>
-              <div *ngIf="servicoEstado && servicoDelete.id == serve.id">
-                <button type="button" class="btn btn-danger" (click)="deletarServico($event, serve)">Deletar</button>
-                <a type="button" class="btn btn-primary" [routerLink]="['/serviços', userId, 'detalhe', serve.id]">Detalhes</a><br>
-                <a type="button" class="btn alert alert-warning" [routerLink]="['/serviço', serve.id, 'usuario', userId, 'avaliações']">Avaliações</a>
-              </div>
-            </div>
-          </div>
-        </li>
-      </ul>
-    </div>
+        <div class="service-deletion-confirmation" *ngIf="servicePendingDeletion && servicePendingDeletion.id === service.id" role="alert">
+          <strong>Remover {{ service.nome }}?</strong>
+          <p>O serviço deixará de aparecer para novos clientes. Esta ação não pode ser desfeita.</p>
+          <div class="card-actions"><button class="button-secondary" type="button" (click)="dismissServiceDeletion()" [disabled]="isDeletingService">Manter serviço</button><button class="button-danger" type="button" (click)="confirmServiceDeletion()" [disabled]="isDeletingService">{{ isDeletingService ? 'Removendo...' : 'Confirmar exclusão' }}</button></div>
+        </div>
+      </article>
+    </section>
 
-  </body>
-
-</html>
+    <section class="empty-state" *ngIf="servicosArray.length == 0"><div class="empty-state-content"><span class="icon-badge">+</span><h2>Nenhum serviço cadastrado</h2><p>Adicione sua primeira especialidade para começar a receber pedidos.</p><a class="button-primary" routerLink="/serprofissional">Cadastrar serviço</a></div></section>
+  </div>
+</main>

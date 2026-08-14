@@ -1,83 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Sobre nós</title>
-     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-</head>
-<header class="navbar navbar-expand-lg navbar-light bg-primary">
-
-    <a class="navbar-brand btn" routerLink="/home">Home Easy</a>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="btn btn-primary" [routerLink]="['/usuario', userId]" role="button">Perfil</a>
-        <a class="btn btn-primary" routerLink="/feed" role="button">Serviços</a>
-        <a class="btn btn-primary" routerLink="/sobrenos" role="button">Sobre Nós</a>
-        <a class="btn btn-primary" routerLink="/contato" role="button">Contato</a>
-        <a class="btn btn-primary" routerLink="/login" role="button" *ngIf="!entrarSair">Entrar</a>
-        <a class="btn btn-danger" (click)="sair()" role="button" *ngIf="entrarSair">Sair</a>
-      </div>
-    </div>
-   
-  </header>
-<body>
- 
-  <section class="team-section">
-     <div class="container">
-         <div class="row">
-             <div class="section-title">
-                 <h1>NOSSO TIME</h1>
-                 <p>INTEGRANTES DO HOME EASY</p>
-             </div>
-         </div>
-         <div class="row">
-             <div class="team-items">
-                  <div class="item">
-                      <img src="https://uploaddeimagens.com.br/images/002/893/970/full/IMG_20200816_021513_767.jpg?1600985997" alt="team" />
-                      <div class="inner">
-                          <div class="info">
-                               <h5>Álvaro Miguel</h5>
-                               <p>Designer</p>
-                               <div class="social-links">
-                                   <a href="https://www.facebook.com"><span class="fa fa-facebook"></span></a>
-                                   <a href="https://www.twitter.com"><span class="fa fa-twitter"></span></a>
-                                 
-                               </div>
-                          </div>
-                      </div>
-                  </div>
-                  <div class="item">
-                      <img src="https://i.ibb.co/NmTZf5P/20210103-181834.png" alt="team" />
-                      <div class="inner">
-                          <div class="info">
-                               <h5>Carlos Sabino</h5>
-                               <p>CEO</p>
-                               <div class="social-links">
-                                   <a href="https://www.facebook.com"><span class="fa fa-facebook"></span></a>
-                                   <a href="https://www.twitter.com"><span class="fa fa-twitter"></span></a>
-                                  
-                               </div>
-                          </div>
-                      </div>
-                  </div>
-                  <div class="item">
-                      <img src="https://uploaddeimagens.com.br/images/002/894/008/full/WhatsApp_Image_2020-09-24_at_19.46.05.jpeg?1600987648" alt="team" />
-                      <div class="inner">
-                          <div class="info">
-                               <h5>Péricles Soares</h5>
-                               <p>Analista</p>
-                               <div class="social-links">
-                                   <a href="https://www.facebook.com"><span class="fa fa-facebook"></span></a>
-                                   <a href="https://www.twitter.com"><span class="fa fa-twitter"></span></a>
-                               </div>
-                          </div>
-                      </div>
-                  </div>
-                  </div>
-             </div>
-         </div>
-    
+<app-navbar [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
+<main class="app-page"><div class="page-shell">
+  <header class="page-heading"><div class="page-heading-copy"><span class="page-kicker">Sobre a Home Easy</span><h1>Aproximamos pessoas e bons profissionais.</h1><p>Nascemos para tornar o cuidado com a casa mais simples, transparente e humano.</p></div></header>
+  <section class="surface-card" style="margin-bottom: 24px"><div class="content-grid"><div><h2>Uma ponte para resolver</h2><p>Reunimos profissionais de serviços domésticos e reformas em um lugar onde clientes podem conhecer, conversar e contratar com confiança.</p></div><div><h2>Feito para ser direto</h2><p>Menos etapas, informações claras e contato sem intermediários desnecessários.</p></div></div></section>
+  <div class="page-heading"><div class="page-heading-copy"><span class="page-kicker">Nosso time</span><h2>Quem constrói essa experiência</h2></div></div>
+  <section class="entity-grid">
+    <article class="entity-card"><span class="icon-badge">AM</span><h3>Álvaro Miguel</h3><p>Design de produto</p></article>
+    <article class="entity-card"><span class="icon-badge">CS</span><h3>Carlos Sabino</h3><p>Estratégia e operações</p></article>
+    <article class="entity-card"><span class="icon-badge">PS</span><h3>Péricles Soares</h3><p>Análise e tecnologia</p></article>
   </section>
-
-</body>
-</html>
+</div></main>

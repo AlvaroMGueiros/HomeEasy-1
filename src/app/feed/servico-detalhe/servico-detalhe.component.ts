@@ -8,9 +8,6 @@ import { Subscription } from 'rxjs';
 import { ServicosService } from '../../Servicos/servicos.service';
 import { LoginServiceService } from '../../Servicos/login-service.service';
 import { Usuario } from 'src/app/Usuarios/usuario';
-import { formattedError } from '@angular/compiler';
-import { formControlBinding } from '@angular/forms/src/directives/ng_model';
-import { ComponentFactoryBoundToModule } from '@angular/core/src/linker/component_factory_resolver';
 
 @Component({
   selector: 'app-servico-detalhe',
@@ -24,6 +21,7 @@ export class ServicoDetalheComponent implements OnInit {
  serveIDSubscription : Subscription;
  entrarSair : boolean;
  userId : string;
+ isLoading = true;
 
   constructor(
     public afs : AngularFirestore, 
@@ -40,7 +38,9 @@ export class ServicoDetalheComponent implements OnInit {
     (params : Params) => { this.serveID = params['id'] });
 
     this.usuariosSubscription = this.servico.getUsuarios(this.serveID).subscribe(data => {
-    this.usuariosArray = data;});
+    this.usuariosArray = data;
+    this.isLoading = false;
+    });
 
     if(this.afAuth.auth.currentUser != null){
       this.entrarSair = true;

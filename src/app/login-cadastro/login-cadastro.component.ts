@@ -1,10 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/auth';
 
 import { Usuario } from './../Usuarios/usuario';
 import { LoginServiceService } from '../Servicos/login-service.service';
+import { FeedbackType } from '../shared/action-feedback/action-feedback.component';
+import { resolveAuthErrorMessage } from '../shared/utils/auth-error.utils';
+
+type AuthMode = 'login' | 'register';
 
 @Component({
   selector: 'app-login-cadastro',
@@ -12,75 +16,93 @@ import { LoginServiceService } from '../Servicos/login-service.service';
   styleUrls: ['./login-cadastro.component.css']
 })
 export class LoginCadastroComponent implements OnInit {
- userLogin : Usuario = {}; 
- userRegister : Usuario = {};
- mensagemErro : string = null;
- entrarSair : boolean;
- userId : string;
-  
+  loginUser: Usuario = {};
+  registrationUser: Usuario = {};
+  feedbackMessage = '';
+  feedbackType: FeedbackType = 'error';
+  authMode: AuthMode = 'login';
+  isLoginSubmitting = false;
+  isRegistrationSubmitting = false;
+  authenticated = false;
+  userId: string;
+  returnUrl = '/feed';
+
   constructor(
-    public loginservico : LoginServiceService, 
-    public router : Router,
-    public afs : AngularFirestore,
-    public afAuth : AngularFireAuth,
-    ) { }
+    private loginService: LoginServiceService,
+    private router: Router,
+    private route: ActivatedRoute,
+    private afs: AngularFirestore,
+    private afAuth: AngularFireAuth
+  ) { }
 
-  ngOnInit() {    
-    if(this.afAuth.auth.currentUser != null){
-      this.entrarSair = true;
-      this.userId = this.afAuth.auth.currentUser.uid;
-    }else this.entrarSair = false
-  }
+  ngOnInit() {
+    const requestedReturnUrl = this.route.snapshot.queryParams['returnUrl'];
+    if (requestedReturnUrl && requestedReturnUrl.startsWith('/')) {
+      this.returnUrl = requestedReturnUrl;
+    }
 
-  async login(){
-    try{
-      await this.loginservico.login(this.userLogin).then(
-        (success) => {this.router.navigate(["/feed"])})
-    }catch(error){
-      switch (error.code) {
-        case 'auth/wrong-password':
-          this.mensagemErro = "Senha Incorreta!";
-        break;
-        case 'auth/user-not-found':
-          this.mensagemErro = "E-mail Não Cadastrado!";
-        break;
-        case 'auth/invalid-email':
-          this.mensagemErro = "E-mail Inválido!";
-        break;
-      }
+    const currentUser = this.afAuth.auth.currentUser;
+
+    if (currentUser) {
+      this.authenticated = true;
+      this.userId = currentUser.uid;
     }
   }
 
-  async register(){
-    try{
-      const novoUsuario = await this.afAuth.auth.createUserWithEmailAndPassword(this.userRegister.email, this.userRegister.senha);
+  setAuthMode(authMode: AuthMode) {
+    this.authMode = authMode;
+    this.feedbackMessage = '';
+  }
 
-      const usuarioObject = Object.assign({}, this.userRegister);
-      usuarioObject.id = novoUsuario.user.uid;
-      delete usuarioObject.email;
-      delete usuarioObject.senha;
+  async signIn() {
+    if (this.isLoginSubmitting) {
+      return;
+    }
 
-      await this.afs.collection("Usuarios").doc(novoUsuario.user.uid).set(usuarioObject).then(
-        (success) => {this.router.navigate(['/feed'])});
-    }catch(error){
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          this.mensagemErro = "E-mail Já Cadastrado!";
-        break;
-        case 'auth/invalid-email':
-          this.mensagemErro = "E-mail Inválido!";
-        break;
-      }
+    this.feedbackMessage = '';
+    this.isLoginSubmitting = true;
+
+    try {
+      await this.loginService.login(this.loginUser);
+      this.router.navigateByUrl(this.returnUrl);
+    } catch (error) {
+      this.feedbackType = 'error';
+      this.feedbackMessage = resolveAuthErrorMessage(error.code, 'login');
+    } finally {
+      this.isLoginSubmitting = false;
     }
   }
 
-  async sair(){
-    try{
-      await this.loginservico.sair().then(
-        (success) => {this.router.navigate(["/home"])});
-     }catch(error){
-       console.error(error);
+  async createAccount() {
+    if (this.isRegistrationSubmitting) {
+      return;
+    }
+
+    this.feedbackMessage = '';
+    this.isRegistrationSubmitting = true;
+
+    try {
+      const newUser = await this.afAuth.auth.createUserWithEmailAndPassword(
+        this.registrationUser.email,
+        this.registrationUser.senha
+      );
+      const userProfile = Object.assign({}, this.registrationUser);
+      userProfile.id = newUser.user.uid;
+      delete userProfile.email;
+      delete userProfile.senha;
+
+      await this.afs.collection('Usuarios').doc(newUser.user.uid).set(userProfile);
+      this.router.navigateByUrl(this.returnUrl);
+    } catch (error) {
+      this.feedbackType = 'error';
+      this.feedbackMessage = resolveAuthErrorMessage(error.code, 'register');
+    } finally {
+      this.isRegistrationSubmitting = false;
     }
   }
-  
+
+  async logout() {
+    await this.loginService.sair();
+    this.router.navigate(['/home']);
+  }
 }

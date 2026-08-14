@@ -3,11 +3,13 @@ import { CommonModule } from "@angular/common";
 
 import { SobreRoutingModule } from './sobre.routing.module';
 import { SobreNosComponent } from './sobre-nos.component';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
     imports:[
         CommonModule,
-        SobreRoutingModule
+        SobreRoutingModule,
+        SharedModule
     ],
     declarations:[
         SobreNosComponent

@@ -1,53 +1,7 @@
-<html>
-
-  <head>
-    <title>Pedido</title>
-    <meta charset="utf-8">  
-  </head>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-  
-  <header class="navbar navbar-expand-lg navbar-light bg-primary">
-
-    <a class="navbar-brand btn" routerLink="/home">Home Easy</a>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="btn btn-primary" [routerLink]="['/usuario', userId]" role="button">Perfil</a>
-        <a class="btn btn-primary" routerLink="/feed" role="button">Serviços</a>
-        <a class="btn btn-primary" routerLink="/sobrenos" role="button">Sobre Nós</a>
-        <a class="btn btn-primary" routerLink="/contato" role="button">Contato</a>
-        <a class="btn btn-primary" routerLink="/login" role="button" *ngIf="!entrarSair">Entrar</a>
-        <a class="btn btn-danger" (click)="sair()" role="button" *ngIf="entrarSair">Sair</a>
-      </div>
-    </div>
-   
-  </header>
-
-  <body>
-    <div class="container">
-    <h2>Informações</h2>
-    <h3 style="text-transform: capitalize">Serviço Escolhido: {{ serve.nome}}</h3><br>
-    <h3>Profissional Escolhido: {{ servidor.nome}}</h3><br>
-    <h3>Preço do Serviço: {{ servePedido.preco}}</h3><br>
-
-    <form #f="ngForm">
-      <div class="label">
-        <label>Qual a data que o serviço será realizado?</label><br>
-        <input type="date" name="data" [min]="today" ng-min="today" [(ngModel)]="pedido.data" required><br>
-        <div *ngIf="pedido.data < today" class="idade">Porfavor, escolha uma data válida!</div>
-        <label>Qual local em que o serviço será realizado?</label><br>
-        <input type="text" name="local" [(ngModel)]="pedido.local" required><br>
-        <label>Em qual horário o serviço será realizado?</label><br>
-        <input type="time" name="hora" [(ngModel)]="pedido.hora" required><br>
-        <label>Em qual cidade o serviço será realizado?</label><br>
-        <input type="text" name="hora" [(ngModel)]="pedido.cidade" required><br>
-        <label>Em qual Estado o serviço será realizado?</label><br>
-        <select class="form-control" [(ngModel)]="pedido.estado" name="estado" required>
-          <option>Pernambuco</option>
-        </select><br>
-      </div>
-      <button type="button" (click)="addpedido()" [disabled]="!f.valid || pedido.data < today">Fazer Pedido</button>
-    </form>
-    </div>
-  </body>
-
-</html>
+<app-navbar [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
+<div class="context-nav"><app-back-link [route]="['/serviço', serveID, 'usuario', usuarioID]" label="Voltar ao profissional"></app-back-link></div>
+<main class="app-page"><div class="page-shell"><header class="page-heading"><div class="page-heading-copy"><span class="page-kicker">Novo pedido</span><h1>Agende seu serviço.</h1><p>Revise a escolha e informe quando e onde o atendimento deve acontecer.</p></div></header>
+  <div class="content-grid"><aside class="surface-card"><span class="page-kicker">Resumo</span><h2>{{ serve.nome }}</h2><div class="detail-list"><div class="detail-item"><span>Profissional</span><strong>{{ servidor.nome }}</strong></div><div class="detail-item"><span>Valor</span><strong>R$ {{ servePedido.preco }}</strong></div></div></aside>
+    <form class="surface-card form-stack" #f="ngForm" (ngSubmit)="addpedido()"><div class="form-grid"><div class="field-group"><label for="orderDate">Data</label><input id="orderDate" type="date" name="data" [min]="today" [(ngModel)]="pedido.data" required><span class="field-error" *ngIf="pedido.data < today">Escolha uma data futura.</span></div><div class="field-group"><label for="orderTime">Horário</label><input id="orderTime" type="time" name="hora" [(ngModel)]="pedido.hora" required></div><div class="field-group field-group-full"><label for="orderAddress">Endereço do atendimento</label><input id="orderAddress" type="text" name="local" [(ngModel)]="pedido.local" required placeholder="Rua, número e complemento"></div><div class="field-group"><label for="orderCity">Cidade</label><input id="orderCity" type="text" name="cidade" [(ngModel)]="pedido.cidade" required></div><div class="field-group"><label for="orderState">Estado</label><select id="orderState" [(ngModel)]="pedido.estado" name="estado" required><option>Pernambuco</option></select></div></div><app-action-feedback [message]="feedbackMessage" [type]="feedbackType"></app-action-feedback><div class="form-actions"><button class="button-primary" type="submit" [disabled]="!f.valid || pedido.data < today || isSubmitting">{{ isSubmitting ? 'Confirmando...' : 'Confirmar pedido' }}</button></div></form>
+  </div>
+</div></main>

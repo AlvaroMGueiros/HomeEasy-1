@@ -9,12 +9,14 @@ import { PedidoFeitoComponent } from './pedido-feito/pedido-feito.component';
 import { PedidoFeitoDetalheComponent } from './pedido-feito-detalhe/pedido-feito-detalhe.component';
 import { PedidoRecebidoComponent } from './pedido-recebido/pedido-recebido.component';
 import { PedidoRecebidoDetalheComponent } from './pedido-recebido-detalhe/pedido-recebido-detalhe.component';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
     imports:[
         CommonModule,
         FormsModule, 
-        PedidoRoutingModule
+        PedidoRoutingModule,
+        SharedModule
     ],
     declarations:[
         PedidoComponent,

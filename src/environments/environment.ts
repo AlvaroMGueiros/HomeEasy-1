@@ -4,6 +4,7 @@
 
 export const environment = {
   production: false,
+  geocodingApiUrl: 'https://nominatim.openstreetmap.org/search',
   firebase: {
     apiKey: "AIzaSyCYyutJVjVj9HxXm385h6Jtcc1rkuQ5GYg",
     authDomain: "homeeasy-52792.firebaseapp.com",

@@ -1,0 +1,22 @@
+export const colors: {[colorName: string]: string} = {
+  primary: '#164E63',
+  primaryDark: '#0F3D4C',
+  primarySoft: '#E8F2F3',
+  accent: '#7E9F85',
+  accentSoft: '#EDF3EE',
+  background: '#F7F7F2',
+  surface: '#FFFFFF',
+  surfaceMuted: '#F0F2EE',
+  text: '#17211D',
+  textMuted: '#64706A',
+  border: '#DDE3DE',
+  danger: '#B54747',
+  dangerSoft: '#FBECEC',
+  warning: '#9A6B22',
+  warningSoft: '#FFF6E5',
+  success: '#397251',
+  successSoft: '#EAF5EE',
+  shadow: 'rgba(23, 33, 29, 0.08)',
+  shadowStrong: 'rgba(23, 33, 29, 0.14)',
+  overlay: 'rgba(15, 61, 76, 0.72)'
+};

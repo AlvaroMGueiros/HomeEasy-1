@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { Router } from '@angular/router';
+import { NgForm } from '@angular/forms';
 
 import { ContatoService } from '../Servicos/contato.service';
 import { Mensagem } from './../Usuarios/mensagem';
 import { LoginServiceService } from '../Servicos/login-service.service';
+import { FeedbackType } from '../shared/action-feedback/action-feedback.component';
 
 
 @Component({
@@ -16,6 +18,9 @@ export class ContatoComponent implements OnInit {
   mensagem : Mensagem = {};
   entrarSair : boolean;
   userId : string;
+  feedbackMessage = '';
+  feedbackType: FeedbackType = 'info';
+  isSubmitting = false;
 
   constructor(
     public contatoServico : ContatoService, 
@@ -30,10 +35,26 @@ export class ContatoComponent implements OnInit {
       this.userId = this.afAuth.auth.currentUser.uid;
     }else this.entrarSair = false;
   }
-  enviarmensagem(){
-    this.contatoServico.salvarmensagem(this.mensagem).then((success) =>{
-      alert("Mensagem Enviada!");
-    });
+  async sendMessage(contactForm: NgForm){
+    if (this.isSubmitting) {
+      return;
+    }
+
+    this.feedbackMessage = '';
+    this.isSubmitting = true;
+
+    try {
+      await this.contatoServico.salvarmensagem(this.mensagem);
+      this.feedbackType = 'success';
+      this.feedbackMessage = 'Mensagem enviada. Nossa equipe responderá pelo canal informado.';
+      this.mensagem = {};
+      contactForm.resetForm();
+    } catch (error) {
+      this.feedbackType = 'error';
+      this.feedbackMessage = 'Não foi possível enviar sua mensagem. Verifique sua conexão e tente novamente.';
+    } finally {
+      this.isSubmitting = false;
+    }
   }
   async sair(){
     try{

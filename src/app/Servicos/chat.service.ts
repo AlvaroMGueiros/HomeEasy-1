@@ -23,8 +23,15 @@ export class ChatService {
   }
  //adiciona uma mensagem ao chat de um usuario
  addMensagem(cliente : string, servidor : string, mensagem : Chat){
-    this.chatCollection.doc(cliente).collection('Contato').doc(servidor).collection('Mensagens').add(mensagem);
-    this.chatCollection.doc(servidor).collection('Contato').doc(cliente).collection('Mensagens').add(mensagem);
+    const batch = this.afs.firestore.batch();
+    const messageId = this.afs.createId();
+    const clientMessageReference = this.chatCollection.doc(cliente).collection('Contato').doc(servidor).collection('Mensagens').doc(messageId).ref;
+    const professionalMessageReference = this.chatCollection.doc(servidor).collection('Contato').doc(cliente).collection('Mensagens').doc(messageId).ref;
+
+    batch.set(clientMessageReference, mensagem);
+    batch.set(professionalMessageReference, mensagem);
+
+    return batch.commit();
  } 
  //pega as mensagens de uma conversa
  getMensagens(cliente : string, servidor : string){
@@ -41,8 +48,30 @@ export class ChatService {
  }
  //add a conversa na lista de contatos 
  addCliente(cliente : Usuario, servidor : Usuario){
-   this.contatosCollection.doc(servidor.id).collection('Lista').doc(cliente.id).set(cliente);
-   this.contatosCollection.doc(cliente.id).collection('Lista').doc(servidor.id).set(servidor);
+   const batch = this.afs.firestore.batch();
+   const professionalContactReference = this.contatosCollection.doc(servidor.id).collection('Lista').doc(cliente.id).ref;
+   const clientContactReference = this.contatosCollection.doc(cliente.id).collection('Lista').doc(servidor.id).ref;
+
+   batch.set(professionalContactReference, cliente);
+   batch.set(clientContactReference, servidor);
+
+   return batch.commit();
+ }
+
+ sendMessage(cliente : Usuario, servidor : Usuario, mensagem : Chat){
+   const batch = this.afs.firestore.batch();
+   const messageId = this.afs.createId();
+   const clientMessageReference = this.chatCollection.doc(cliente.id).collection('Contato').doc(servidor.id).collection('Mensagens').doc(messageId).ref;
+   const professionalMessageReference = this.chatCollection.doc(servidor.id).collection('Contato').doc(cliente.id).collection('Mensagens').doc(messageId).ref;
+   const professionalContactReference = this.contatosCollection.doc(servidor.id).collection('Lista').doc(cliente.id).ref;
+   const clientContactReference = this.contatosCollection.doc(cliente.id).collection('Lista').doc(servidor.id).ref;
+
+   batch.set(clientMessageReference, mensagem);
+   batch.set(professionalMessageReference, mensagem);
+   batch.set(professionalContactReference, cliente);
+   batch.set(clientContactReference, servidor);
+
+   return batch.commit();
  }
  //exclui um contato da lista
  deleteContato(cliente : Usuario, servidor : Usuario){

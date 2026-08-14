@@ -1,126 +1,100 @@
-<html>
+<app-navbar [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
 
-  <head>
-    <meta charset="utf-8">
-    <title>Feed</title>
-  </head>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-  <header class="navbar navbar-expand-lg navbar-light bg-primary">
-
-    <a class="navbar-brand btn" routerLink="/home">Home Easy</a>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="btn btn-primary" [routerLink]="['/usuario', userId]" role="button">Perfil</a>
-        <a class="btn btn-primary" routerLink="/feed" role="button">Serviços</a>
-        <a class="btn btn-primary" routerLink="/conversas" role="button" *ngIf="entrarSair">Conversas</a>
-        <a class="btn btn-primary" routerLink="/sobrenos" role="button">Sobre Nós</a>
-        <a class="btn btn-primary" routerLink="/contato" role="button">Contato</a>
-        <a class="btn btn-primary" routerLink="/login" role="button" *ngIf="!entrarSair">Entrar</a>
-        <a class="btn btn-danger" (click)="sair()" role="button" *ngIf="entrarSair">Sair</a>
-      </div>
-      </div>
-   
-    <form #f="ngForm"class="form-inline">
-      <input class="form-control mr-sm-2" name="nome "type="search" [(ngModel)]="pesquisarServico" placeholder="Procure um serviço" aria-label="Search" style="text-transform: capitalize">
-      <button class="btn btn-outline-success btn-light my-2 my-sm-0" type="submit" [routerLink]="['/procurar', pesquisarServico]">Buscar</button>
-    </form>
-  </header>
-
-  <body>
-
-    <div class="wrapper">
-
-      <div class="links">
-        <h3>Categorias</h3>
+<main class="app-page feed-page">
+  <div class="page-shell">
+    <header class="feed-heading">
+      <div class="page-heading-copy">
+        <span class="page-kicker">Serviços para sua casa</span>
+        <h1>O que você precisa resolver hoje?</h1>
+        <p>Busque pelo serviço ou pelo problema, refine as opções e encontre profissionais compatíveis.</p>
       </div>
 
-      <div class="view_wrap list-view" style="display: block;">
+      <form class="feed-search surface-card" #searchForm="ngForm" (ngSubmit)="searchService()" role="search">
+        <span class="search-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5L21 21"></path></svg>
+        </span>
+        <label class="sr-only" for="serviceSearch">Buscar serviço ou problema</label>
+        <input id="serviceSearch" name="serviceSearch" type="search" [(ngModel)]="serviceSearch" (ngModelChange)="onSearchChange()" placeholder=" Digite para pesquisar" autocomplete="off">
+        <button class="button-primary" type="submit">Pesquisar</button>
+        <small class="search-help">A busca entende nomes relacionados, como “criança” para babá e “roupa” para lavadeira.</small>
+      </form>
 
-        <div class="view_item">
-          <div class="vi_left">
-            <img src="https://image.flaticon.com/icons/png/512/994/994928.png">
-          </div>
-          <div class="vi_right">
-            <p class="content"></p>
-           <h1>Serviços Domésticos</h1>
-            <button class="btn btn-primary" (click)="mostrarConteudoDO()">Ver mais</button><br><br>
-            <div [hidden] = "!mostrarContentDO" class="domestico">
-              <ul class="list-group list-group-horizontal ulserve">
-                <div *ngFor="let serve of servicosDomesticosArray">
-                  <li class="list-group-item">
-                    <div class="card" style="width: 15rem;">
-                      <div class="card-body">
-                        <h5 class="card-title" style="text-transform: capitalize">{{ serve.nome }}</h5>
-                        <button type="button" class="btn btn-primary" [routerLink]="['/serviço', serve.id]">Ver Profissionais</button>
-                      </div>
-                    </div>
-                  </li>
-                </div>
-              </ul>        
-            </div>
-          </div>
-        </div>
+      <nav class="category-shortcuts" aria-label="Atalhos para categorias">
+        <a href="#domesticServices" (click)="selectCategory('domestic')"><app-service-icon serviceName="Serviços domésticos"></app-service-icon><span><strong>Domésticos</strong><small>Rotina e cuidados</small></span></a>
+        <a href="#renovationServices" (click)="selectCategory('renovation')"><app-service-icon serviceName="Reformas e reparos"></app-service-icon><span><strong>Reformas</strong><small>Consertos e melhorias</small></span></a>
+      </nav>
+    </header>
 
-      </div> 
-
-      <div class="view_wrap list-view" style="display: block;">
-
-        <div class="view_item">
-          <div class="vi_right">
-            <img src="https://b2barquitetura.com.br/wp-content/uploads/2019/06/jack-renovate-icon-300x300.png">
-          </div>
-          <div class="vi_right">
-            <p class="content"></p>
-            <h1>Serviços de Reformas</h1>
-            <button class="btn btn-primary" (click)="mostrarConteudoRE()">Ver mais</button><br><br>
-            <div [hidden] = "!mostrarContentRE">
-              <ul class="list-group list-group-horizontal ulserve">
-                <div *ngFor="let serve of servicosReformaArray">
-                  <li class="list-group-item">
-                    <div class="card" style="width: 15rem;">
-                      <div class="card-body">
-                        <h5 class="card-title" style="text-transform: capitalize">{{ serve.nome }}</h5>
-                        <button type="button" class="btn btn-primary" [routerLink]="['/serviço', serve.id]">Ver Profissionais</button>
-                      </div>
-                    </div>
-                  </li>
-                </div>
-              </ul>      
-            </div>
-          </div>
-          
-        </div>
-
-      </div>
-      <div class="content">
-      
-      <footer id="myFooter">
-          <div class="container">
-              <ul>
-                  <li><a routerLink="/sobrenos">Informações da Equipe</a></li>
-                  <li><a routerLink="/contato">Contato</a></li>
-                  <li><a routerLink="/home">Home</a></li>
-                  <li><a routerLink="/login">Login</a></li>
-              </ul>
-              <p class="footer-copyright">© 2021 Copyright - HOME EASY
-                
-              </p>
-              <p class="footer-copyright">O sistema tem o objetivo de aglutinar profissionais que trabalham fornecendo serviços a domicílio em apenas uma plataforma, facilitando assim a localização dos profissionais e sua área de atuação, por possíveis contratantes. 
-                Permitindo que a primeira abordagem entre o profissional e o contratante seja virtual, fazendo com que seja direta e rápida.
-              </p>
-          </div>
-          <div class="footer-social">
-            
-              <a href="https://www.facebook.com/" class="social-icons"><i class="fa fa-facebook"></i></a>
-              <a href="https://www.instagram.com" class="social-icons"><i class="fa fa-instagram"></i></a>
-              <a href="https://www.youtube.com/" class="social-icons"><i class="fa fa-youtube"></i></a>
-              <a href="https://twitter.com/" class="social-icons"><i class="fa fa-twitter"></i></a>
-          </div>
-      </footer>
-      <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  
+    <div class="filter-disclosure">
+      <button class="button-secondary filter-toggle" type="button" (click)="toggleFilterPanel()" [attr.aria-expanded]="isFilterPanelOpen" aria-controls="advancedFilters">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"></path></svg>
+        {{ isFilterPanelOpen ? 'Ocultar filtros' : 'Mais filtros' }}
+      </button>
+      <span class="active-filter-note" *ngIf="hasActiveFilters()">Filtros ativos · {{ totalFilteredServices }} resultado(s)</span>
     </div>
-    </div>
-  </body>
-  
-</html>
+
+    <section class="filter-panel surface-card" id="advancedFilters" aria-labelledby="filterTitle" *ngIf="isFilterPanelOpen">
+      <header class="filter-header">
+        <div><span class="page-kicker">Refine sua busca</span><h2 id="filterTitle">Filtros</h2></div>
+        <button class="button-quiet" type="button" *ngIf="hasActiveFilters()" (click)="clearFilters()">Limpar filtros</button>
+      </header>
+
+      <div class="filter-grid">
+        <div class="field-group"><label for="categoryFilter">Categoria</label><select id="categoryFilter" name="categoryFilter" [(ngModel)]="categoryFilter" (ngModelChange)="onFilterChange()"><option value="all">Todas</option><option value="domestic">Domésticos</option><option value="renovation">Reformas e reparos</option></select></div>
+        <div class="field-group"><label for="cityFilter">Cidade</label><select id="cityFilter" name="cityFilter" [(ngModel)]="cityFilter" (ngModelChange)="onFilterChange()" [disabled]="isFilterMetadataLoading"><option value="">Todas as cidades</option><option *ngFor="let city of availableCities" [value]="city">{{ city }}</option></select></div>
+        <div class="field-group"><label for="minimumPrice">Preço mínimo</label><input id="minimumPrice" name="minimumPrice" type="number" min="0" step="1" [(ngModel)]="minimumPrice" (ngModelChange)="onFilterChange()" placeholder="R$ 0"></div>
+        <div class="field-group"><label for="maximumPrice">Preço máximo</label><input id="maximumPrice" name="maximumPrice" type="number" min="0" step="1" [(ngModel)]="maximumPrice" (ngModelChange)="onFilterChange()" placeholder="Sem limite"></div>
+        <div class="field-group"><label for="minimumRating">Avaliação mínima</label><select id="minimumRating" name="minimumRating" [(ngModel)]="minimumRating" (ngModelChange)="onFilterChange()"><option [ngValue]="0">Qualquer nota</option><option [ngValue]="3">3 ou mais</option><option [ngValue]="4">4 ou mais</option><option [ngValue]="4.5">4,5 ou mais</option></select></div>
+        <label class="availability-filter"><input type="checkbox" name="availableOnly" [(ngModel)]="availableOnly" (ngModelChange)="onFilterChange()"><span><strong>Somente disponíveis</strong><small>Com profissional cadastrado</small></span></label>
+      </div>
+
+      <div class="filter-summary" aria-live="polite"><span *ngIf="isFilterMetadataLoading">Carregando cidades, preços e avaliações...</span><span class="filter-error" *ngIf="!isFilterMetadataLoading && hasInvalidPriceRange">O preço mínimo deve ser menor ou igual ao preço máximo.</span><strong *ngIf="!isFilterMetadataLoading && !hasInvalidPriceRange">{{ totalFilteredServices }} serviço(s) encontrado(s)</strong></div>
+    </section>
+
+    <app-loading-state *ngIf="isFilterMetadataLoading && hasActiveFilters()" message="Aplicando os filtros..."></app-loading-state>
+
+    <app-regional-service-map [regions]="serviceRegions" [isLoading]="isFilterMetadataLoading" (citySelected)="selectCityFromMap($event)"></app-regional-service-map>
+
+    <section class="service-category" id="domesticServices" *ngIf="categoryFilter !== 'renovation'">
+      <header class="category-heading">
+        <div class="category-title"><app-service-icon serviceName="Serviços domésticos"></app-service-icon><div><span class="page-kicker">Cuidados do dia a dia</span><h2>Serviços domésticos</h2></div></div>
+        <span class="service-count" *ngIf="!isDomesticLoading">{{ filteredDomesticServices.length }} opções</span>
+      </header>
+
+      <div class="service-grid" *ngIf="!isDomesticLoading && (!isFilterMetadataLoading || !hasActiveFilters()) && filteredDomesticServices.length">
+        <a class="service-card" *ngFor="let service of filteredDomesticServices" [routerLink]="['/serviço', service.id]">
+          <app-service-icon [serviceName]="service.nome"></app-service-icon>
+          <div><h3>{{ service.nome }}</h3><p *ngIf="isFilterMetadataLoading">Ver profissionais disponíveis</p><p *ngIf="!isFilterMetadataLoading"><strong>{{ getServiceProfessionalCount(service.id) }}</strong> profissional(is)</p></div>
+          <span class="card-arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+
+      <div class="service-grid" *ngIf="isDomesticLoading" aria-label="Carregando serviços domésticos"><div class="service-skeleton"><span></span><div></div></div><div class="service-skeleton"><span></span><div></div></div><div class="service-skeleton"><span></span><div></div></div></div>
+      <div class="category-empty" *ngIf="!isDomesticLoading && !isFilterMetadataLoading && !filteredDomesticServices.length && !hasActiveFilters()">Nenhum serviço doméstico disponível no momento.</div>
+    </section>
+
+    <section class="service-category" id="renovationServices" *ngIf="categoryFilter !== 'domestic'">
+      <header class="category-heading">
+        <div class="category-title"><app-service-icon serviceName="Reformas e reparos"></app-service-icon><div><span class="page-kicker">Transforme seus ambientes</span><h2>Reformas e reparos</h2></div></div>
+        <span class="service-count" *ngIf="!isRenovationLoading">{{ filteredRenovationServices.length }} opções</span>
+      </header>
+
+      <div class="service-grid" *ngIf="!isRenovationLoading && (!isFilterMetadataLoading || !hasActiveFilters()) && filteredRenovationServices.length">
+        <a class="service-card" *ngFor="let service of filteredRenovationServices" [routerLink]="['/serviço', service.id]">
+          <app-service-icon [serviceName]="service.nome"></app-service-icon>
+          <div><h3>{{ service.nome }}</h3><p *ngIf="isFilterMetadataLoading">Ver profissionais disponíveis</p><p *ngIf="!isFilterMetadataLoading"><strong>{{ getServiceProfessionalCount(service.id) }}</strong> profissional(is)</p></div>
+          <span class="card-arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+
+      <div class="service-grid" *ngIf="isRenovationLoading" aria-label="Carregando serviços de reforma"><div class="service-skeleton"><span></span><div></div></div><div class="service-skeleton"><span></span><div></div></div><div class="service-skeleton"><span></span><div></div></div></div>
+      <div class="category-empty" *ngIf="!isRenovationLoading && !isFilterMetadataLoading && !filteredRenovationServices.length && !hasActiveFilters()">Nenhum serviço de reforma disponível no momento.</div>
+    </section>
+
+    <section class="empty-state" *ngIf="!isDomesticLoading && !isRenovationLoading && !isFilterMetadataLoading && hasActiveFilters() && totalFilteredServices === 0">
+      <div class="empty-state-content"><span class="icon-badge">0</span><h2>Nenhum serviço corresponde aos filtros</h2><p>Tente ampliar a faixa de preço, reduzir a avaliação mínima ou buscar outro termo.</p><button class="button-primary" type="button" (click)="clearFilters()">Limpar filtros</button></div>
+    </section>
+  </div>
+</main>
+
+<app-floating-chat [authenticated]="entrarSair" [userId]="userId"></app-floating-chat>

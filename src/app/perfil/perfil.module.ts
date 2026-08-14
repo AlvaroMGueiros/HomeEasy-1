@@ -7,12 +7,14 @@ import { PerfilRoutingModule } from './perfil.routing.module';
 import { EditarInfoComponent } from './editar-info/editar-info.component';
 import { PerfilPedidoComponent } from './perfil-pedido/perfil-pedido.component';
 import { AvaliacoesComponent } from './avaliacoes/avaliacoes.component';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
     imports:[
         CommonModule,
         FormsModule, 
-        PerfilRoutingModule
+        PerfilRoutingModule,
+        SharedModule
     ],
     declarations:[
         PerfilComponent,

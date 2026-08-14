@@ -24,7 +24,7 @@ export class ServicoPedidoService {
   }
  //adiciona os detalhes de um servico 
  addServicoPedido(usuario : Usuario, servico : Servico, servicopedido : ServicoPedido){
-    this.servicoPedidoCollection.doc(usuario.id).collection('Serviços').doc(servico.id)
+    return this.servicoPedidoCollection.doc(usuario.id).collection('Serviços').doc(servico.id)
       .set(servicopedido);
  }
  //pega os detalhes de um servico de um usuario
@@ -34,8 +34,14 @@ export class ServicoPedidoService {
  }
  //adiciona um pedido
  addPedido(cliente : Usuario, servidor : Usuario, pedido : Pedido){
-   this.usuariosCollection.doc(cliente.id).collection('PedidosFeitos').doc(pedido.id).set(pedido);
-   this.usuariosCollection.doc(servidor.id).collection('PedidosRecebidos').doc(pedido.id).set(pedido);
+   const batch = this.afs.firestore.batch();
+   const clientOrderReference = this.usuariosCollection.doc(cliente.id).collection('PedidosFeitos').doc(pedido.id).ref;
+   const professionalOrderReference = this.usuariosCollection.doc(servidor.id).collection('PedidosRecebidos').doc(pedido.id).ref;
+
+   batch.set(clientOrderReference, pedido);
+   batch.set(professionalOrderReference, pedido);
+
+   return batch.commit();
  }
  //pega os pedidos feitos de um cliente 
  getPedidosFeitos(id : string){
@@ -72,11 +78,11 @@ export class ServicoPedidoService {
  }
  //apagar o pedido recebido de um profissional
  deletePedidoRecebido(idServidor : string, Idpedido : string){
-  this.afs.collection('Usuarios').doc(idServidor).collection('PedidosRecebidos').doc<Pedido>(Idpedido).delete();
+  return this.afs.collection('Usuarios').doc(idServidor).collection('PedidosRecebidos').doc<Pedido>(Idpedido).delete();
  }
  //apagar o pedido feito de um cliente
  deletePedidoFeito(idCliente : string, Idpedido : string){
-  this.afs.collection('Usuarios').doc(idCliente).collection('PedidosFeitos').doc<Pedido>(Idpedido).delete();
+  return this.afs.collection('Usuarios').doc(idCliente).collection('PedidosFeitos').doc<Pedido>(Idpedido).delete();
  }
 
 }

@@ -5,12 +5,14 @@ import { FormsModule } from '@angular/forms';
 import { ServicoComponent } from './servico.component';
 import { ServicoDetalheComponent } from './servico-detalhe/servico-detalhe.component';
 import { ServicoRoutingModule } from './servico.routing.module';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
     imports:[
         CommonModule,
         FormsModule, 
-        ServicoRoutingModule
+        ServicoRoutingModule,
+        SharedModule
     ],
     declarations:[
         ServicoComponent,

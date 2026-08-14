@@ -27,6 +27,7 @@ export class PedidoFeitoComponent implements OnInit {
  pedidosFeitosSubscription : Subscription;
  pedidoEstado : boolean = false;
  pedidoDetalhe : Pedido = {};
+ isLoading = true;
 
  constructor(
   public afs : AngularFirestore, 
@@ -51,6 +52,7 @@ export class PedidoFeitoComponent implements OnInit {
     });
     this.pedidosFeitosSubscription = this.servicoPedido.getPedidosFeitos(this.userId).subscribe(data => {
       this.pedidosFeitosArray = data;
+      this.isLoading = false;
     });
   }
   ngOnDestroy(){ 
@@ -72,9 +74,5 @@ export class PedidoFeitoComponent implements OnInit {
   limparBotao(){
     this.pedidoEstado = false;
   }
-  mostrarDetalhe(event, serve){
-    alert("to pensando!");
-  }
-
 }
 

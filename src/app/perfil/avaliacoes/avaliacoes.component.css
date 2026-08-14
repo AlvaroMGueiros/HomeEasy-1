@@ -1,15 +1,1 @@
-body{
-	font-family: 'Poppins', sans-serif;
-}
-
-.ulserve{
-	flex-wrap: wrap;
-}
-h2{
-	text-align: center;
-	margin: 50px auto;
-}
-.card{
-	background-color: #fff;
-	box-shadow: 0 1.4rem 8rem rgba(0,0,0, 0.2);
-}
+:host { display: block; min-height: 100vh; background: var(--color-background); }

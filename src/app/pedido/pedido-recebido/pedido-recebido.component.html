@@ -1,58 +1,6 @@
-<html>
-  <head>
-    <title>Pedido</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <meta charset="utf-8">  
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-  </head>
-
-  <header class="navbar navbar-expand-lg navbar-light bg-primary">
-
-    <a class="navbar-brand btn" routerLink="/home">Home Easy</a>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="btn btn-primary" [routerLink]="['/usuario', userId]" role="button">Perfil</a>
-        <a class="btn btn-primary" routerLink="/feed" role="button">Serviços</a>
-        <a class="btn btn-primary" routerLink="/sobrenos" role="button">Sobre Nós</a>
-        <a class="btn btn-primary" routerLink="/contato" role="button">Contato</a>
-        <a class="btn btn-primary" routerLink="/login" role="button" *ngIf="!entrarSair">Entrar</a>
-        <a class="btn btn-danger" (click)="sair()" role="button" *ngIf="entrarSair">Sair</a>
-      </div>
-    </div>
-   
-  </header>
-
-  <body>
-
-    <div class="container">
-
-      <div>
-        <h2>Pedidos Recebidos</h2><br>
-        <ul class="list-group list-group-horizontal ulserve">
-          <li class="list-group-item card" *ngFor="let serve of pedidosRecebidosArray">
-            <div class="card" style="width: 10rem;">
-              <div class="card-body">
-                <h5 class="card-title">{{ serve.nome }}</h5>
-                <a clas="secondary-content">
-                  <i  *ngIf="!pedidoEstado" (click)="mostrarBotaoDetalhe($event, serve)" class="fa fa-cog"></i>
-                  <i *ngIf="pedidoEstado" (click)="limparBotao()" class="fa fa-compress"></i>
-                </a>
-                <div *ngIf="pedidoEstado && pedidoDetalhe.id == serve.id">
-                  <a type="button" class="btn btn-primary" [routerLink]="['/usuario', serve.idContratante, 'pedidos-recebidos', serve.id]">Detalhes</a>
-                </div>
-              </div>
-            </div>
-          </li>
-        </ul>
-
-        <div *ngIf="pedidosRecebidosArray.length == 0">
-          <h2>Você Ainda Não Recebeu Pedidos!</h2>
-        </div>
-
-      </div>
-
-    </div>
-
-  </body>
-
-</html>
+<app-navbar [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
+<main class="app-page"><div class="page-shell"><header class="page-heading"><div class="page-heading-copy"><span class="page-kicker">Painel profissional</span><h1>Pedidos recebidos</h1><p>Veja novas solicitações e responda aos seus clientes.</p></div></header>
+  <app-loading-state *ngIf="isLoading" message="Carregando solicitações..."></app-loading-state>
+  <section class="entity-grid" *ngIf="!isLoading && pedidosRecebidosArray.length != 0"><article class="entity-card" *ngFor="let serve of pedidosRecebidosArray"><span class="icon-badge">PR</span><h2>{{ serve.nome }}</h2><p>{{ serve.data }} · {{ serve.cidade }}</p><div class="card-actions"><a class="button-primary" [routerLink]="['/usuario', serve.idContratante, 'pedidos-recebidos', serve.id]">Analisar pedido</a></div></article></section>
+  <section class="empty-state" *ngIf="!isLoading && pedidosRecebidosArray.length == 0"><div class="empty-state-content"><span class="icon-badge">0</span><h2>Nenhuma solicitação nova</h2><p>Quando um cliente solicitar um dos seus serviços, o pedido aparecerá aqui.</p></div></section>
+</div></main>

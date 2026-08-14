@@ -12,6 +12,7 @@ import { ServicosService } from './../Servicos/servicos.service';
 import { LoginServiceService } from '../Servicos/login-service.service';
 import { ServicoPedidoService } from './../Servicos/servico-pedido.service';
 import { ChatService } from './../Servicos/chat.service';
+import { FeedbackType } from '../shared/action-feedback/action-feedback.component';
 
 @Component({
   selector: 'app-chat',
@@ -32,6 +33,9 @@ export class ChatComponent implements OnInit {
   usuario : Usuario = {}; //info do cliente
   userSubscription : Subscription;
   imgCSubscription : Subscription;
+  feedbackMessage = '';
+  feedbackType: FeedbackType = 'error';
+  isSending = false;
 
   constructor(
     public afs : AngularFirestore, 
@@ -71,17 +75,36 @@ export class ChatComponent implements OnInit {
       this.mensagensArray = data;
     });
   }
-  enviarMensagem(){
-    if(this.usuario.id != this.servidor.id){
-      this.mensagem.data = new Date().getTime();
-      this.mensagem.id = this.userId;
-      this.mensagem.hora = new Date().getHours() + ":" + new Date().getMinutes();
-      this.chatService.addCliente(this.usuario, this.servidor);
-      this.chatService.addMensagem(this.userId, this.servidorId, this.mensagem);
-      this.mensagem.mensagem="";
-    }else{
-      alert("Não é possivel mandar mensagens para si mesmo!");
-      this.router.navigate(["/feed"]);
+  async enviarMensagem(){
+    if (this.isSending) {
+      return;
+    }
+
+    if(this.usuario.id === this.servidor.id){
+      this.feedbackType = 'error';
+      this.feedbackMessage = 'Você não pode enviar uma mensagem para si mesmo.';
+      return;
+    }
+
+    const currentDate = new Date();
+    const messageToSend: Chat = {
+      mensagem: this.mensagem.mensagem,
+      data: currentDate.getTime(),
+      id: this.userId,
+      hora: currentDate.getHours() + ':' + currentDate.getMinutes().toString().padStart(2, '0')
+    };
+
+    this.feedbackMessage = '';
+    this.isSending = true;
+
+    try {
+      await this.chatService.sendMessage(this.usuario, this.servidor, messageToSend);
+      this.mensagem.mensagem = '';
+    } catch (error) {
+      this.feedbackType = 'error';
+      this.feedbackMessage = 'A mensagem não foi enviada. Verifique sua conexão e tente novamente.';
+    } finally {
+      this.isSending = false;
     }
   }
   ngOnDestroy(){

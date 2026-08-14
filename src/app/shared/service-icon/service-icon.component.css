@@ -1,0 +1,4 @@
+:host { display: inline-flex; }
+.service-icon { display: inline-grid; width: 52px; height: 52px; flex: 0 0 52px; place-items: center; border-radius: 15px; color: var(--color-primary); background: var(--color-primarySoft); transition: color 180ms ease, background-color 180ms ease, transform 180ms ease; }
+.service-icon svg { width: 27px; height: 27px; }
+:host-context(.service-card:hover) .service-icon { color: var(--color-surface); background: var(--color-primary); transform: scale(1.04); }

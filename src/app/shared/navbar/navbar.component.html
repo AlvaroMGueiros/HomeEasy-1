@@ -1,0 +1,23 @@
+<header class="app-navbar">
+  <a class="navbar-brand" routerLink="/home" (click)="closeMenu()" aria-label="Home Easy - Início">
+    <span class="brand-logo-frame" aria-hidden="true">
+      <img class="brand-logo" src="assets/home-easy-logo-v2.png" alt="">
+    </span>
+  </a>
+
+  <button class="menu-toggle" type="button" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen" aria-controls="mainNavigation" [attr.aria-label]="menuOpen ? 'Fechar menu' : 'Abrir menu'">
+    <span></span><span></span><span></span>
+  </button>
+
+  <nav id="mainNavigation" class="navbar-links" [class.menu-open]="menuOpen" aria-label="Navegação principal">
+    <a routerLink="/feed" routerLinkActive="active" (click)="closeMenu()">Serviços</a>
+    <a routerLink="/pedido-info" routerLinkActive="active" (click)="closeMenu()">Como funciona</a>
+    <a routerLink="/profissional" routerLinkActive="active" (click)="closeMenu()">Seja profissional</a>
+    <a routerLink="/sobrenos" routerLinkActive="active" (click)="closeMenu()">Sobre</a>
+    <a routerLink="/contato" routerLinkActive="active" (click)="closeMenu()">Contato</a>
+    <a *ngIf="authenticated" routerLink="/conversas" routerLinkActive="active" (click)="closeMenu()">Conversas</a>
+    <a *ngIf="authenticated" [routerLink]="['/usuario', userId]" routerLinkActive="active" (click)="closeMenu()">Meu perfil</a>
+    <a *ngIf="!authenticated" class="navbar-action" routerLink="/login" (click)="closeMenu()">Entrar</a>
+    <button *ngIf="authenticated" class="logout-action" type="button" (click)="requestLogout()">Sair</button>
+  </nav>
+</header>

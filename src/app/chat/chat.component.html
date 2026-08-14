@@ -1,70 +1,7 @@
-<html>
-
-  <head>
-    <meta charset="utf-8">
-    <title>Chat</title>
-  </head>
-
-  <header class="navbar navbar-expand-lg navbar-light bg-primary">
-
-    <a class="navbar-brand btn" routerLink="/home">Home Easy</a>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="btn btn-primary" [routerLink]="['/usuario', userId]" role="button">Perfil</a>
-        <a class="btn btn-primary" routerLink="/feed" role="button">Serviços</a>
-        <a class="btn btn-primary" routerLink="/sobrenos" role="button">Sobre Nós</a>
-        <a class="btn btn-primary" routerLink="/contato" role="button">Contato</a>
-        <a class="btn btn-primary" routerLink="/login" role="button" *ngIf="!entrarSair">Entrar</a>
-        <a class="btn btn-danger" (click)="sair()" role="button" *ngIf="entrarSair">Sair</a>
-      </div>
-    </div>
-   
-  </header>
-
-  <body>
-
-    <div class="container">
-
-       <div class="user1">
-        <img *ngIf="usuario.foto" [src]="usuario.foto">
-        <img *ngIf="!usuario.foto" src="https://i.pinimg.com/originals/ff/a0/9a/ffa09aec412db3f54deadf1b3781de2a.png">
-        <div><span>{{ usuario.nome }}</span></div>
-      </div>
-      <div class="user2" >
-        Conversando com:
-        <img *ngIf="servidor.foto" class="img-1" [src]="servidor.foto">
-        <img *ngIf="!servidor.foto" class="img-1" src="https://i.pinimg.com/originals/ff/a0/9a/ffa09aec412db3f54deadf1b3781de2a.png">
-        <div class="span"><span>{{ servidor.nome }}</span></div>
-      </div>
-      <br>
-      
-      <br>
-      <div class="msg">
-        <div class="mensagem">
-      <div *ngFor="let msg of mensagensArray">
-
-        <div *ngIf="msg.id == servidor.id" class="msg-1">
-          <p>{{ msg.mensagem }}</p> <h6>{{ msg.hora }}</h6>
-        </div>
-
-        <div *ngIf="msg.id !== servidor.id" class="msg-2">
-          <p>{{ msg.mensagem }}</p> <h6 >{{ msg.hora }}</h6>
-        </div>
-        
-       </div>
-      </div>
-    </div>
-    
-      <br>
-      <form class="forms" #f="ngForm"> 
-        <div class="group ">
-          <input type="text" class="input" placeholder="Digite uma mensagem..." [(ngModel)] = "mensagem.mensagem" name="mensagem" required > 
-          <button type="submit" [disabled]="!f.valid" (click)="enviarMensagem()">Enviar</button>
-        </div>
-      </form>
-
-    </div>
-
-  </body>
-
-</html>
+<app-navbar [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
+<main class="chat-page"><section class="chat-shell">
+  <header class="chat-header"><div class="chat-person"><span class="chat-avatar" *ngIf="!servidor.foto">{{ servidor.nome ? servidor.nome.charAt(0) : 'HE' }}</span><img class="chat-avatar" *ngIf="servidor.foto" [src]="servidor.foto" [alt]="servidor.nome"><div><span>Conversando com</span><strong>{{ servidor.nome }}</strong></div></div><a class="button-secondary" routerLink="/conversas">Todas as conversas</a></header>
+  <div class="message-list" aria-live="polite"><div *ngFor="let msg of mensagensArray"><article class="message message-received" *ngIf="msg.id == servidor.id"><div class="message-content"><p>{{ msg.mensagem }}</p><time>{{ msg.hora }}</time></div></article><article class="message message-sent" *ngIf="msg.id !== servidor.id"><div class="message-content"><p>{{ msg.mensagem }}</p><time>{{ msg.hora }}</time></div></article></div></div>
+  <app-action-feedback [message]="feedbackMessage" [type]="feedbackType"></app-action-feedback>
+  <form class="message-form" #f="ngForm" (ngSubmit)="enviarMensagem()"><label class="sr-only" for="newMessage">Nova mensagem</label><input id="newMessage" type="text" placeholder="Digite uma mensagem..." [(ngModel)]="mensagem.mensagem" name="mensagem" required autocomplete="off"><button class="button-primary" type="submit" [disabled]="!f.valid || isSending">{{ isSending ? 'Enviando...' : 'Enviar' }}</button></form>
+</section></main>

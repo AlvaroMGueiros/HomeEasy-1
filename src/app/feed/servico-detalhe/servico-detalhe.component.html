@@ -1,51 +1,7 @@
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Feed</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.1/css/all.min.css">
-  </head>
-
-  <header class="navbar navbar-expand-lg navbar-light bg-primary">
-
-    <a class="navbar-brand btn" routerLink="/home">Home Easy</a>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="btn btn-primary" [routerLink]="['/usuario', userId]" role="button">Perfil</a>
-        <a class="btn btn-primary" routerLink="/feed" role="button">Serviços</a>
-        <a class="btn btn-primary" routerLink="/sobrenos" role="button">Sobre Nós</a>
-        <a class="btn btn-primary" routerLink="/contato" role="button">Contato</a>
-        <a class="btn btn-primary" routerLink="/login" role="button" *ngIf="!entrarSair">Entrar</a>
-        <a class="btn btn-danger" (click)="sair()" role="button" *ngIf="entrarSair">Sair</a>
-      </div>
-    </div>
-   
-  </header> 
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-  <body>
-
-    <div class="container">
-      <h3>Principais Profissionais</h3>
-
-        <ul class="list-group list-group-horizontal-lg ulserve">
-          <li class="list-group-item card" *ngFor="let user of usuariosArray">
-            <div class="card" style="width: 18rem;">
-              <div class="card-body">
-                <h5 class="card-title">{{ user.nome }}</h5>
-                <a *ngIf="user.linkedIn" href="https://www.{{user.linkedIn}}"><h2><i class="fab fa-linkedin-in"></i></h2></a>
-                <a *ngIf="user.instagram" href="https://www.instagram.com/{{user.instagram}}/"><h2><i class="fab fa-instagram"></i></h2></a>
-                <a *ngIf="user.site" href="https://www.{{user.site}}"><h2><i class="fas fa-mouse-pointer"></i></h2></a>
-                <a class="btn btn-primary" [routerLink]="['/serviço', serveID, 'usuario', user.id]">Detalhes</a>
-              </div>
-            </div>
-          </li>
-        </ul>
-
-      <div *ngIf="usuariosArray.length == 0">
-        <br>
-        <h2>Ainda Não Temos Profissionais Para Esse Serviço!</h2>
-      </div>
-    </div>
-    
-  </body>
-
-</html>
+<app-navbar [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
+<div class="context-nav"><app-back-link route="/feed" label="Voltar aos serviços"></app-back-link></div>
+<main class="app-page"><div class="page-shell"><header class="page-heading"><div class="page-heading-copy"><span class="page-kicker">Profissionais</span><h1>Escolha com confiança.</h1><p>Conheça os profissionais disponíveis e veja os detalhes antes de contratar.</p></div></header>
+  <app-loading-state *ngIf="isLoading" message="Buscando profissionais..."></app-loading-state>
+  <section class="entity-grid" *ngIf="!isLoading && usuariosArray.length != 0"><article class="entity-card" *ngFor="let user of usuariosArray"><span class="icon-badge">{{ user.nome ? user.nome.charAt(0) : 'HE' }}</span><h2>{{ user.nome }}</h2><p>Profissional disponível para este serviço.</p><div class="card-actions"><a class="button-primary" [routerLink]="['/serviço', serveID, 'usuario', user.id]">Ver perfil</a></div></article></section>
+  <section class="empty-state" *ngIf="!isLoading && usuariosArray.length == 0"><div class="empty-state-content"><span class="icon-badge">0</span><h2>Nenhum profissional por enquanto</h2><p>Estamos ampliando nossa rede. Explore outros serviços disponíveis.</p><a class="button-secondary" routerLink="/feed">Voltar ao catálogo</a></div></section>
+</div></main>

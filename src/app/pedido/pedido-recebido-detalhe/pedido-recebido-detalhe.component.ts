@@ -13,6 +13,7 @@ import { AvalicaoService } from './../../Servicos/avaliacao.service';
 import { Avaliacao } from './../../Usuarios/avaliacao';
 import { ServicosService } from './../../Servicos/servicos.service';
 import { Usuario } from './../../Usuarios/usuario';
+import { FeedbackType } from '../../shared/action-feedback/action-feedback.component';
 
 @Component({
   selector: 'app-pedido-recebido-detalhe',
@@ -32,6 +33,10 @@ export class PedidoRecebidoDetalheComponent implements OnInit {
   clienteSubscription : Subscription;
   usuario : Usuario = {} //usuario | servidor
   usuarioSubscription : Subscription;
+  feedbackMessage = '';
+  feedbackType: FeedbackType = 'error';
+  isSubmitting = false;
+  isConfirmingCancellation = false;
 
   constructor(
     public afs : AngularFirestore, 
@@ -83,17 +88,56 @@ export class PedidoRecebidoDetalheComponent implements OnInit {
        console.error(error);
     }
   }
-  aceitarPedido(){
+  async aceitarPedido(){
+    if (this.isSubmitting) {
+      return;
+    }
+
+    this.feedbackMessage = '';
+    this.isSubmitting = true;
     this.pedido.profissionalCancelou = false;
     this.pedido.statusProfissional = true;
-    this.servicoPedido.addPedido(this.cliente, this.usuario, this.pedido);
+    try {
+      await this.servicoPedido.addPedido(this.cliente, this.usuario, this.pedido);
+      this.feedbackType = 'success';
+      this.feedbackMessage = 'Pedido aceito. Agora você pode combinar os detalhes com o cliente.';
+    } catch (error) {
+      this.pedido.statusProfissional = false;
+      this.feedbackType = 'error';
+      this.feedbackMessage = 'Não foi possível aceitar o pedido. Tente novamente.';
+    } finally {
+      this.isSubmitting = false;
+    }
   }
-  cancelarPedido(){
+
+  requestCancellation(){
+    this.isConfirmingCancellation = true;
+    this.feedbackMessage = '';
+  }
+
+  dismissCancellation(){
+    this.isConfirmingCancellation = false;
+  }
+
+  async cancelarPedido(){
+    if (this.isSubmitting) {
+      return;
+    }
+
+    this.isSubmitting = true;
     this.pedido.profissionalCancelou = true;
-    this.servicoPedido.addPedido(this.cliente, this.usuario, this.pedido);
-    this.servicoPedido.deletePedidoRecebido(this.userId, this.pedido.id);
-    alert("Pedido Cancelado!");
-    this.router.navigate(["/feed"]);
+    try {
+      await this.servicoPedido.addPedido(this.cliente, this.usuario, this.pedido);
+      await this.servicoPedido.deletePedidoRecebido(this.userId, this.pedido.id);
+      this.router.navigate(['/usuario', this.userId, 'pedidos-recebidos']);
+    } catch (error) {
+      this.pedido.profissionalCancelou = false;
+      this.feedbackType = 'error';
+      this.feedbackMessage = 'Não foi possível recusar o pedido. Tente novamente.';
+    } finally {
+      this.isSubmitting = false;
+      this.isConfirmingCancellation = false;
+    }
   }
 
 }

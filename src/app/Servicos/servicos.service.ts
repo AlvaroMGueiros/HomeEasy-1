@@ -88,13 +88,25 @@ getReforma(){
 }
 //add usuario num serviço
 addUsuario(usuario : Usuario, serve : Servico){
-  this.afs.collection('Serviços').doc(serve.id).collection('Usuarios').doc(usuario.id).set(usuario);
-  this.afs.collection('Usuarios').doc(usuario.id).collection('Serviços').doc(serve.id).set(serve);
+  const batch = this.afs.firestore.batch();
+  const serviceProfessionalReference = this.afs.collection('Serviços').doc(serve.id).collection('Usuarios').doc(usuario.id).ref;
+  const professionalServiceReference = this.afs.collection('Usuarios').doc(usuario.id).collection('Serviços').doc(serve.id).ref;
+
+  batch.set(serviceProfessionalReference, usuario);
+  batch.set(professionalServiceReference, serve);
+
+  return batch.commit();
 }
 //deletar usuario de um servico
 apagarServico(usuario : Usuario, serve : Servico){
-  this.afs.collection('Serviços').doc(serve.id).collection('Usuarios').doc(usuario.id).delete();
-  this.afs.collection('Usuarios').doc(usuario.id).collection('Serviços').doc(serve.id).delete();
+  const batch = this.afs.firestore.batch();
+  const serviceProfessionalReference = this.afs.collection('Serviços').doc(serve.id).collection('Usuarios').doc(usuario.id).ref;
+  const professionalServiceReference = this.afs.collection('Usuarios').doc(usuario.id).collection('Serviços').doc(serve.id).ref;
+
+  batch.delete(serviceProfessionalReference);
+  batch.delete(professionalServiceReference);
+
+  return batch.commit();
 }
 //pegar usuarios de um serviço  
 getUsuarios(id : string){

@@ -1,88 +1,22 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-<meta charset="UTF-8">
-<title>Contato</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-
-</head>
-<header class="navbar navbar-expand-lg navbar-light bg-primary">
-
-    <a class="navbar-brand btn" routerLink="/home">Home Easy</a>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="btn btn-primary" [routerLink]="['/usuario', userId]" role="button">Perfil</a>
-        <a class="btn btn-primary" routerLink="/feed" role="button">Serviços</a>
-        <a class="btn btn-primary" routerLink="/sobrenos" role="button">Sobre Nós</a>
-        <a class="btn btn-primary" routerLink="/contato" role="button">Contato</a>
-        <a class="btn btn-primary" routerLink="/login" role="button" *ngIf="!entrarSair">Entrar</a>
-        <a class="btn btn-danger" (click)="sair()" role="button" *ngIf="entrarSair">Sair</a>
-      </div>
+<app-navbar [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
+<main class="app-page">
+  <div class="page-shell">
+    <header class="page-heading">
+      <div class="page-heading-copy"><span class="page-kicker">Fale com a gente</span><h1>Como podemos ajudar?</h1><p>Envie sua dúvida. Nossa equipe responde pelo canal informado.</p></div>
+    </header>
+    <div class="content-grid">
+      <form class="surface-card form-stack" #contactForm="ngForm" (ngSubmit)="sendMessage(contactForm)">
+        <div class="form-grid">
+          <div class="field-group"><label for="contactName">Nome</label><input id="contactName" type="text" placeholder="Seu nome" [(ngModel)]="mensagem.nome" name="nome" required></div>
+          <div class="field-group"><label for="contactPhone">Telefone</label><input id="contactPhone" type="tel" placeholder="(00) 00000-0000" [(ngModel)]="mensagem.telefone" name="telefone" required pattern="^[0-9]{9,11}$" #rateInput1="ngModel"><span class="field-error" *ngIf="rateInput1.errors && rateInput1.touched">Informe um telefone válido.</span></div>
+          <div class="field-group"><label for="contactEmail">E-mail</label><input id="contactEmail" type="email" placeholder="voce@exemplo.com" [(ngModel)]="mensagem.email" name="email" required email></div>
+          <div class="field-group"><label for="contactSubject">Assunto</label><input id="contactSubject" type="text" placeholder="Como podemos ajudar?" [(ngModel)]="mensagem.assunto" name="assunto" required></div>
+          <div class="field-group field-group-full"><label for="contactMessage">Mensagem</label><textarea id="contactMessage" rows="5" placeholder="Conte os detalhes da sua dúvida" [(ngModel)]="mensagem.mensagem" name="mensagem" required></textarea></div>
+        </div>
+        <app-action-feedback [message]="feedbackMessage" [type]="feedbackType"></app-action-feedback>
+        <div class="form-actions"><button class="button-primary" type="submit" [disabled]="!contactForm.valid || isSubmitting">{{ isSubmitting ? 'Enviando...' : 'Enviar mensagem' }}</button></div>
+      </form>
+      <aside class="surface-card"><span class="icon-badge">HE</span><h2>Contato direto</h2><p>Prefere outro canal? Fale conosco durante o horário comercial.</p><div class="detail-list"><div class="detail-item"><span>E-mail</span><strong>contatohomeeasy@gmail.com</strong></div><div class="detail-item"><span>Telefone</span><strong>3761-xxx</strong></div><div class="detail-item field-group-full"><span>Atendimento</span><strong>Terezinha, Canhotinho e Bom Conselho — PE</strong></div></div></aside>
     </div>
-   
-  </header>
-<body>
-   
-<div class="container">
-    <h1>Conecte-se Conosco</h1>
-    <p>Vamos adorar responder suas duvidas! É gratuito!</p>
-    <div class="contact-box">
-        <div class="contact-left"><h3>Mande sua pergunta</h3>
-            <form #f="ngForm">
-                <div class="input-row">
-                    <div class="input-group">
-                     <label>Nome</label>
-                     <input type="text" placeholder="Seu nome" [(ngModel)] = "mensagem.nome" name="nome" required> 
-                    </div>
-                    <div class="input-group">
-                        <label>Telefone</label>
-                        <input type="text" placeholder="Seu telefone" [(ngModel)] = "mensagem.telefone" name="telefone" required pattern="^[0-9]{9,11}$" #rateInput1 = "ngModel">
-                        <div *ngIf="rateInput1.errors && (rateInput1.dirty || rateInput1.touched)">
-                            <div class="idade" [hidden]="!rateInput1.errors.pattern">
-                                Porfavor, digite um número de telefone válido!
-                            </div>
-                          </div>
-                       </div>
-                </div>
-                       <div class="input-row">
-                       <div class="input-group">
-                        <label>Email</label>
-                        <input type="email" class ="email" placeholder="Seu Email" [(ngModel)] = "mensagem.email" name="email" required email #email="ngModel">
-                       </div>
-                       <div class="input-group">
-                           <label>Assunto</label>
-                           <input type="text" placeholder="Assunto" [(ngModel)] = "mensagem.assunto" name="assunto" required>
-                          </div>
-                       </div>
-
-                       <label>Mensagem</label>
-                       <textarea rows="5" placeholder="Digite a sua mensagem" [(ngModel)] = "mensagem.mensagem" name="mensagem" required></textarea>
-                       <button type="submit" [disabled]="!f.valid" (click)="enviarmensagem()">ENVIAR</button>
-                </form>
-    </div>
-        <div class="contact-right"><h3>Nos encontre em:</h3>
-            <table>
-                <tr>
-                    <td>Email: </td>
-                    <td>contatohomeeasy@gmail.com</td>
-                </tr>
-                <tr>
-                    <td>Telefone: </td>
-                    <td>3761-xxx</td>
-                </tr>
-                <tr>
-                    <td>Endereço: </td>
-                    <td>Terezinha - PE, Canhotinho - PE, Bom conselho - PE</td>
-                </tr>   
-            </table>
-    </div>
-        
-    </div>
-</div>
-
-</body>
-
-
-
-</html>
+  </div>
+</main>

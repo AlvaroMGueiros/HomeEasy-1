@@ -1,0 +1,19 @@
+<span class="service-icon" aria-hidden="true">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" [ngSwitch]="iconType">
+    <g *ngSwitchCase="'babysitting'"><circle cx="12" cy="7" r="3"></circle><path d="M7 21v-4a5 5 0 0 1 10 0v4M9 12l-3 3m9-3 3 3"></path></g>
+    <g *ngSwitchCase="'cooking'"><path d="M7 3v7m-3-7v4a3 3 0 0 0 6 0V3M7 10v11M17 3c-2 3-2 7 0 9v9M17 3c3 2 4 7 0 9"></path></g>
+    <g *ngSwitchCase="'laundry'"><rect x="4" y="2" width="16" height="20" rx="2"></rect><circle cx="12" cy="14" r="5"></circle><path d="M8 5h1m3 0h4m-7 9c2-2 4 2 7 0"></path></g>
+    <g *ngSwitchCase="'driving'"><path d="M5 17h14l-1-6-2-4H8l-2 4-1 6zM7 17v2m10-2v2M6 12h12M8 14h1m6 0h1"></path></g>
+    <g *ngSwitchCase="'security'"><path d="M12 2l8 3v6c0 5-3.4 9-8 11-4.6-2-8-6-8-11V5zM9 12l2 2 4-5"></path></g>
+    <g *ngSwitchCase="'cleaning'"><path d="M15 3l6 6M13.5 4.5l-7 7M5.5 10.5l8 8M3 13l8 8M3 13l2.5-2.5 8 8L11 21z"></path></g>
+    <g *ngSwitchCase="'electrical'"><path d="M13 2L5 14h7l-1 8 8-12h-7z"></path></g>
+    <g *ngSwitchCase="'plumbing'"><path d="M12 2s6 6.4 6 12a6 6 0 0 1-12 0c0-5.6 6-12 6-12zM9 15a3 3 0 0 0 3 3"></path></g>
+    <g *ngSwitchCase="'painting'"><rect x="3" y="4" width="13" height="6" rx="2"></rect><path d="M16 7h3v5h-7v3M10 15h4v7h-4z"></path></g>
+    <g *ngSwitchCase="'garden'"><path d="M20 4C11 4 5 9 5 16c5 0 12-3 15-12zM4 21c3-6 7-9 13-13"></path></g>
+    <g *ngSwitchCase="'carpentry'"><path d="M14 4l6 6M12 6l4-4 6 6-4 4M14 10L5 19M3 21l2-2"></path></g>
+    <g *ngSwitchCase="'masonry'"><path d="M3 6h18v12H3zM3 10h18M3 14h18M8 6v4m8-4v4m-5 0v4m-5 0v4m10-4v4"></path></g>
+    <g *ngSwitchCase="'renovation'"><path d="M14.5 6.5a4 4 0 0 0-5-5l2.2 2.2-3 3L6.5 4.5a4 4 0 0 0 5 5L20 18a2 2 0 0 1-2 2zM5 21l5-5"></path></g>
+    <g *ngSwitchCase="'domestic'"><path d="M3 11l9-8 9 8M5 10v10h14V10M9 20v-6h6v6"></path></g>
+    <g *ngSwitchDefault><path d="M14.5 6.5a4 4 0 0 0-5-5l2.2 2.2-3 3L6.5 4.5a4 4 0 0 0 5 5L20 18a2 2 0 0 1-2 2zM5 21l5-5"></path></g>
+  </svg>
+</span>

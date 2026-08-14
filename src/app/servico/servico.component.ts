@@ -12,6 +12,7 @@ import { UsuarioService } from '../Servicos/usuario.service';
 import { ServicosService } from './../Servicos/servicos.service';
 import { LoginServiceService } from '../Servicos/login-service.service';
 import { ServicoPedidoService } from './../Servicos/servico-pedido.service';
+import { FeedbackType } from '../shared/action-feedback/action-feedback.component';
 
 @Component({
   selector: 'app-servico',
@@ -26,8 +27,10 @@ export class ServicoComponent implements OnInit {
   entrarSair : boolean;
   servicosArray = new Array<Servico>();
   servicosSubscription : Subscription;
-  servicoEstado : boolean = false;
-  servicoDelete : Servico = {};
+  servicePendingDeletion: Servico;
+  isDeletingService = false;
+  feedbackMessage = '';
+  feedbackType: FeedbackType = 'success';
 
   constructor(
     public afs : AngularFirestore, 
@@ -58,16 +61,34 @@ export class ServicoComponent implements OnInit {
     this.userSubscription.unsubscribe();
     this.servicosSubscription.unsubscribe();
   }
-  mostrarBotaoDeletar(event, serve){
-    this.servicoEstado = true;
-    this.servicoDelete = serve;
+  requestServiceDeletion(service: Servico){
+    this.servicePendingDeletion = service;
+    this.feedbackMessage = '';
   }
-  limparBotao(){
-    this.servicoEstado = false;
+
+  dismissServiceDeletion(){
+    this.servicePendingDeletion = null;
   }
-  deletarServico(event, serve){
-    this.servico.apagarServico(this.usuario, serve);
-    alert("Inscrição Cancelada!");
+
+  async confirmServiceDeletion(){
+    if (!this.servicePendingDeletion || this.isDeletingService) {
+      return;
+    }
+
+    const serviceToDelete = this.servicePendingDeletion;
+    this.isDeletingService = true;
+
+    try {
+      await this.servico.apagarServico(this.usuario, serviceToDelete);
+      this.feedbackType = 'success';
+      this.feedbackMessage = 'O serviço foi removido do seu perfil.';
+      this.servicePendingDeletion = null;
+    } catch (error) {
+      this.feedbackType = 'error';
+      this.feedbackMessage = 'Não foi possível remover o serviço. Verifique sua conexão e tente novamente.';
+    } finally {
+      this.isDeletingService = false;
+    }
   }
   async sair(){
     try{

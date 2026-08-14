@@ -14,6 +14,7 @@ import { Pedido } from 'src/app/Usuarios/pedido';
 import { AvalicaoService } from './../../Servicos/avaliacao.service';
 import { Avaliacao } from './../../Usuarios/avaliacao';
 import { ServicosService } from './../../Servicos/servicos.service';
+import { FeedbackType } from '../../shared/action-feedback/action-feedback.component';
 
 @Component({
   selector: 'app-pedido-feito-detalhe',
@@ -39,6 +40,10 @@ export class PedidoFeitoDetalheComponent implements OnInit {
   ano : number = new Date().getFullYear(); 
   dia : number = new Date().getDate();
   today = new Date().toJSON().split('T')[0];
+  feedbackMessage = '';
+  feedbackType: FeedbackType = 'error';
+  isSubmitting = false;
+  isConfirmingCancellation = false;
 
   constructor(
     public afs : AngularFirestore, 
@@ -90,23 +95,58 @@ export class PedidoFeitoDetalheComponent implements OnInit {
        console.error(error);
     }
   }
-  addAvaliacao(){
+  async addAvaliacao(){
+    if (this.isSubmitting) {
+      return;
+    }
+
+    this.feedbackMessage = '';
+    this.isSubmitting = true;
     this.avaliacao.nomeContratante = this.usuario.nome;
     this.avaliacao.idServidor = this.servidorId;
     this.avaliacao.idPedido = this.pedidoId;
     this.avaliacao.idServico = this.pedido.idServico;
     this.avaliacao.data = this.dia + "/" + this.mes + "/" + this.ano;
-    this.avaliacaoService.addAvaliacao(this.avaliacao, this.servidorId, this.pedido.idServico);
-    this.servicoPedido.addPedido(this.usuario, this.servidor, this.pedido);
-    alert("Avaliação Realizada!");
-    this.router.navigate(["/feed"]);
+    try {
+      await this.avaliacaoService.addAvaliacao(this.avaliacao, this.servidorId, this.pedido.idServico);
+      this.feedbackType = 'success';
+      this.feedbackMessage = 'Avaliação publicada com sucesso.';
+    } catch (error) {
+      this.feedbackType = 'error';
+      this.feedbackMessage = 'Não foi possível publicar a avaliação. Tente novamente.';
+    } finally {
+      this.isSubmitting = false;
+    }
   }
-  cancelarPedido(){
+
+  requestCancellation(){
+    this.isConfirmingCancellation = true;
+    this.feedbackMessage = '';
+  }
+
+  dismissCancellation(){
+    this.isConfirmingCancellation = false;
+  }
+
+  async cancelarPedido(){
+    if (this.isSubmitting) {
+      return;
+    }
+
+    this.isSubmitting = true;
     this.pedido.clienteCancelou = true;
-    this.servicoPedido.addPedido(this.usuario, this.servidor, this.pedido);
-    this.servicoPedido.deletePedidoFeito(this.userId, this.pedido.id);
-    alert("Pedido Cancelado!");
-    this.router.navigate(["/feed"]);
+    try {
+      await this.servicoPedido.addPedido(this.usuario, this.servidor, this.pedido);
+      await this.servicoPedido.deletePedidoFeito(this.userId, this.pedido.id);
+      this.router.navigate(['/usuario', this.userId, 'pedidos-feitos']);
+    } catch (error) {
+      this.pedido.clienteCancelou = false;
+      this.feedbackType = 'error';
+      this.feedbackMessage = 'Não foi possível cancelar o pedido. Tente novamente.';
+    } finally {
+      this.isSubmitting = false;
+      this.isConfirmingCancellation = false;
+    }
   }
 
 }

@@ -13,6 +13,7 @@ import { UsuarioService } from '../Servicos/usuario.service';
 import { ServicosService } from './../Servicos/servicos.service';
 import { LoginServiceService } from '../Servicos/login-service.service';
 import { ServicoPedidoService } from './../Servicos/servico-pedido.service';
+import { FeedbackType } from '../shared/action-feedback/action-feedback.component';
 
 @Component({
   selector: 'app-pedido',
@@ -36,6 +37,9 @@ export class PedidoComponent implements OnInit {
   servePedidoSubscription : Subscription;
   servePedido : ServicoPedido = {}; //detalhes do serviço
   today = new Date().toJSON().split('T')[0];
+  feedbackMessage = '';
+  feedbackType: FeedbackType = 'error';
+  isSubmitting = false;
 
   constructor(
     public afs : AngularFirestore, 
@@ -81,7 +85,7 @@ export class PedidoComponent implements OnInit {
     this.clienteSubscription.unsubscribe();
     this.servidorSubscription.unsubscribe();
     this.serveSubscription.unsubscribe();
-    this.servidorSubscription.unsubscribe();
+    this.servePedidoSubscription.unsubscribe();
   }
   async sair(){
     try{
@@ -91,8 +95,14 @@ export class PedidoComponent implements OnInit {
        console.error(error);
     }
   }
-  addpedido(){
+  async addpedido(){
+    if (this.isSubmitting) {
+      return;
+    }
+
     if(this.userId != this.servidor.id){
+      this.feedbackMessage = '';
+      this.isSubmitting = true;
       this.pedido.nome = this.serve.nome;
       this.pedido.id = Math.floor(Math.random() * 1000) + this.cliente.id;
       this.pedido.idServidor = this.servidor.id;
@@ -102,11 +112,18 @@ export class PedidoComponent implements OnInit {
       this.pedido.profissionalCancelou = false;
       this.pedido.statusProfissional = false;
       this.pedido.idServico = this.serveID;
-      this.servicoPedido.addPedido(this.cliente, this.servidor, this.pedido);
-      alert("Pedido Realizado!");
-      this.router.navigate(["/feed"]);
+      try {
+        await this.servicoPedido.addPedido(this.cliente, this.servidor, this.pedido);
+        this.router.navigate(['/usuario', this.userId, 'pedidos-feitos']);
+      } catch (error) {
+        this.feedbackType = 'error';
+        this.feedbackMessage = 'Não foi possível confirmar o pedido. Verifique sua conexão e tente novamente.';
+      } finally {
+        this.isSubmitting = false;
+      }
     }else{
-      alert("Não é possivel fazer um pedido para si mesmo!");
+      this.feedbackType = 'error';
+      this.feedbackMessage = 'Você não pode solicitar o próprio serviço.';
     }
   }
 

@@ -1,57 +1,10 @@
-<html>
-  <head>
-    <title>Pedido</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <meta charset="utf-8">  
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-  </head>
-
-  <header class="navbar navbar-expand-lg navbar-light bg-primary">
-
-    <a class="navbar-brand btn" routerLink="/home">Home Easy</a>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="btn btn-primary" [routerLink]="['/usuario', userId]" role="button">Perfil</a>
-        <a class="btn btn-primary" routerLink="/feed" role="button">Serviços</a>
-        <a class="btn btn-primary" routerLink="/sobrenos" role="button">Sobre Nós</a>
-        <a class="btn btn-primary" routerLink="/contato" role="button">Contato</a>
-        <a class="btn btn-primary" routerLink="/login" role="button" *ngIf="!entrarSair">Entrar</a>
-        <a class="btn btn-danger" (click)="sair()" role="button" *ngIf="entrarSair">Sair</a>
-      </div>
-    </div>
-   
-  </header>
- 
-  <body>
-
-    <div class="container">
-      <h2>Informações</h2>
-      <h3>Servico: {{pedido.nome}}</h3>
-      <h3>Cliente: {{cliente.nome}}</h3>
-      <a type="button" class="btn btn-primary" [routerLink]="['/chat', cliente.id]">Conversar</a><br>
-      <h3>Data: {{pedido.data}}</h3>
-      <h3>Preço: {{pedido.preco}}</h3>
-      <h3>Horário: {{pedido.hora}}</h3>
-      <h3>Local: {{pedido.local}}</h3>
-      <h3>Cidade: {{pedido.cidade}}</h3>
-      <h3>Estado: {{pedido.estado}}</h3>
-      <br>
-      <div *ngIf="pedido.clienteCancelou == false && pedido.profissionalCancelou == false && pedido.statusProfissional == false">
-        <button type="button" class="alert alert-success" (click)="aceitarPedido()">Aceitar Pedido</button>
-        <button type="button" class="alert alert-danger" (click)="cancelarPedido()">Cancelar Pedido</button>
-      </div>
-      <br>
-      <div *ngIf="pedido.statusProfissional == true">
-        <h3>Você Aceitou Esse Pedido!</h3> 
-      </div>
-      <br>
-      <div *ngIf="pedido.clienteCancelou == true">
-        <h3>{{cliente.nome}} Cancelou Esse Pedido!</h3>
-      </div>
-
-    </div> 
-
-
-  </body>
-
-</html>
+<app-navbar [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
+<div class="context-nav context-nav-narrow"><app-back-link [route]="['/usuario', userId, 'pedidos-recebidos']" label="Voltar às solicitações"></app-back-link></div>
+<main class="app-page"><div class="page-shell page-shell-narrow"><header class="page-heading"><div class="page-heading-copy"><span class="page-kicker">Solicitação recebida</span><h1>{{ pedido.nome }}</h1><p>Revise os dados antes de aceitar o atendimento.</p></div></header>
+  <section class="surface-card"><div class="detail-list"><div class="detail-item"><span>Cliente</span><strong>{{ cliente.nome }}</strong></div><div class="detail-item"><span>Valor</span><strong>R$ {{ pedido.preco }}</strong></div><div class="detail-item"><span>Data</span><strong>{{ pedido.data }}</strong></div><div class="detail-item"><span>Horário</span><strong>{{ pedido.hora }}</strong></div><div class="detail-item"><span>Endereço</span><strong>{{ pedido.local }}</strong></div><div class="detail-item"><span>Localidade</span><strong>{{ pedido.cidade }}, {{ pedido.estado }}</strong></div></div>
+    <div class="status-banner status-success" *ngIf="pedido.statusProfissional == true">Você aceitou este pedido.</div><div class="status-banner status-danger" *ngIf="pedido.clienteCancelou == true">O cliente cancelou este pedido.</div>
+    <app-action-feedback [message]="feedbackMessage" [type]="feedbackType"></app-action-feedback>
+    <div class="form-actions" style="margin-top: 28px"><a class="button-secondary" [routerLink]="['/chat', cliente.id]">Conversar com cliente</a><button class="button-primary" type="button" *ngIf="pedido.clienteCancelou == false && pedido.profissionalCancelou == false && pedido.statusProfissional == false && !isConfirmingCancellation" (click)="aceitarPedido()" [disabled]="isSubmitting">{{ isSubmitting ? 'Aceitando...' : 'Aceitar pedido' }}</button><button class="button-danger" type="button" *ngIf="pedido.clienteCancelou == false && pedido.profissionalCancelou == false && pedido.statusProfissional == false && !isConfirmingCancellation" (click)="requestCancellation()">Recusar</button></div>
+    <div class="status-banner status-danger" *ngIf="isConfirmingCancellation" role="alert"><span>Ao recusar, o pedido sairá da sua lista. Deseja continuar?</span><div class="form-actions"><button class="button-secondary" type="button" (click)="dismissCancellation()">Voltar</button><button class="button-danger" type="button" (click)="cancelarPedido()" [disabled]="isSubmitting">{{ isSubmitting ? 'Recusando...' : 'Confirmar recusa' }}</button></div></div>
+  </section>
+</div></main>

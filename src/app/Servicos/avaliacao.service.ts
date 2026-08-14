@@ -33,7 +33,7 @@ export class AvalicaoService {
   }
   //add uma avaliação ao serviço de um profissional
  addAvaliacao(avaliacao :Avaliacao, idServidor : string, idServico : string){
-    this.usuarioCollection.doc(idServidor).collection('Serviços').doc(idServico)
+    return this.usuarioCollection.doc(idServidor).collection('Serviços').doc(idServico)
         .collection('Avaliações').doc(avaliacao.idPedido).set(avaliacao);
  }
 

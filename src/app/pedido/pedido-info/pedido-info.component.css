@@ -1,12 +1,14 @@
-body{
-  background-image: url(https://i.ibb.co/5kgycRg/Escolja-um-Servi-o.png);
-  height:100vh;
-  background-size:cover;
-  background-position:center ;
-}
-header{
-  position: fixed;
-  width: 100%;
-}
-
-
+:host { display: block; min-height: 100vh; background: var(--color-background); }
+.process-page { width: min(1000px, calc(100% - 40px)); margin: 0 auto; padding: 90px 0 110px; }
+.process-intro { max-width: 760px; margin-bottom: 70px; }
+.process-intro > span { color: var(--color-primary); font-size: 0.78rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
+.process-intro h1 { margin: 18px 0 22px; font-size: clamp(2.8rem, 6vw, 5rem); line-height: 1; }
+.process-intro p { max-width: 640px; font-size: 1.1rem; }
+.process-list { border-top: 1px solid var(--color-border); }
+.process-list article { display: grid; grid-template-columns: 100px 1fr; gap: 24px; padding: 34px 0; border-bottom: 1px solid var(--color-border); }
+.process-list article > span { color: var(--color-accent); font-family: 'Manrope', sans-serif; font-weight: 800; }
+.process-list h2 { margin: 0 0 8px; font-size: 1.5rem; }
+.process-list p { max-width: 620px; margin: 0; }
+.process-action { display: inline-flex; min-height: 50px; align-items: center; margin-top: 44px; padding: 0 24px; border-radius: 12px; color: var(--color-surface); background: var(--color-primary); font-weight: 700; }
+.process-action:hover { color: var(--color-surface); background: var(--color-primaryDark); }
+@media (max-width: 560px) { .process-page { padding: 58px 0 80px; } .process-list article { grid-template-columns: 48px 1fr; } }

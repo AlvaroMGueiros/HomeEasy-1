@@ -1,25 +1,67 @@
-<html>
-  <head>
-    <title>Seja Um Profissional</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
-  <meta charset="utf-8">  
-  </head>
+<app-navbar [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
 
-  <body>
+<main class="professional-page">
+  <section class="professional-copy">
+    <span class="page-kicker">Para profissionais</span>
+    <h1>Seu trabalho mais perto de quem precisa.</h1>
+    <p>Crie seu perfil, apresente seus serviços e receba pedidos de clientes da sua região.</p>
+    <div class="form-actions">
+      <a *ngIf="!entrarSair" routerLink="/login" class="button-primary">Criar minha conta</a>
+      <a *ngIf="entrarSair" routerLink="/serprofissional" class="button-primary">Cadastrar serviço</a>
+      <a routerLink="/pedido-info" class="button-secondary">Como funciona</a>
+    </div>
+  </section>
 
-    <section>
-      <header>
-        <h2><a href="#" class="logo" >Home Easy</a></h2>
+  <section class="professional-visual" aria-hidden="true">
+    <div class="professional-dashboard">
+      <header class="dashboard-header">
+        <div class="dashboard-brand">
+          <span class="dashboard-logo"><img src="assets/home-easy-logo-v2.png" alt=""></span>
+          <div><small>Home Easy Pro</small><strong>Seu painel</strong></div>
+        </div>
+        <span class="profile-status"><i></i> Perfil ativo</span>
       </header>
-      <div class="content">
-        <div class="info">
-          <h2>Venha ser um profissional<br><span>Home Easy</span></h2>
-          <p>Faça parte do Home Easy e forneça serviços para quem necessita.</p>
-          <a *ngIf="!entrarSair" href="/login" class="info-btn">Cadastre-se</a>
-          <a *ngIf="entrarSair" href="/serprofissional" class="info-btn">Cadastrar</a>
+
+      <div class="request-card">
+        <div class="request-heading">
+          <span>Novo pedido</span>
+          <small>Agora</small>
+        </div>
+        <h2>Limpeza residencial</h2>
+        <div class="request-details">
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-4.4 7-11a7 7 0 1 0-14 0c0 6.6 7 11 7 11Z"></path><circle cx="12" cy="10" r="2"></circle></svg>
+            Próximo de você
+          </span>
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+            Hoje, 14h
+          </span>
+        </div>
+        <div class="client-row">
+          <span class="client-avatar">MC</span>
+          <div><strong>Maria C.</strong><small>Cliente da sua região</small></div>
+          <span class="reply-action">Responder</span>
         </div>
       </div>
-    </section>
 
-  </body>
-</html>
+      <div class="dashboard-metrics">
+        <div><span>Perfil completo</span><strong>100%</strong></div>
+        <div><span>Sua avaliação</span><strong>4,9 <small>★</small></strong></div>
+      </div>
+    </div>
+
+    <div class="pro-highlight pro-highlight-top">
+      <span class="highlight-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m5 12 4 4L19 6"></path></svg>
+      </span>
+      <div><strong>Perfil pronto</strong><small>para receber clientes</small></div>
+    </div>
+    <div class="pro-highlight pro-highlight-bottom">
+      <span class="highlight-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg>
+      </span>
+      <div><strong>Novo pedido</strong><small>na sua região</small></div>
+    </div>
+  </section>
+</main>

@@ -1,47 +1,5 @@
-<html>
-  <head>
-    <title>Perfil</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <meta charset="utf-8">  
-  </head>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-  <header class="navbar navbar-expand-lg navbar-light bg-primary">
-
-    <a class="navbar-brand btn" routerLink="/home">Home Easy</a>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="btn btn-primary" [routerLink]="['/usuario', userId]" role="button">Perfil</a>
-        <a class="btn btn-primary" routerLink="/feed" role="button">Serviços</a>
-        <a class="btn btn-primary" routerLink="/sobrenos" role="button">Sobre Nós</a>
-        <a class="btn btn-primary" routerLink="/contato" role="button">Contato</a>
-        <a class="btn btn-primary" routerLink="/login" role="button" *ngIf="!entrarSair">Entrar</a>
-        <a class="btn btn-danger" (click)="sair()" role="button" *ngIf="entrarSair">Sair</a>
-      </div>
-    </div>
-   
-  </header>
-
-  <body>
-      <h2>Avaliações</h2><br>
-
-      <ul class="list-group list-group-horizontal ulserve">
-        <li class="list-group-item card" *ngFor="let serve of AvaliacoesArray">
-          <div class="card" style="width: 18rem;">
-            <div class="card-body">
-              <h3 class="card-title">{{ serve.nomeContratante }}</h3>
-              <h4>Nota: {{serve.avaliacaoNota}}</h4>
-              <h4>Avaliação: {{serve.avaliacao}}</h4>
-              <h4>Postado em: {{serve.data}}</h4>
-            </div>
-          </div>
-        </li>
-      </ul>
-
-      <div *ngIf="AvaliacoesArray.length == 0">
-        <br>
-        <h2>Esse Profissional Ainda Não Possui Avaliações!</h2>
-      </div>
-  </body>
-
-</html>
-
+<app-navbar [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
+<main class="app-page"><div class="page-shell"><header class="page-heading"><div class="page-heading-copy"><span class="page-kicker">Reputação</span><h1>Avaliações de clientes</h1><p>Experiências compartilhadas por quem já contratou este profissional.</p></div></header>
+  <section class="entity-grid" *ngIf="AvaliacoesArray.length != 0"><article class="entity-card" *ngFor="let serve of AvaliacoesArray"><span class="icon-badge">{{ serve.nomeContratante ? serve.nomeContratante.charAt(0) : 'HE' }}</span><h2>{{ serve.nomeContratante }}</h2><div class="rating"><strong>{{ serve.avaliacaoNota }}</strong><span>de 5</span></div><p>{{ serve.avaliacao }}</p><span class="field-help">Publicado em {{ serve.data }}</span></article></section>
+  <section class="empty-state" *ngIf="AvaliacoesArray.length == 0"><div class="empty-state-content"><span class="icon-badge">0</span><h2>Ainda não há avaliações</h2><p>As experiências dos clientes aparecerão aqui após os primeiros serviços.</p></div></section>
+</div></main>

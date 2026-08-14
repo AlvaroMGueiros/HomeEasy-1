@@ -1,0 +1,41 @@
+<section class="regional-map surface-card" aria-labelledby="regionalMapTitle">
+  <header class="regional-map-header">
+    <div>
+      <span class="page-kicker">Profissionais perto de você</span>
+      <h2 id="regionalMapTitle">Explore por região</h2>
+      <p>Veja quantos profissionais oferecem os serviços encontrados em cada cidade.</p>
+    </div>
+    <button class="button-secondary map-toggle" type="button" (click)="toggleMap()" [attr.aria-expanded]="isOpen" aria-controls="regionalMapContent">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z"></path><path d="M9 3v15M15 6v15"></path></svg>
+      {{ isOpen ? 'Ocultar mapa' : 'Ver mapa' }}
+    </button>
+  </header>
+
+  <div class="regional-map-content" id="regionalMapContent" *ngIf="isOpen">
+    <app-loading-state *ngIf="isLoading" message="Contando profissionais por região..."></app-loading-state>
+
+    <div *ngIf="!isLoading && regions.length">
+      <div class="map-frame">
+        <div #mapContainer class="map-canvas" aria-label="Mapa com a quantidade de profissionais por cidade"></div>
+        <div class="map-progress" *ngIf="isLocatingCities"><span></span>Posicionando cidades...</div>
+      </div>
+
+      <p class="map-feedback" *ngIf="mapFeedback" role="status">{{ mapFeedback }}</p>
+
+      <div class="region-list" aria-label="Regiões disponíveis">
+        <button type="button" *ngFor="let region of regions" (click)="selectCity(region.city)">
+          <span class="region-pin" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-4.4 7-11a7 7 0 1 0-14 0c0 6.6 7 11 7 11Z"></path><circle cx="12" cy="10" r="2"></circle></svg>
+          </span>
+          <span class="region-copy"><strong>{{ region.city }}</strong><small>{{ region.state || 'Brasil' }} · {{ region.serviceCount }} serviço(s)</small></span>
+          <span class="region-count"><strong>{{ region.professionalCount }}</strong><small *ngIf="region.professionalCount === 1">profissional</small><small *ngIf="region.professionalCount !== 1">profissionais</small></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="map-empty" *ngIf="!isLoading && !regions.length">
+      <span class="icon-badge">0</span>
+      <div><strong>Nenhuma região disponível</strong><p>Ajuste os filtros para encontrar profissionais em outras cidades.</p></div>
+    </div>
+  </div>
+</section>

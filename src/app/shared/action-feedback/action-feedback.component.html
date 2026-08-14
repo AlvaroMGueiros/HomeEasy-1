@@ -1,0 +1,9 @@
+<div
+  *ngIf="message"
+  class="status-banner"
+  [class.status-danger]="isError"
+  [class.status-success]="isSuccess"
+  [attr.role]="isError ? 'alert' : 'status'"
+  aria-live="polite">
+  {{ message }}
+</div>

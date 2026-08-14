@@ -1,36 +1,63 @@
+<app-navbar [authenticated]="authenticated" [userId]="userId" (logout)="logout()"></app-navbar>
 
-<!DOCTYPE html>
-<html>
+<main class="home-page">
 
-<head>
-<title>Home Easy</title>
-</head>
-<body>
-   <header> 
-     <div class="main">
-        <div class="logo">
-         <img src="https://i.ibb.co/02jGf2r/oie-transparent-1.png">
-       </div>
-       <ul>
-         <li><a routerLink="/profissional">Seja um Profissional</a></li>
-         <li><a routerLink="/pedido-info">Como Funciona?</a></li>
-         <li><a routerLink="/login">Login</a></li>
-         <li><a routerLink="/sobrenos">Sobre Nós</a></li>
-         <li><a routerLink="/contato">Contato</a></li>
-         
-       </ul>
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="eyebrow">Sua casa, bem cuidada</span>
+      <h1>O profissional certo, sem complicação.</h1>
+      <p>Encontre especialistas de confiança para limpeza, reparos e reformas. Compare opções, converse e contrate em um só lugar.</p>
+      <div class="hero-actions">
+        <a class="primary-action" routerLink="/feed">Encontrar um serviço</a>
+        <a class="secondary-action" routerLink="/profissional">Quero trabalhar</a>
       </div>
-      <div class="title">
-        <h1>HOME EASY</h1>
-
+      <div class="trust-row" aria-label="Benefícios da plataforma">
+        <span><i aria-hidden="true">✓</i> Profissionais avaliados</span>
+        <span><i aria-hidden="true">✓</i> Contato direto</span>
       </div>
-      <div class="button">
-        <a routerLink="/feed" class="btn"> ENCONTRE UM SERVIÇO</a>
-        <a routerLink="/login" class="btn"> CADASTRE-SE AGORA!</a>
+    </div>
+
+    <div class="hero-visual" aria-label="Demonstração dos serviços Home Easy">
+      <div class="hero-logo-panel">
+        <img src="assets/home-easy-logo-v2.png" alt="Logo Home Easy">
       </div>
-      
-   </header>
-</body>
+      <div class="service-chip chip-top"><span>01</span> Limpeza</div>
+      <div class="service-chip chip-bottom"><span>02</span> Reparos</div>
+      <div class="rating-card"><strong>4,9</strong><span>avaliação média</span></div>
+    </div>
+  </section>
 
+  <section class="how-it-works">
+    <div class="section-heading">
+      <span class="eyebrow">Simples de verdade</span>
+      <h2>Resolva em três passos</h2>
+    </div>
+    <div class="steps-grid">
+      <article>
+        <span class="step-number">01</span>
+        <h3>Escolha o serviço</h3>
+        <p>Conte o que sua casa precisa e encontre profissionais disponíveis.</p>
+      </article>
+      <article>
+        <span class="step-number">02</span>
+        <h3>Converse e combine</h3>
+        <p>Veja perfis, avaliações e alinhe todos os detalhes diretamente.</p>
+      </article>
+      <article>
+        <span class="step-number">03</span>
+        <h3>Pronto, resolvido</h3>
+        <p>Agende com tranquilidade e avalie o atendimento ao final.</p>
+      </article>
+    </div>
+  </section>
 
-</html>
+  <footer class="home-footer">
+    <a class="home-brand" routerLink="/home">
+      <span class="brand-logo-frame" aria-hidden="true">
+        <img class="brand-logo" src="assets/home-easy-logo-v2.png" alt="">
+      </span>
+    </a>
+    <p>Cuidar da casa pode ser mais simples.</p>
+    <span>© 2026 Home Easy</span>
+  </footer>
+</main>

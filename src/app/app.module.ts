@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { environment } from '../environments/environment';
 import { AngularFireModule } from '@angular/fire';
@@ -26,6 +27,7 @@ import { ChatModule } from './chat/chat.module';
 import { ChatService } from './Servicos/chat.service';
 import { ServicoModule } from './servico/servico.module';
 import { AvalicaoService } from './Servicos/avaliacao.service';
+import { SharedModule } from './shared/shared.module';
 
 @NgModule({
   declarations: [
@@ -36,6 +38,7 @@ import { AvalicaoService } from './Servicos/avaliacao.service';
   imports: [
     BrowserModule,
     FormsModule,
+    HttpClientModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireDatabaseModule,
     AngularFireAuthModule,
@@ -49,6 +52,7 @@ import { AvalicaoService } from './Servicos/avaliacao.service';
     PedidoModule,
     ChatModule,
     ServicoModule,
+    SharedModule,
     AppRoutingModule
   ], 
   providers: [ LoginServiceService, ContatoService, ServicosService, UsuarioService, ChatService, AvalicaoService ],

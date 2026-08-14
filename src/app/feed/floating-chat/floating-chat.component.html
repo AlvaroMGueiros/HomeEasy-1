@@ -1,0 +1,32 @@
+<div class="floating-chat" *ngIf="authenticated">
+  <section class="chat-panel" id="feedChatPanel" *ngIf="isOpen" role="region" aria-label="Conversas recentes">
+    <header class="chat-panel-header">
+      <div><span>Mensagens</span><h2>Conversas</h2></div>
+      <button class="icon-button" type="button" (click)="closeChat()" aria-label="Fechar conversas">×</button>
+    </header>
+
+    <app-loading-state *ngIf="isLoading" message="Carregando conversas..."></app-loading-state>
+
+    <div class="contact-list" *ngIf="!isLoading && contacts.length">
+      <a class="contact-row" *ngFor="let contact of contacts; trackBy: trackByContactId" [routerLink]="['/chat', contact.id]" (click)="closeChat()">
+        <img class="contact-avatar" *ngIf="contact.foto" [src]="contact.foto" [alt]="contact.nome">
+        <span class="contact-avatar contact-initial" *ngIf="!contact.foto" aria-hidden="true">{{ contact.nome ? contact.nome.charAt(0) : 'HE' }}</span>
+        <span class="contact-copy"><strong>{{ contact.nome }}</strong><small>Abrir conversa</small></span>
+        <span class="contact-arrow" aria-hidden="true">→</span>
+      </a>
+    </div>
+
+    <div class="chat-empty" *ngIf="!isLoading && !contacts.length">
+      <strong>Nenhuma conversa ainda</strong>
+      <span>Abra o perfil de um profissional para iniciar um contato.</span>
+    </div>
+
+    <a class="all-conversations" routerLink="/conversas" (click)="closeChat()">Ver todas as conversas</a>
+  </section>
+
+  <button class="chat-trigger" type="button" (click)="toggleChat()" [attr.aria-expanded]="isOpen" aria-controls="feedChatPanel" [attr.aria-label]="isOpen ? 'Fechar conversas' : 'Abrir conversas'">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path><path d="M8 9h8M8 13h5"></path></svg>
+    <span>Conversas</span>
+    <small *ngIf="contacts.length" aria-label="Quantidade de conversas">{{ contacts.length }}</small>
+  </button>
+</div>

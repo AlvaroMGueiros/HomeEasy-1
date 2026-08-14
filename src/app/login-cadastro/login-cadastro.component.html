@@ -1,96 +1,68 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Login e Cadastro</title>
+<app-navbar [authenticated]="authenticated" [userId]="userId" (logout)="logout()"></app-navbar>
 
-</head>
+<main class="auth-page">
+  <section class="auth-intro">
+    <span class="page-kicker">Bem-vindo</span>
+    <h1>Sua casa mais simples de cuidar.</h1>
+    <p>Entre para contratar profissionais, conversar e acompanhar seus pedidos.</p>
+    <div class="auth-benefits">
+      <span><i aria-hidden="true">✓</i> Profissionais avaliados</span>
+      <span><i aria-hidden="true">✓</i> Contato direto</span>
+      <span><i aria-hidden="true">✓</i> Pedidos em um só lugar</span>
+    </div>
+  </section>
 
-
-
-    
-<header class="navbar navbar-expand-lg navbar-light bg-primary">
-
-    <a class="navbar-brand btn" routerLink="/home">Home Easy</a>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="btn btn-primary" [routerLink]="['/usuario', userId]" role="button">Perfil</a>
-        <a class="btn btn-primary" routerLink="/feed" role="button">Serviços</a>
-        <a class="btn btn-primary" routerLink="/sobrenos" role="button">Sobre Nós</a>
-        <a class="btn btn-primary" routerLink="/contato" role="button">Contato</a>
-        <a class="btn btn-primary" routerLink="/login" role="button" *ngIf="!entrarSair">Entrar</a>
-        <a class="btn btn-danger" (click)="sair()" role="button" *ngIf="entrarSair">Sair</a>
+  <section class="login-wrap" aria-labelledby="authTitle">
+    <div class="login-html">
+      <h2 id="authTitle">Acesse sua conta</h2>
+      <div class="auth-tabs" role="tablist" aria-label="Escolha entre entrar ou criar conta">
+        <button type="button" role="tab" [attr.aria-selected]="authMode === 'login'" [class.active]="authMode === 'login'" (click)="setAuthMode('login')">Entrar</button>
+        <button type="button" role="tab" [attr.aria-selected]="authMode === 'register'" [class.active]="authMode === 'register'" (click)="setAuthMode('register')">Criar conta</button>
       </div>
-    </div>
-   
-  </header>
 
-
-<body>
-    <div class="login-wrap">
-        <div class="login-html">
-            <input id="tab-1" type="radio" name="tab" class="sign-in" checked><label for="tab-1" class="tab">Entrar</label>
-            <input id="tab-2" type="radio" name="tab" class="sign-up"><label for="tab-2" class="tab">Cadastrar</label>
-            <form class="login-form" #f="ngForm">
-                <div class="sign-in-htm">
-                    <div class="group">
-                        <label for="user" class="label">Email</label>
-                        <input type="email" class="input" [(ngModel)]="userLogin.email" name="email" required email>
-                    </div>
-                    <div class="group">
-                        <label for="pass" class="label">Senha</label>
-                        <input type="password" class="input" data-type="password" [(ngModel)]="userLogin.senha" name="password" required>
-                    </div>
-                    <div class="group">
-                        <input type="submit" class="button" value="Entrar" (click)="login()">
-                    </div>
-                    <div *ngIf="mensagemErro" class="alert alert-danger msgerror" role="alert">
-                        {{mensagemErro}}
-                    </div>
-                    <div class="hr"></div>
-                    <div class="foot-lnk">
-                        <a routerLink="/recuperar-senha">Esqueceu sua senha?</a>
-                    </div>
-                </div>
-                <div class="sign-up-htm">
-                    <div class="group">
-                        <label for="pass" class="label">Nome</label>
-                        <input type="text" class="input" [(ngModel)]="userRegister.nome" name="nome" required>
-                    </div>
-                    <div class="group">
-                        <label for="pass" class="label">Idade</label>
-                        <input type="number" class="input" [(ngModel)]="userRegister.idade" name="idade" pattern="^$|^([1-9][0-9]|[9][9])?" required min="18" max="99" #rateInput2 = "ngModel">
-                        <div *ngIf="rateInput2.errors && (rateInput2.dirty || rateInput2.touched) || userRegister.idade < 18">
-                            <div class="idade" [hidden]="!rateInput2.errors.pattern">
-                                A sua idade deve ser acima de 18 anos!
-                            </div>
-                        </div>
-                    </div>
-                    <div class="group">
-                        <label for="pass" class="label">Email</label>
-                        <input type="text" class="input" [(ngModel)]="userRegister.email" name="email" required email>
-                    </div>
-                    <div class="group">
-                        <label for="pass" class="label">Senha</label>
-                        <input type="password" class="input" data-type="password" [(ngModel)]="userRegister.senha" name="password" required pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$" #rateInput1 = "ngModel">
-                        <div *ngIf="!rateInput1.dirty && !rateInput1.touched">
-                            <p class="senha">Use oito ou mais caracteres com uma combinação de letras maiúsculas e minúsculas e números!</p>
-                        </div>
-                        <div *ngIf="rateInput1.errors && (rateInput1.dirty && rateInput1.touched)">
-                            <div class="idade" [hidden]="!rateInput1.errors.pattern">
-                                Escolha uma senha mais segura!
-                            </div>
-                        </div>
-                    </div> 
-                    <div class="group">
-                        <button value="Cadastrar" type="submit" class="button" [disabled]="!f.valid" (click)="register()">Cadastrar</button>
-                    </div>
-                    <div *ngIf="mensagemErro" class="alert alert-danger msgerror" role="alert">
-                        {{mensagemErro}}
-                    </div>
-                    <div class="hr"></div>
-                </div>
-            </form>
+      <form *ngIf="authMode === 'login'" class="form-stack" #loginForm="ngForm" (ngSubmit)="signIn()" role="tabpanel">
+        <div class="field-group">
+          <label for="loginEmail">E-mail</label>
+          <input id="loginEmail" type="email" [(ngModel)]="loginUser.email" name="email" required email autocomplete="email" #loginEmail="ngModel">
+          <span class="field-error" *ngIf="loginEmail.invalid && loginEmail.touched">Informe um e-mail válido.</span>
         </div>
+        <div class="field-group">
+          <label for="loginPassword">Senha</label>
+          <input id="loginPassword" type="password" [(ngModel)]="loginUser.senha" name="password" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="button-primary auth-submit" [disabled]="!loginForm.valid || isLoginSubmitting">
+          {{ isLoginSubmitting ? 'Entrando...' : 'Entrar' }}
+        </button>
+        <a class="recovery-link" routerLink="/recuperar-senha">Esqueci minha senha</a>
+      </form>
+
+      <form *ngIf="authMode === 'register'" class="form-stack" #registerForm="ngForm" (ngSubmit)="createAccount()" role="tabpanel">
+        <div class="field-group">
+          <label for="registerName">Nome</label>
+          <input id="registerName" type="text" [(ngModel)]="registrationUser.nome" name="registerName" required autocomplete="name">
+        </div>
+        <div class="field-group">
+          <label for="registerAge">Idade</label>
+          <input id="registerAge" type="number" [(ngModel)]="registrationUser.idade" name="age" required min="18" max="99" #registrationAge="ngModel">
+          <span class="field-error" *ngIf="registrationAge.invalid && registrationAge.touched">A idade deve estar entre 18 e 99 anos.</span>
+        </div>
+        <div class="field-group">
+          <label for="registerEmail">E-mail</label>
+          <input id="registerEmail" type="email" [(ngModel)]="registrationUser.email" name="registerEmail" required email autocomplete="email" #registerEmail="ngModel">
+          <span class="field-error" *ngIf="registerEmail.invalid && registerEmail.touched">Informe um e-mail válido.</span>
+        </div>
+        <div class="field-group">
+          <label for="registerPassword">Senha</label>
+          <input id="registerPassword" type="password" [(ngModel)]="registrationUser.senha" name="registerPassword" required pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$" autocomplete="new-password" aria-describedby="passwordRequirements" #registerPassword="ngModel">
+          <p id="passwordRequirements" class="field-help">Use 8 ou mais caracteres, com maiúscula, minúscula e número.</p>
+          <span class="field-error" *ngIf="registerPassword.invalid && registerPassword.touched">A senha ainda não atende aos requisitos.</span>
+        </div>
+        <button type="submit" class="button-primary auth-submit" [disabled]="!registerForm.valid || isRegistrationSubmitting">
+          {{ isRegistrationSubmitting ? 'Criando conta...' : 'Criar conta' }}
+        </button>
+      </form>
+
+      <app-action-feedback [message]="feedbackMessage" [type]="feedbackType"></app-action-feedback>
     </div>
-</body>
-</html>
+  </section>
+</main>
