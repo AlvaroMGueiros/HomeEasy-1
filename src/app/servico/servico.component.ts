@@ -70,6 +70,14 @@ export class ServicoComponent implements OnInit {
     this.servicePendingDeletion = null;
   }
 
+  get serviceDeletionTitle(): string {
+    if (!this.servicePendingDeletion) {
+      return 'Remover serviço';
+    }
+
+    return 'Remover ' + this.servicePendingDeletion.nome + '?';
+  }
+
   async confirmServiceDeletion(){
     if (!this.servicePendingDeletion || this.isDeletingService) {
       return;

@@ -1,20 +1,111 @@
 <app-navbar [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
-<main class="app-page"><div class="page-shell"><header class="page-heading"><div class="page-heading-copy"><span class="page-kicker">Configurações</span><h1>Editar perfil</h1><p>Mantenha seus dados atualizados para uma experiência mais segura.</p></div></header>
-  <div class="form-stack">
-    <form class="surface-card form-stack" #f="ngForm"><div><span class="page-kicker">Dados pessoais</span><h2>Informações básicas</h2></div><div class="form-grid">
-      <div class="field-group field-group-full"><label for="profileName">Nome</label><input id="profileName" type="text" [(ngModel)]="usuario.nome" name="nome"></div>
-      <div class="field-group"><label for="profileAge">Idade</label><input id="profileAge" type="number" [(ngModel)]="usuario.idade" name="idade" pattern="^$|^([1-9][8-9]|[9][9])?" min="18" max="99" #rateInput2="ngModel"><span class="field-error" *ngIf="rateInput2.errors && rateInput2.touched">A idade deve estar entre 18 e 99 anos.</span></div>
-      <div class="field-group"><label for="profilePhone">Telefone</label><input id="profilePhone" type="tel" [(ngModel)]="usuario.telefone" name="telefone" pattern="^[0-9]{9,11}$" #rateInput1="ngModel"><span class="field-error" *ngIf="rateInput1.errors && rateInput1.touched">Informe um telefone válido.</span></div>
-      <div class="field-group field-group-full"><label>Tipo de documento</label><label class="choice-control"><input type="checkbox" name="documentType" [(ngModel)]="valor"> Usar CPF em vez de CNPJ</label></div>
-      <div class="field-group" *ngIf="valor"><label for="profileCpf">CPF</label><input id="profileCpf" type="number" [(ngModel)]="usuario.cpf" name="cpf" pattern="^[0-9]{11}$" #rateInput3="ngModel"><span class="field-error" *ngIf="rateInput3.errors && rateInput3.touched">Informe os 11 dígitos do CPF.</span></div>
-      <div class="field-group" *ngIf="!valor"><label for="profileCnpj">CNPJ</label><input id="profileCnpj" type="number" [(ngModel)]="usuario.cnpj" name="cnpj" pattern="^[0-9]{14}$" #rateInput4="ngModel"><span class="field-error" *ngIf="rateInput4.errors && rateInput4.touched">Informe os 14 dígitos do CNPJ.</span></div>
-      <div class="field-group field-group-full"><label for="profileAddress">Endereço</label><input id="profileAddress" type="text" [(ngModel)]="usuario.endereco" name="endereco"></div>
-      <div class="field-group"><label for="profileState">Estado</label><select id="profileState" [(ngModel)]="usuario.estado" name="estado"><option>Pernambuco</option></select></div>
-      <div class="field-group"><label for="profileCity">Cidade</label><input id="profileCity" type="text" [(ngModel)]="usuario.cidade" name="cidade"></div>
-    </div><div class="form-actions"><button class="button-primary" type="submit" [disabled]="!f.valid" (click)="editarInfo()">Salvar dados</button></div></form>
 
-    <form class="surface-card form-stack" #photoForm="ngForm"><div><span class="page-kicker">Imagem</span><h2>Foto de perfil</h2><p>Use uma foto nítida para facilitar o reconhecimento.</p></div><div class="field-group"><label for="profilePhoto">Escolher arquivo</label><input id="profilePhoto" type="file" (change)="upload($event)" accept=".png,.jpg,.jpeg" name="foto" required></div><div class="form-actions"><button class="button-primary" type="submit" [disabled]="!photoForm.valid" (click)="editarImg()">Atualizar foto</button></div></form>
+<main class="app-page">
+  <div class="page-shell">
+    <header class="page-heading">
+      <div class="page-heading-copy">
+        <span class="page-kicker">Configurações</span>
+        <h1>Editar perfil</h1>
+        <p>Mantenha seus dados atualizados para uma experiência mais segura.</p>
+      </div>
+    </header>
 
-    <form class="surface-card form-stack" #socialForm="ngForm"><div><span class="page-kicker">Presença digital</span><h2>Redes sociais</h2><p>Links opcionais para clientes conhecerem melhor seu trabalho.</p></div><div class="form-grid"><div class="field-group"><label for="socialInstagram">Instagram</label><input id="socialInstagram" type="text" placeholder="Nome de usuário" name="instagram" [(ngModel)]="usuario.instagram"></div><div class="field-group"><label for="socialFacebook">Facebook</label><input id="socialFacebook" type="text" placeholder="Link do perfil" name="facebook" [(ngModel)]="usuario.facebook"></div><div class="field-group"><label for="socialTwitter">X / Twitter</label><input id="socialTwitter" type="text" placeholder="Nome de usuário" name="twitter" [(ngModel)]="usuario.twitter"></div><div class="field-group"><label for="socialLinkedin">LinkedIn</label><input id="socialLinkedin" type="text" placeholder="Link do perfil" name="linkedIn" [(ngModel)]="usuario.linkedIn"></div><div class="field-group field-group-full"><label for="socialSite">Site</label><input id="socialSite" type="text" placeholder="Endereço do seu site" name="site" [(ngModel)]="usuario.site"></div></div><div class="form-actions"><button class="button-primary" type="submit" [disabled]="!socialForm.valid" (click)="editarInfo()">Salvar redes sociais</button></div></form>
+    <div class="profile-edit-layout">
+      <form class="surface-card form-stack" #profileForm="ngForm" (ngSubmit)="editarInfo()">
+        <div>
+          <span class="page-kicker">Dados pessoais</span>
+          <h2>Informações básicas</h2>
+        </div>
+
+        <div class="form-grid">
+          <div class="field-group field-group-full">
+            <label for="profileName">Nome</label>
+            <input id="profileName" type="text" [(ngModel)]="usuario.nome" name="name" autocomplete="name">
+          </div>
+
+          <div class="field-group">
+            <label for="profileAge">Idade</label>
+            <input id="profileAge" type="number" [(ngModel)]="usuario.idade" name="age" min="18" max="99" #ageInput="ngModel">
+            <span class="field-error" *ngIf="ageInput.errors && ageInput.touched">A idade deve estar entre 18 e 99 anos.</span>
+          </div>
+
+          <div class="field-group">
+            <label for="profilePhone">Telefone</label>
+            <input id="profilePhone" type="tel" [ngModel]="phoneInput" (ngModelChange)="updatePhone($event)" name="phone" placeholder="(00) 00000-0000" autocomplete="tel" pattern="^\([0-9]{2}\) [0-9]{4,5}-[0-9]{4}$" #phoneControl="ngModel">
+            <span class="field-error" *ngIf="phoneControl.errors && phoneControl.touched">Informe um telefone com DDD.</span>
+          </div>
+
+          <div class="field-group field-group-full">
+            <span class="field-label">Tipo de documento</span>
+            <label class="choice-control"><input type="checkbox" name="documentType" [(ngModel)]="usesCpf"> Usar CPF em vez de CNPJ</label>
+          </div>
+
+          <div class="field-group" *ngIf="usesCpf">
+            <label for="profileCpf">CPF</label>
+            <input id="profileCpf" type="text" inputmode="numeric" [ngModel]="cpfInput" (ngModelChange)="updateCpf($event)" name="cpf" placeholder="000.000.000-00" pattern="^[0-9]{3}\.[0-9]{3}\.[0-9]{3}-[0-9]{2}$" #cpfControl="ngModel">
+            <span class="field-error" *ngIf="cpfControl.errors && cpfControl.touched">Informe os 11 dígitos do CPF.</span>
+          </div>
+
+          <div class="field-group" *ngIf="!usesCpf">
+            <label for="profileCnpj">CNPJ</label>
+            <input id="profileCnpj" type="text" inputmode="numeric" [ngModel]="cnpjInput" (ngModelChange)="updateCnpj($event)" name="cnpj" placeholder="00.000.000/0000-00" pattern="^[0-9]{2}\.[0-9]{3}\.[0-9]{3}/[0-9]{4}-[0-9]{2}$" #cnpjControl="ngModel">
+            <span class="field-error" *ngIf="cnpjControl.errors && cnpjControl.touched">Informe os 14 dígitos do CNPJ.</span>
+          </div>
+
+          <div class="field-group field-group-full">
+            <label for="profileAddress">Endereço</label>
+            <input id="profileAddress" type="text" [(ngModel)]="usuario.endereco" name="address" placeholder="Rua, número e complemento" autocomplete="street-address">
+          </div>
+
+          <div class="field-group">
+            <label for="profileState">Estado</label>
+            <select id="profileState" [ngModel]="usuario.estado" (ngModelChange)="selectState($event)" name="state" [disabled]="isStatesLoading">
+              <option value="" disabled>{{ isStatesLoading ? 'Carregando estados...' : 'Selecione um estado' }}</option>
+              <option *ngFor="let state of states" [value]="state.nome">{{ state.nome }}</option>
+            </select>
+          </div>
+
+          <div class="field-group" *ngIf="usuario.estado">
+            <label for="profileCity">Cidade</label>
+            <select id="profileCity" [(ngModel)]="usuario.cidade" name="city" [disabled]="isCitiesLoading">
+              <option value="" disabled>{{ isCitiesLoading ? 'Carregando cidades...' : 'Selecione uma cidade' }}</option>
+              <option *ngFor="let city of cities" [value]="city.nome">{{ city.nome }}</option>
+            </select>
+          </div>
+
+          <p class="field-error field-group-full" role="alert" *ngIf="locationFeedback">{{ locationFeedback }}</p>
+        </div>
+
+        <div class="form-actions">
+          <button class="button-primary" type="submit" [disabled]="!profileForm.valid || isSavingProfile">{{ isSavingProfile ? 'Salvando...' : 'Salvar dados' }}</button>
+        </div>
+      </form>
+
+      <aside class="surface-card form-stack profile-photo-warning" aria-labelledby="profilePhotoTitle">
+        <div>
+          <span class="page-kicker">Imagem</span>
+          <h2 id="profilePhotoTitle">Foto de perfil</h2>
+        </div>
+        <div class="status-banner status-danger" role="status">
+          A alteração da foto de perfil está temporariamente indisponível. As demais informações do seu perfil continuam editáveis normalmente.
+        </div>
+      </aside>
+
+      <form class="surface-card form-stack profile-social-card" #socialForm="ngForm" (ngSubmit)="editarInfo()">
+        <div>
+          <span class="page-kicker">Presença digital</span>
+          <h2>Redes sociais</h2>
+          <p>Links opcionais para clientes conhecerem melhor seu trabalho.</p>
+        </div>
+        <div class="form-grid">
+          <div class="field-group"><label for="socialInstagram">Instagram</label><input id="socialInstagram" type="text" placeholder="Nome de usuário" name="instagram" [(ngModel)]="usuario.instagram"></div>
+          <div class="field-group"><label for="socialFacebook">Facebook</label><input id="socialFacebook" type="text" placeholder="Link do perfil" name="facebook" [(ngModel)]="usuario.facebook"></div>
+          <div class="field-group"><label for="socialTwitter">X / Twitter</label><input id="socialTwitter" type="text" placeholder="Nome de usuário" name="twitter" [(ngModel)]="usuario.twitter"></div>
+          <div class="field-group"><label for="socialLinkedin">LinkedIn</label><input id="socialLinkedin" type="text" placeholder="Link do perfil" name="linkedIn" [(ngModel)]="usuario.linkedIn"></div>
+          <div class="field-group field-group-full"><label for="socialSite">Site</label><input id="socialSite" type="url" placeholder="https://seusite.com.br" name="site" [(ngModel)]="usuario.site"></div>
+        </div>
+        <div class="form-actions"><button class="button-primary" type="submit" [disabled]="!socialForm.valid || isSavingProfile">{{ isSavingProfile ? 'Salvando...' : 'Salvar redes sociais' }}</button></div>
+      </form>
+    </div>
   </div>
-</div></main>
+</main>

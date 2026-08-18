@@ -1,1 +1,23 @@
 :host { display: block; min-height: 100vh; background: var(--color-background); }
+
+.profile-edit-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.7fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.profile-edit-layout > * { min-width: 0; }
+.profile-social-card { grid-column: 1 / -1; }
+.profile-photo-warning .status-banner { align-items: flex-start; margin: 0; }
+.field-label { margin-bottom: 8px; color: var(--color-text); font-weight: 700; }
+
+@media (max-width: 900px) {
+  .profile-edit-layout { grid-template-columns: 1fr; }
+  .profile-social-card { grid-column: auto; }
+}
+
+@media (max-width: 560px) {
+  .profile-edit-layout { gap: 14px; }
+  .form-actions > * { width: 100%; }
+}

@@ -1,5 +1,15 @@
 {
   "projects": {
-    "default": "homeeasy-52792"
-  }
+    "default": "homeeasy-bd496"
+  },
+  "targets": {
+    "homeeasy-bd496": {
+      "hosting": {
+        "redesign": [
+          "homeeasy-bd496"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

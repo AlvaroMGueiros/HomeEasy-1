@@ -1,0 +1,13 @@
+<div class="dialog-backdrop" *ngIf="open" (mousedown)="cancelDialog()">
+  <section class="dialog-card" role="dialog" aria-modal="true" [attr.aria-labelledby]="title ? 'dialogTitle' : null" aria-describedby="dialogMessage" (mousedown)="$event.stopPropagation()">
+    <span class="dialog-icon" [class.dialog-icon-success]="type === 'success'" [class.dialog-icon-error]="type === 'error'" [class.dialog-icon-warning]="type === 'warning'" aria-hidden="true">{{ icon }}</span>
+    <div class="dialog-copy">
+      <h2 id="dialogTitle" *ngIf="title">{{ title }}</h2>
+      <p id="dialogMessage">{{ message }}</p>
+    </div>
+    <div class="dialog-actions">
+      <button #cancelButton class="button-secondary" type="button" *ngIf="confirmation" (click)="cancelDialog()" [disabled]="loading">{{ cancelLabel }}</button>
+      <button #primaryButton type="button" [class.button-primary]="!dangerAction" [class.button-danger]="dangerAction" (click)="confirmDialog()" [disabled]="loading">{{ loading ? 'Processando...' : confirmLabel }}</button>
+    </div>
+  </section>
+</div>

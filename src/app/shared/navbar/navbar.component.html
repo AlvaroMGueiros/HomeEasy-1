@@ -1,23 +1,113 @@
-<header class="app-navbar">
-  <a class="navbar-brand" routerLink="/home" (click)="closeMenu()" aria-label="Home Easy - Início">
-    <span class="brand-logo-frame" aria-hidden="true">
-      <img class="brand-logo" src="assets/home-easy-logo-v2.png" alt="">
-    </span>
+<header class="app-navbar" *ngIf="!authenticated">
+  <a class="navbar-brand" [routerLink]="authenticated ? '/feed' : '/home'" (click)="closeMenu()" [attr.aria-label]="authenticated ? 'Home Easy - Feed de serviços' : 'Home Easy - Início'">
+    <span class="brand-logo-frame" aria-hidden="true"><img class="brand-logo" src="assets/home-easy-logo-v2.png" alt=""></span>
+    <span class="brand-name">home easy</span>
   </a>
 
   <button class="menu-toggle" type="button" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen" aria-controls="mainNavigation" [attr.aria-label]="menuOpen ? 'Fechar menu' : 'Abrir menu'">
     <span></span><span></span><span></span>
   </button>
 
-  <nav id="mainNavigation" class="navbar-links" [class.menu-open]="menuOpen" aria-label="Navegação principal">
+  <nav id="mainNavigation" class="navbar-links" [class.menu-open]="menuOpen" aria-label="Navegação principal" *ngIf="!authenticated">
     <a routerLink="/feed" routerLinkActive="active" (click)="closeMenu()">Serviços</a>
     <a routerLink="/pedido-info" routerLinkActive="active" (click)="closeMenu()">Como funciona</a>
-    <a routerLink="/profissional" routerLinkActive="active" (click)="closeMenu()">Seja profissional</a>
-    <a routerLink="/sobrenos" routerLinkActive="active" (click)="closeMenu()">Sobre</a>
-    <a routerLink="/contato" routerLinkActive="active" (click)="closeMenu()">Contato</a>
-    <a *ngIf="authenticated" routerLink="/conversas" routerLinkActive="active" (click)="closeMenu()">Conversas</a>
-    <a *ngIf="authenticated" [routerLink]="['/usuario', userId]" routerLinkActive="active" (click)="closeMenu()">Meu perfil</a>
-    <a *ngIf="!authenticated" class="navbar-action" routerLink="/login" (click)="closeMenu()">Entrar</a>
-    <button *ngIf="authenticated" class="logout-action" type="button" (click)="requestLogout()">Sair</button>
+    <a routerLink="/profissional" routerLinkActive="active" (click)="closeMenu()">Para profissionais</a>
+    <a routerLink="/contato" routerLinkActive="active" (click)="closeMenu()">Suporte</a>
+    <a class="navbar-action" routerLink="/login" (click)="closeMenu()">Entrar</a>
   </nav>
+
 </header>
+
+<header class="app-navbar account-navbar" *ngIf="authenticated">
+  <button class="authenticated-menu-toggle" type="button" (click)="toggleSidebar($event)" [attr.aria-expanded]="sidebarOpen" aria-controls="accountNavigation" [attr.aria-label]="sidebarOpen ? 'Fechar menu' : 'Abrir menu'">
+    <span></span><span></span><span></span>
+  </button>
+
+  <a class="navbar-brand" routerLink="/feed" aria-label="Home Easy - Início">
+    <span class="brand-logo-frame" aria-hidden="true"><img class="brand-logo" src="assets/home-easy-logo-v2.png" alt=""></span>
+    <span class="brand-name">home easy</span>
+  </a>
+
+  <div class="account-actions">
+    <button class="notification-link" type="button" (click)="toggleNotificationMenu($event)" [attr.aria-expanded]="notificationMenuOpen" aria-controls="notificationMenu" [attr.aria-label]="notificationAriaLabel" title="Notificações">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg>
+      <span class="notification-badge" *ngIf="notificationCount > 0" aria-hidden="true">{{ notificationBadgeLabel }}</span>
+    </button>
+
+    <section id="notificationMenu" class="notification-menu" *ngIf="notificationMenuOpen" (click)="$event.stopPropagation()" aria-label="Pedidos novos">
+      <header class="notification-menu-header">
+        <span><small>Atualizações</small><strong>Notificações</strong></span>
+        <span class="notification-total" *ngIf="notificationCount > 0">{{ notificationCount }}</span>
+      </header>
+
+      <div class="notification-empty" *ngIf="notificationCount === 0">
+        <span aria-hidden="true">✓</span>
+        <strong>Tudo em dia</strong>
+        <p>Você não tem novos pedidos ou propostas para analisar.</p>
+      </div>
+
+      <div class="notification-list" *ngIf="notificationCount > 0">
+        <a *ngFor="let notification of notificationItems" [routerLink]="notification.route" (click)="closeNotificationMenu()">
+          <span class="notification-order-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="3"></rect><path d="M8 8h8M8 12h6M8 16h4"></path></svg>
+          </span>
+          <span class="notification-order-copy">
+            <strong>{{ notification.title }}</strong>
+            <small>{{ notification.order.data }}<span *ngIf="notification.order.cidade"> · {{ notification.order.cidade }}</span></small>
+          </span>
+          <span class="notification-order-arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+
+      <a class="notification-menu-footer" routerLink="/feed" (click)="closeNotificationMenu()">Voltar ao início</a>
+    </section>
+
+    <button class="topbar-account" type="button" (click)="toggleProfileMenu($event)" [attr.aria-expanded]="profileMenuOpen" aria-controls="profileMenu" aria-label="Abrir opções da conta">
+      <img *ngIf="user && user.foto" [src]="user.foto" [alt]="user.nome" (error)="hideUnavailableUserPhoto()">
+      <span class="account-initial" *ngIf="!user || !user.foto" aria-hidden="true">{{ userInitial }}</span>
+      <span class="account-copy"><strong>Olá, {{ userFirstName }}</strong><small>Ver opções</small></span>
+      <svg class="account-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 10l5 5 5-5"></path></svg>
+    </button>
+
+    <div id="profileMenu" class="profile-menu" *ngIf="profileMenuOpen" (click)="$event.stopPropagation()">
+      <a [routerLink]="['/usuario', userId]" (click)="closeProfileMenu()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>
+        <span><strong>Meu perfil</strong><small>Ver e editar meus dados</small></span>
+      </a>
+      <button type="button" (click)="requestLogout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3M14 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5"></path></svg>
+        <span><strong>Sair</strong><small>Encerrar minha sessão</small></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<button class="sidebar-backdrop" type="button" *ngIf="authenticated && sidebarOpen" (click)="closeSidebar()" aria-label="Fechar menu"></button>
+
+<aside id="accountNavigation" class="global-sidebar" *ngIf="authenticated" [class.sidebar-open]="sidebarOpen" aria-label="Navegação da conta">
+  <nav class="sidebar-navigation">
+    <a routerLink="/feed" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeSidebar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 11l9-8 9 8"></path><path d="M5 10v10h14V10M9 20v-6h6v6"></path></svg><span>Início</span>
+    </a>
+    <a [routerLink]="['/usuario', userId, 'pedidos-feitos']" routerLinkActive="active" (click)="closeSidebar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"></rect><path d="M8 8h8M8 12h6M8 16h4"></path></svg><span>Solicitações</span>
+    </a>
+    <a [routerLink]="['/usuario', userId, 'pedidos-recebidos']" routerLinkActive="active" (click)="closeSidebar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16v14H4zM8 3v4m8-4v4M4 10h16"></path></svg><span>Pedidos recebidos</span>
+    </a>
+    <a routerLink="/conversas" routerLinkActive="active" (click)="closeSidebar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path></svg><span>Mensagens</span>
+    </a>
+    <a [routerLink]="['/usuario', userId]" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeSidebar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg><span>Meu perfil</span>
+    </a>
+  </nav>
+
+  <section class="professional-cta">
+    <span class="cta-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.5 6.5a4 4 0 0 0-5-5l2.2 2.2-3 3L6.5 4.5a4 4 0 0 0 5 5L20 18a2 2 0 0 1-2 2z"></path><path d="M5 21l5-5"></path></svg></span>
+    <h2>Seja um profissional Home Easy</h2>
+    <p>Apresente seus serviços e encontre clientes na sua região.</p>
+    <a routerLink="/serprofissional" (click)="closeSidebar()">Quero me cadastrar</a>
+  </section>
+
+</aside>

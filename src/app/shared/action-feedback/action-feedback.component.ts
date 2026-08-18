@@ -4,7 +4,8 @@ export type FeedbackType = 'error' | 'info' | 'success';
 
 @Component({
   selector: 'app-action-feedback',
-  templateUrl: './action-feedback.component.html'
+  templateUrl: './action-feedback.component.html',
+  styleUrls: ['./action-feedback.component.css']
 })
 export class ActionFeedbackComponent {
   @Input() message = '';
@@ -16,5 +17,17 @@ export class ActionFeedbackComponent {
 
   get isSuccess(): boolean {
     return this.type === 'success';
+  }
+
+  get icon(): string {
+    if (this.isError) {
+      return '!';
+    }
+
+    if (this.isSuccess) {
+      return '✓';
+    }
+
+    return 'i';
   }
 }

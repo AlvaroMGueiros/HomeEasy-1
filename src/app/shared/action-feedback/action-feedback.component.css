@@ -1,0 +1,2 @@
+.status-banner { align-items: flex-start; }
+.feedback-icon { display: grid; width: 24px; height: 24px; flex: 0 0 24px; border-radius: 50%; background: var(--color-surface); font-size: 0.78rem; font-weight: 800; place-items: center; }

@@ -2,9 +2,25 @@
 <div class="context-nav context-nav-narrow"><app-back-link [route]="['/usuario', userId, 'pedidos-feitos']" label="Voltar aos pedidos"></app-back-link></div>
 <main class="app-page"><div class="page-shell page-shell-narrow"><header class="page-heading"><div class="page-heading-copy"><span class="page-kicker">Detalhes do pedido</span><h1>{{ pedido.nome }}</h1><p>Acompanhe o status e todas as informações do atendimento.</p></div></header>
   <section class="surface-card"><div class="detail-list"><div class="detail-item"><span>Profissional</span><strong>{{ servidor.nome }}</strong></div><div class="detail-item"><span>Valor</span><strong>R$ {{ pedido.preco }}</strong></div><div class="detail-item"><span>Data</span><strong>{{ pedido.data }}</strong></div><div class="detail-item"><span>Horário</span><strong>{{ pedido.hora }}</strong></div><div class="detail-item"><span>Endereço</span><strong>{{ pedido.local }}</strong></div><div class="detail-item"><span>Localidade</span><strong>{{ pedido.cidade }}, {{ pedido.estado }}</strong></div></div>
-    <div class="status-banner status-danger" *ngIf="pedido.profissionalCancelou == true">O profissional não aceitou este pedido.</div><div class="status-banner status-success" *ngIf="pedido.statusProfissional == true">Pedido aceito pelo profissional.</div>
+    <div class="status-banner" [ngClass]="orderStatusClass">{{ orderStatusLabel }}</div>
     <app-action-feedback [message]="feedbackMessage" [type]="feedbackType"></app-action-feedback>
-    <form class="form-stack" #f="ngForm" (ngSubmit)="addAvaliacao()" *ngIf="pedido.clienteCancelou == false && pedido.statusProfissional == true && today >= pedido.data" style="margin-top: 28px"><h2>Avalie o serviço</h2><div class="field-group"><label for="ratingScore">Nota de 1 a 5</label><input id="ratingScore" type="number" min="1" max="5" [(ngModel)]="avaliacao.avaliacaoNota" name="nota" required></div><div class="field-group"><label for="ratingText">Sua experiência</label><textarea id="ratingText" rows="3" [(ngModel)]="avaliacao.avaliacao" name="avaliacao" required></textarea></div><button class="button-primary" type="submit" [disabled]="!f.valid || isSubmitting">{{ isSubmitting ? 'Publicando...' : 'Publicar avaliação' }}</button></form>
-    <div *ngIf="pedido.profissionalCancelou == false && pedido.statusProfissional == false" style="margin-top: 28px"><div class="form-actions" *ngIf="!isConfirmingCancellation"><button class="button-danger" type="button" (click)="requestCancellation()">Cancelar pedido</button></div><div class="status-banner status-danger" *ngIf="isConfirmingCancellation" role="alert"><span>Esta ação não pode ser desfeita. Deseja cancelar?</span><div class="form-actions"><button class="button-secondary" type="button" (click)="dismissCancellation()">Manter pedido</button><button class="button-danger" type="button" (click)="cancelarPedido()" [disabled]="isSubmitting">{{ isSubmitting ? 'Cancelando...' : 'Confirmar cancelamento' }}</button></div></div></div>
+    <section class="proposal-summary" *ngIf="pedido.proposalPrice"><div><span class="page-kicker">Proposta do profissional</span><h2>R$ {{ pedido.proposalPrice | number:'1.2-2' }}</h2><p *ngIf="pedido.proposalMessage">{{ pedido.proposalMessage }}</p></div><button class="button-primary" type="button" *ngIf="canAcceptProposal" (click)="acceptProposal()" [disabled]="isSubmitting">{{ isSubmitting ? 'Confirmando...' : 'Aceitar proposta' }}</button></section>
+    <section class="order-timeline" *ngIf="orderHistory.length"><h2>Histórico do pedido</h2><ol><li *ngFor="let historyEntry of orderHistory"><span class="timeline-marker" aria-hidden="true"></span><div><strong>{{ historyEntry.label }}</strong><time>{{ historyEntry.changedAt | date:'dd/MM/yyyy HH:mm' }}</time></div></li></ol></section>
+    <form class="form-stack" #f="ngForm" (ngSubmit)="addAvaliacao()" *ngIf="canReviewOrder" style="margin-top: 28px"><h2>Avalie o serviço</h2><div class="field-group"><label for="ratingScore">Nota de 1 a 5</label><input id="ratingScore" type="number" min="1" max="5" [(ngModel)]="avaliacao.avaliacaoNota" name="nota" required></div><div class="field-group"><label for="ratingText">Sua experiência</label><textarea id="ratingText" rows="3" [(ngModel)]="avaliacao.avaliacao" name="avaliacao" required></textarea></div><button class="button-primary" type="submit" [disabled]="!f.valid || isSubmitting">{{ isSubmitting ? 'Publicando...' : 'Publicar avaliação' }}</button></form>
+    <div *ngIf="canCancelOrder" style="margin-top: 28px"><div class="form-actions"><button class="button-danger" type="button" (click)="requestCancellation()">Cancelar pedido</button></div></div>
   </section>
 </div></main>
+
+<app-dialog
+  [open]="isConfirmingCancellation"
+  title="Cancelar pedido?"
+  message="O pedido será mantido no histórico com o status de cancelado, e o profissional poderá acompanhar a atualização."
+  type="warning"
+  [confirmation]="true"
+  [dangerAction]="true"
+  [loading]="isSubmitting"
+  confirmLabel="Confirmar cancelamento"
+  cancelLabel="Manter pedido"
+  (confirm)="cancelarPedido()"
+  (cancel)="dismissCancellation()">
+</app-dialog>

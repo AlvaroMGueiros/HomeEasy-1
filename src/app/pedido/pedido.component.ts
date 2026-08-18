@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
 
 import { Usuario } from './../Usuarios/usuario';
 import { Servico } from './../Usuarios/servico';
-import { Pedido } from './../Usuarios/pedido';
+import { OrderStatus, Pedido } from './../Usuarios/pedido';
 import { ServicoPedido } from './../Usuarios/serico-pedido';
 import { UsuarioService } from '../Servicos/usuario.service';
 import { ServicosService } from './../Servicos/servicos.service';
@@ -104,13 +104,14 @@ export class PedidoComponent implements OnInit {
       this.feedbackMessage = '';
       this.isSubmitting = true;
       this.pedido.nome = this.serve.nome;
-      this.pedido.id = Math.floor(Math.random() * 1000) + this.cliente.id;
+      this.pedido.id = this.afs.createId();
       this.pedido.idServidor = this.servidor.id;
       this.pedido.idContratante = this.cliente.id;
       this.pedido.preco = this.servePedido.preco;
       this.pedido.clienteCancelou = false;
       this.pedido.profissionalCancelou = false;
       this.pedido.statusProfissional = false;
+      this.pedido.status = OrderStatus.Requested;
       this.pedido.idServico = this.serveID;
       try {
         await this.servicoPedido.addPedido(this.cliente, this.servidor, this.pedido);

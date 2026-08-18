@@ -1,2 +1,13 @@
 <router-outlet></router-outlet>
 
+<ng-container *ngIf="notificationService.state$ | async as notification">
+  <app-dialog
+    [open]="notification.open"
+    [title]="notification.title"
+    [message]="notification.message"
+    [type]="notification.type"
+    (confirm)="closeNotification()"
+    (cancel)="closeNotification()">
+  </app-dialog>
+</ng-container>
+

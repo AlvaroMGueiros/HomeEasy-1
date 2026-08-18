@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { AngularFireStorage } from '@angular/fire/storage';
 import { Subscription } from 'rxjs';
 
 import { ServicosService } from '../../Servicos/servicos.service';
@@ -26,14 +25,12 @@ export class PerfilPedidoComponent implements OnInit {
  userId : string;  
  entrarSair : boolean;
  userSubscription : Subscription;
- imgSubscription : Subscription;
  servePedidoSubscription : Subscription;
  servePedido : ServicoPedido = {};
 
   constructor(
     public afs : AngularFirestore, 
     public afAuth : AngularFireAuth,
-    public storage : AngularFireStorage,
     public loginService : LoginServiceService,
     public servico : ServicosService, 
     public servicoPedido : ServicoPedidoService,
@@ -55,11 +52,8 @@ export class PerfilPedidoComponent implements OnInit {
     this.usuarioIDSubscription = this.active.params.subscribe(
       (params : Params) => { this.usuarioID = params['idd'] }
     ); 
-    this.userSubscription = this.usuarioService.getUsuario(this.usuarioID).subscribe(data => {
+    this.userSubscription = this.usuarioService.getUserWithProfilePhoto(this.usuarioID).subscribe(data => {
       this.usuario = data; 
-    });
-    this.imgSubscription = this.storage.ref('Usuarios/' + this.usuarioID + '/fotoPerfil.jpg').getDownloadURL().subscribe(data => {
-      this.usuario.foto = data;
     });
     this.servePedidoSubscription = this.servicoPedido.getDetalheServico(this.usuarioID, this.serveID).subscribe(data => {
       this.servePedido = data;}

@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { AngularFireStorage } from '@angular/fire/storage';
 import { Subscription } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 import { ServicosService } from '../../Servicos/servicos.service';
 import { LoginServiceService } from '../../Servicos/login-service.service';
@@ -30,7 +30,6 @@ export class ListaContatoComponent implements OnInit {
   constructor(
     public afs : AngularFirestore, 
     public afAuth : AngularFireAuth,
-    public storage : AngularFireStorage,
     public loginService : LoginServiceService,
     public servico : ServicosService, 
     public servicoPedido : ServicoPedidoService,
@@ -46,7 +45,9 @@ export class ListaContatoComponent implements OnInit {
       this.userId = this.afAuth.auth.currentUser.uid;
     }else this.entrarSair = false;
 
-    this.listaContatosSubscription = this.chatService.getContatos(this.userId).subscribe(data => {
+    this.listaContatosSubscription = this.chatService.getContatos(this.userId).pipe(
+      switchMap(contacts => this.usuarioService.resolveProfilePhotos(contacts))
+    ).subscribe(data => {
       this.listaContatos = data;
       this.isLoading = false;
     });

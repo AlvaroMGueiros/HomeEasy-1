@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { AngularFireStorage } from '@angular/fire/storage';
 import { ActivatedRoute, Router, Params} from '@angular/router';
 import { Subscription } from 'rxjs';
 
@@ -24,7 +23,6 @@ export class ChatComponent implements OnInit {
   servidorSubscription : Subscription;
   servidorId : string; //id do servidor
   servidorIdSubscription : Subscription;
-  imgSubscription : Subscription;
   entrarSair : boolean;
   mensagensArray = new Array<Chat>(); //array com as mensagens
   mensagensArraySubscription : Subscription;
@@ -32,7 +30,6 @@ export class ChatComponent implements OnInit {
   userId : string; //id do cliente
   usuario : Usuario = {}; //info do cliente
   userSubscription : Subscription;
-  imgCSubscription : Subscription;
   feedbackMessage = '';
   feedbackType: FeedbackType = 'error';
   isSending = false;
@@ -40,7 +37,6 @@ export class ChatComponent implements OnInit {
   constructor(
     public afs : AngularFirestore, 
     public afAuth : AngularFireAuth,
-    public storage : AngularFireStorage,
     public loginService : LoginServiceService,
     public servico : ServicosService, 
     public servicoPedido : ServicoPedidoService,
@@ -59,17 +55,11 @@ export class ChatComponent implements OnInit {
     this.servidorIdSubscription = this.active.params.subscribe(
       (params : Params) => { this.servidorId = params['id'] }
     );
-    this.servidorSubscription = this.usuarioService.getUsuario(this.servidorId).subscribe(data => {
+    this.servidorSubscription = this.usuarioService.getUserWithProfilePhoto(this.servidorId).subscribe(data => {
       this.servidor = data; 
     });
-    this.userSubscription = this.usuarioService.getUsuario(this.userId).subscribe(data => {
+    this.userSubscription = this.usuarioService.getUserWithProfilePhoto(this.userId).subscribe(data => {
       this.usuario = data; 
-    });
-    this.imgSubscription = this.storage.ref('Usuarios/' + this.servidorId + '/fotoPerfil.jpg').getDownloadURL().subscribe(data => {
-      this.servidor.foto = data;
-    });
-    this.imgCSubscription = this.storage.ref('Usuarios/' + this.userId + '/fotoPerfil.jpg').getDownloadURL().subscribe(data => {
-      this.usuario.foto = data;
     });
     this.mensagensArraySubscription = this.chatService.getMensagens(this.userId, this.servidorId).subscribe(data => {
       this.mensagensArray = data;

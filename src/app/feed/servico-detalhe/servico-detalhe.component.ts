@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { AngularFireStorage } from '@angular/fire/storage';
 import { Subscription } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 import { ServicosService } from '../../Servicos/servicos.service';
 import { LoginServiceService } from '../../Servicos/login-service.service';
 import { Usuario } from 'src/app/Usuarios/usuario';
+import { UsuarioService } from '../../Servicos/usuario.service';
 
 @Component({
   selector: 'app-servico-detalhe',
@@ -26,9 +27,9 @@ export class ServicoDetalheComponent implements OnInit {
   constructor(
     public afs : AngularFirestore, 
     public afAuth : AngularFireAuth,
-    public storage : AngularFireStorage,
     public loginService : LoginServiceService,
     public servico : ServicosService, 
+    public usuarioService : UsuarioService,
     public router : Router,
     public active : ActivatedRoute
   ) {}
@@ -37,7 +38,9 @@ export class ServicoDetalheComponent implements OnInit {
     this.serveIDSubscription = this.active.params.subscribe(
     (params : Params) => { this.serveID = params['id'] });
 
-    this.usuariosSubscription = this.servico.getUsuarios(this.serveID).subscribe(data => {
+    this.usuariosSubscription = this.servico.getUsuarios(this.serveID).pipe(
+      switchMap(users => this.usuarioService.resolveProfilePhotos(users))
+    ).subscribe(data => {
     this.usuariosArray = data;
     this.isLoading = false;
     });

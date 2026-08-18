@@ -12,6 +12,7 @@ import { UsuarioService } from './../../Servicos/usuario.service';
 import { ServicosService } from './../../Servicos/servicos.service';
 import { LoginServiceService } from './../../Servicos/login-service.service';
 import { ServicoPedidoService } from './../../Servicos/servico-pedido.service';
+import { getOrderStatusClass, getOrderStatusLabel } from '../../shared/utils/order-status.utils';
 
 @Component({
   selector: 'app-pedido-recebido',
@@ -73,5 +74,13 @@ export class PedidoRecebidoComponent implements OnInit {
   }
   limparBotao(){
     this.pedidoEstado = false;
+  }
+
+  getStatusLabel(order: Pedido) {
+    return getOrderStatusLabel(order);
+  }
+
+  getStatusClass(order: Pedido) {
+    return getOrderStatusClass(order);
   }
 }

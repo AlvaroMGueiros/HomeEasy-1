@@ -3,6 +3,7 @@ import { DOCUMENT } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 
 import { colors } from './shared/colors';
+import { NotificationService } from './shared/notification/notification.service';
 
 @Component({
   selector: 'app-root',
@@ -14,7 +15,8 @@ export class AppComponent implements OnInit {
 
   constructor(
     private router : Router,
-    @Inject(DOCUMENT) private document : Document
+    @Inject(DOCUMENT) private document : Document,
+    public notificationService: NotificationService
   ){
 
   }
@@ -26,5 +28,9 @@ export class AppComponent implements OnInit {
   }
   navegar(){
     this.router.navigate(['/Login']);
+  }
+
+  closeNotification() {
+    this.notificationService.close();
   }
 }

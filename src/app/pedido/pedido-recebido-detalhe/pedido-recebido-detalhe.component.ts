@@ -8,12 +8,13 @@ import { Subscription } from 'rxjs';
 import { LoginServiceService } from '../../Servicos/login-service.service';
 import { ServicoPedidoService } from './../../Servicos/servico-pedido.service';
 import { UsuarioService } from './../../Servicos/usuario.service';
-import { Pedido } from 'src/app/Usuarios/pedido';
+import { OrderStatus, Pedido } from 'src/app/Usuarios/pedido';
 import { AvalicaoService } from './../../Servicos/avaliacao.service';
 import { Avaliacao } from './../../Usuarios/avaliacao';
 import { ServicosService } from './../../Servicos/servicos.service';
 import { Usuario } from './../../Usuarios/usuario';
 import { FeedbackType } from '../../shared/action-feedback/action-feedback.component';
+import { canTransitionOrder, getOrderStatusClass, getOrderStatusHistory, getOrderStatusLabel } from '../../shared/utils/order-status.utils';
 
 @Component({
   selector: 'app-pedido-recebido-detalhe',
@@ -37,6 +38,8 @@ export class PedidoRecebidoDetalheComponent implements OnInit {
   feedbackType: FeedbackType = 'error';
   isSubmitting = false;
   isConfirmingCancellation = false;
+  proposalPrice: number;
+  proposalMessage = '';
 
   constructor(
     public afs : AngularFirestore, 
@@ -67,7 +70,9 @@ export class PedidoRecebidoDetalheComponent implements OnInit {
       this.cliente = data;
     });
     this.pedidoSubscription = this.servicoPedido.getPedidoRecebido(this.userId, this.pedidoId).subscribe(data => {
-      this.pedido = data; 
+      this.pedido = data;
+      this.proposalPrice = data.proposalPrice || data.preco;
+      this.proposalMessage = data.proposalMessage || '';
     });
     this.usuarioSubscription = this.usuarioService.getUsuario(this.userId).subscribe(data => {
       this.usuario = data;
@@ -88,23 +93,39 @@ export class PedidoRecebidoDetalheComponent implements OnInit {
        console.error(error);
     }
   }
-  async aceitarPedido(){
+  async submitProposal(){
     if (this.isSubmitting) {
       return;
     }
 
     this.feedbackMessage = '';
     this.isSubmitting = true;
-    this.pedido.profissionalCancelou = false;
-    this.pedido.statusProfissional = true;
     try {
-      await this.servicoPedido.addPedido(this.cliente, this.usuario, this.pedido);
+      await this.servicoPedido.submitProposal(this.pedido, this.proposalPrice, this.proposalMessage, this.userId);
       this.feedbackType = 'success';
-      this.feedbackMessage = 'Pedido aceito. Agora você pode combinar os detalhes com o cliente.';
+      this.feedbackMessage = 'Proposta enviada. O cliente poderá analisar o valor antes de confirmar.';
     } catch (error) {
-      this.pedido.statusProfissional = false;
       this.feedbackType = 'error';
-      this.feedbackMessage = 'Não foi possível aceitar o pedido. Tente novamente.';
+      this.feedbackMessage = error && error.message ? error.message : 'Não foi possível enviar a proposta. Tente novamente.';
+    } finally {
+      this.isSubmitting = false;
+    }
+  }
+
+  async startService(){
+    if (this.isSubmitting) {
+      return;
+    }
+
+    this.feedbackMessage = '';
+    this.isSubmitting = true;
+    try {
+      await this.servicoPedido.updateOrderStatus(this.pedido, OrderStatus.InProgress, this.userId);
+      this.feedbackType = 'success';
+      this.feedbackMessage = 'Serviço iniciado. O cliente já pode acompanhar a atualização.';
+    } catch (error) {
+      this.feedbackType = 'error';
+      this.feedbackMessage = error && error.message ? error.message : 'Não foi possível iniciar o serviço.';
     } finally {
       this.isSubmitting = false;
     }
@@ -125,19 +146,40 @@ export class PedidoRecebidoDetalheComponent implements OnInit {
     }
 
     this.isSubmitting = true;
-    this.pedido.profissionalCancelou = true;
     try {
-      await this.servicoPedido.addPedido(this.cliente, this.usuario, this.pedido);
-      await this.servicoPedido.deletePedidoRecebido(this.userId, this.pedido.id);
+      await this.servicoPedido.updateOrderStatus(this.pedido, OrderStatus.DeclinedByProfessional, this.userId);
       this.router.navigate(['/usuario', this.userId, 'pedidos-recebidos']);
     } catch (error) {
-      this.pedido.profissionalCancelou = false;
       this.feedbackType = 'error';
       this.feedbackMessage = 'Não foi possível recusar o pedido. Tente novamente.';
     } finally {
       this.isSubmitting = false;
       this.isConfirmingCancellation = false;
     }
+  }
+
+  get orderStatusLabel() {
+    return getOrderStatusLabel(this.pedido);
+  }
+
+  get orderStatusClass() {
+    return getOrderStatusClass(this.pedido);
+  }
+
+  get canSubmitProposal() {
+    return canTransitionOrder(this.pedido, OrderStatus.ProposalReceived, this.userId);
+  }
+
+  get canDeclineOrder() {
+    return canTransitionOrder(this.pedido, OrderStatus.DeclinedByProfessional, this.userId);
+  }
+
+  get canStartService() {
+    return canTransitionOrder(this.pedido, OrderStatus.InProgress, this.userId);
+  }
+
+  get orderHistory() {
+    return getOrderStatusHistory(this.pedido);
   }
 
 }

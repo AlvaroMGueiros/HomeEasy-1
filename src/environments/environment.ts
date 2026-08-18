@@ -5,6 +5,7 @@
 export const environment = {
   production: false,
   geocodingApiUrl: 'https://nominatim.openstreetmap.org/search',
+  ibgeLocationsApiUrl: 'https://servicodados.ibge.gov.br/api/v1/localidades',
   firebase: {
     apiKey: "AIzaSyCYyutJVjVj9HxXm385h6Jtcc1rkuQ5GYg",
     authDomain: "homeeasy-52792.firebaseapp.com",

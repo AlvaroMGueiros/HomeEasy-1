@@ -2,9 +2,24 @@
 <div class="context-nav context-nav-narrow"><app-back-link [route]="['/usuario', userId, 'pedidos-recebidos']" label="Voltar às solicitações"></app-back-link></div>
 <main class="app-page"><div class="page-shell page-shell-narrow"><header class="page-heading"><div class="page-heading-copy"><span class="page-kicker">Solicitação recebida</span><h1>{{ pedido.nome }}</h1><p>Revise os dados antes de aceitar o atendimento.</p></div></header>
   <section class="surface-card"><div class="detail-list"><div class="detail-item"><span>Cliente</span><strong>{{ cliente.nome }}</strong></div><div class="detail-item"><span>Valor</span><strong>R$ {{ pedido.preco }}</strong></div><div class="detail-item"><span>Data</span><strong>{{ pedido.data }}</strong></div><div class="detail-item"><span>Horário</span><strong>{{ pedido.hora }}</strong></div><div class="detail-item"><span>Endereço</span><strong>{{ pedido.local }}</strong></div><div class="detail-item"><span>Localidade</span><strong>{{ pedido.cidade }}, {{ pedido.estado }}</strong></div></div>
-    <div class="status-banner status-success" *ngIf="pedido.statusProfissional == true">Você aceitou este pedido.</div><div class="status-banner status-danger" *ngIf="pedido.clienteCancelou == true">O cliente cancelou este pedido.</div>
+    <div class="status-banner" [ngClass]="orderStatusClass">{{ orderStatusLabel }}</div>
     <app-action-feedback [message]="feedbackMessage" [type]="feedbackType"></app-action-feedback>
-    <div class="form-actions" style="margin-top: 28px"><a class="button-secondary" [routerLink]="['/chat', cliente.id]">Conversar com cliente</a><button class="button-primary" type="button" *ngIf="pedido.clienteCancelou == false && pedido.profissionalCancelou == false && pedido.statusProfissional == false && !isConfirmingCancellation" (click)="aceitarPedido()" [disabled]="isSubmitting">{{ isSubmitting ? 'Aceitando...' : 'Aceitar pedido' }}</button><button class="button-danger" type="button" *ngIf="pedido.clienteCancelou == false && pedido.profissionalCancelou == false && pedido.statusProfissional == false && !isConfirmingCancellation" (click)="requestCancellation()">Recusar</button></div>
-    <div class="status-banner status-danger" *ngIf="isConfirmingCancellation" role="alert"><span>Ao recusar, o pedido sairá da sua lista. Deseja continuar?</span><div class="form-actions"><button class="button-secondary" type="button" (click)="dismissCancellation()">Voltar</button><button class="button-danger" type="button" (click)="cancelarPedido()" [disabled]="isSubmitting">{{ isSubmitting ? 'Recusando...' : 'Confirmar recusa' }}</button></div></div>
+    <form class="proposal-form" #proposalForm="ngForm" (ngSubmit)="submitProposal()" *ngIf="canSubmitProposal"><div class="proposal-form-heading"><div><span class="page-kicker">Sua proposta</span><h2>Defina o valor do atendimento</h2></div><p>O cliente precisará aceitar a proposta antes da confirmação.</p></div><div class="form-grid"><div class="field-group"><label for="proposalPrice">Valor proposto</label><input id="proposalPrice" type="number" min="1" step="0.01" name="proposalPrice" [(ngModel)]="proposalPrice" required></div><div class="field-group"><label for="proposalMessage">Mensagem para o cliente</label><textarea id="proposalMessage" rows="3" maxlength="280" name="proposalMessage" [(ngModel)]="proposalMessage" placeholder="Explique o que está incluído no valor"></textarea></div></div><button class="button-primary" type="submit" [disabled]="!proposalForm.valid || isSubmitting">{{ isSubmitting ? 'Enviando...' : 'Enviar proposta' }}</button></form>
+    <section class="order-timeline" *ngIf="orderHistory.length"><h2>Histórico do pedido</h2><ol><li *ngFor="let historyEntry of orderHistory"><span class="timeline-marker" aria-hidden="true"></span><div><strong>{{ historyEntry.label }}</strong><time>{{ historyEntry.changedAt | date:'dd/MM/yyyy HH:mm' }}</time></div></li></ol></section>
+    <div class="form-actions detail-actions"><a class="button-secondary" [routerLink]="['/chat', cliente.id]">Conversar com cliente</a><button class="button-primary" type="button" *ngIf="canStartService" (click)="startService()" [disabled]="isSubmitting">{{ isSubmitting ? 'Atualizando...' : 'Iniciar serviço' }}</button><button class="button-danger" type="button" *ngIf="canDeclineOrder" (click)="requestCancellation()">Recusar</button></div>
   </section>
 </div></main>
+
+<app-dialog
+  [open]="isConfirmingCancellation"
+  title="Recusar solicitação?"
+  message="O pedido será mantido no histórico com o status de recusado, e o cliente poderá acompanhar a atualização."
+  type="warning"
+  [confirmation]="true"
+  [dangerAction]="true"
+  [loading]="isSubmitting"
+  confirmLabel="Confirmar recusa"
+  cancelLabel="Voltar"
+  (confirm)="cancelarPedido()"
+  (cancel)="dismissCancellation()">
+</app-dialog>

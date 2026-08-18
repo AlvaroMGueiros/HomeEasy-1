@@ -17,14 +17,23 @@
           <button class="button-danger" type="button" (click)="requestServiceDeletion(service)">Excluir</button>
         </div>
 
-        <div class="service-deletion-confirmation" *ngIf="servicePendingDeletion && servicePendingDeletion.id === service.id" role="alert">
-          <strong>Remover {{ service.nome }}?</strong>
-          <p>O serviço deixará de aparecer para novos clientes. Esta ação não pode ser desfeita.</p>
-          <div class="card-actions"><button class="button-secondary" type="button" (click)="dismissServiceDeletion()" [disabled]="isDeletingService">Manter serviço</button><button class="button-danger" type="button" (click)="confirmServiceDeletion()" [disabled]="isDeletingService">{{ isDeletingService ? 'Removendo...' : 'Confirmar exclusão' }}</button></div>
-        </div>
       </article>
     </section>
 
     <section class="empty-state" *ngIf="servicosArray.length == 0"><div class="empty-state-content"><span class="icon-badge">+</span><h2>Nenhum serviço cadastrado</h2><p>Adicione sua primeira especialidade para começar a receber pedidos.</p><a class="button-primary" routerLink="/serprofissional">Cadastrar serviço</a></div></section>
   </div>
 </main>
+
+<app-dialog
+  [open]="!!servicePendingDeletion"
+  [title]="serviceDeletionTitle"
+  message="O serviço deixará de aparecer para novos clientes. Esta ação não pode ser desfeita."
+  type="warning"
+  [confirmation]="true"
+  [dangerAction]="true"
+  [loading]="isDeletingService"
+  confirmLabel="Confirmar exclusão"
+  cancelLabel="Manter serviço"
+  (confirm)="confirmServiceDeletion()"
+  (cancel)="dismissServiceDeletion()">
+</app-dialog>

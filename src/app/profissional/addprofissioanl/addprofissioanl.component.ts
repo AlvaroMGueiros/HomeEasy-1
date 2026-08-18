@@ -10,6 +10,7 @@ import { ServicosService } from '../../Servicos/servicos.service';
 import { Usuario } from './../../Usuarios/usuario';
 import { Servico } from './../../Usuarios/servico';
 import { ServicoPedido } from './../../Usuarios/serico-pedido';
+import { NotificationService } from '../../shared/notification/notification.service';
 
 @Component({
   selector: 'app-addprofissioanl',
@@ -25,6 +26,7 @@ export class AddprofissioanlComponent implements OnInit {
  servicosSubscription : Subscription;
  servicoSelecionado : Servico;
  servePedido : ServicoPedido = {};
+ isSubmitting = false;
 
   constructor( 
     public servico : ServicosService, 
@@ -33,6 +35,7 @@ export class AddprofissioanlComponent implements OnInit {
     public servicoPedido : ServicoPedidoService,
     public afAuth : AngularFireAuth,
     public router : Router,
+    private notificationService: NotificationService
   ) { }
 
   ngOnInit() {
@@ -63,11 +66,24 @@ export class AddprofissioanlComponent implements OnInit {
        console.error(error);
     }
   }
-  inscreverServico(){
+  async inscreverServico(){
+    if (this.isSubmitting) {
+      return;
+    }
+
+    this.isSubmitting = true;
     this.servePedido.id = this.servicoSelecionado.id;
-    this.servicoPedido.addServicoPedido(this.usuario, this.servicoSelecionado, this.servePedido);
-    this.servico.addUsuario(this.usuario, this.servicoSelecionado);
-    alert("Inscrição Concluida!");
-    this.router.navigate(["/feed"]);
+    try {
+      await Promise.all([
+        this.servicoPedido.addServicoPedido(this.usuario, this.servicoSelecionado, this.servePedido),
+        this.servico.addUsuario(this.usuario, this.servicoSelecionado)
+      ]);
+      this.notificationService.showSuccess('Serviço cadastrado', 'Sua especialidade já está disponível para novos clientes.');
+      this.router.navigate(['/feed']);
+    } catch (error) {
+      this.notificationService.showError('Não foi possível cadastrar', 'Verifique sua conexão e tente publicar o serviço novamente.');
+    } finally {
+      this.isSubmitting = false;
+    }
   }
 }

@@ -12,6 +12,7 @@ import { Usuario } from 'src/app/Usuarios/usuario';
 import { Servico } from './../../Usuarios/servico';
 import { ServicoPedido } from './../../Usuarios/serico-pedido';
 import { UsuarioService } from './../../Servicos/usuario.service';
+import { NotificationService } from '../../shared/notification/notification.service';
 
 @Component({
   selector: 'app-editar-info',
@@ -28,6 +29,7 @@ export class EditarInfoComponent implements OnInit {
   servicoSubscription : Subscription;
   usuario : Usuario = {};
   usuarioSubscription : Subscription;
+  isSubmitting = false;
 
   constructor(
     public afs : AngularFirestore, 
@@ -38,7 +40,8 @@ export class EditarInfoComponent implements OnInit {
     public servicoPedido : ServicoPedidoService,
     public usuarioService : UsuarioService,
     public router : Router,
-    public active : ActivatedRoute
+    public active : ActivatedRoute,
+    private notificationService: NotificationService
   ) { }
 
   ngOnInit() {
@@ -71,11 +74,22 @@ export class EditarInfoComponent implements OnInit {
        console.error(error);
     }
   }
-  editarInfo(){
+  async editarInfo(){
+    if (this.isSubmitting) {
+      return;
+    }
+
+    this.isSubmitting = true;
     this.servicoped.id = this.serveId;
-    this.servicoPedido.addServicoPedido(this.usuario, this.servico, this.servicoped);
-    alert("Informações Editadas");
-    this.router.navigate(["/feed"]);
+    try {
+      await this.servicoPedido.addServicoPedido(this.usuario, this.servico, this.servicoped);
+      this.notificationService.showSuccess('Serviço atualizado', 'As novas informações já estão disponíveis no seu perfil.');
+      this.router.navigate(['/feed']);
+    } catch (error) {
+      this.notificationService.showError('Não foi possível atualizar', 'Verifique sua conexão e tente salvar o serviço novamente.');
+    } finally {
+      this.isSubmitting = false;
+    }
   }
 
 }

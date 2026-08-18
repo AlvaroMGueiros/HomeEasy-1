@@ -9,8 +9,8 @@ export class Usuario {
     endereco? : string;
     estado? : string;
     cidade? : string;
-    cpf? : number;
-    cnpj? : number;
+    cpf? : number | string;
+    cnpj? : number | string;
     instagram? : string;
     facebook? : string;
     twitter? : string;
