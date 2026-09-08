@@ -1,12 +1,27 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, QueryFailedError, Repository } from 'typeorm';
 
+import { PasswordResetToken } from '../auth/password-reset-token.entity';
+import { RefreshToken } from '../auth/refresh-token.entity';
+import { Message } from '../communications/message.entity';
+import { MessageType } from '../communications/communication.enums';
+import { Notification } from '../communications/notification.entity';
+import { UserBlock } from '../communications/user-block.entity';
+import { UserPresence } from '../communications/user-presence.entity';
+import { Favorite } from '../engagement/favorite.entity';
+import { Review } from '../engagement/review.entity';
+import { Proposal } from '../marketplace/proposal.entity';
+import { ServiceRequest } from '../marketplace/service-request.entity';
+import { VerificationDocument } from '../moderation/verification-document.entity';
+import { ProfessionalProfile } from '../professionals/professional-profile.entity';
+import { ProfessionalService } from '../professionals/professional-service.entity';
 import { normalizeEmail } from '../shared/utils/email.utils';
 import { assertAdultBirthDate } from '../shared/utils/birth-date.utils';
 import { normalizePhone } from '../shared/utils/phone.utils';
 import { normalizeDocument } from '../shared/utils/document.utils';
 import { MediaPurpose } from '../storage/media-purpose.enum';
+import { MediaObject } from '../storage/media-object.entity';
 import { StorageService } from '../storage/storage.service';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { UserProfile } from './user-profile.entity';
@@ -163,6 +178,117 @@ export class UsersService {
       throw error;
     }
     return this.findOwnProfile(userId);
+  }
+
+  async deleteOwnAccount(userId: string) {
+    try {
+      await this.storageService.deleteOwnedObjects(userId);
+    } catch {
+      throw new ServiceUnavailableException(
+        'Não foi possível remover os arquivos da conta. A conta permanece ativa; tente novamente.'
+      );
+    }
+    await this.dataSource.transaction(async (manager) => {
+      await manager.delete(VerificationDocument, { professionalId: userId });
+      await manager.update(
+        UserProfile,
+        { userId },
+        {
+          phone: null,
+          birthDate: null,
+          profilePhotoMediaId: null,
+          address: null,
+          city: null,
+          state: null,
+          cpf: null,
+          cnpj: null,
+          instagram: null,
+          facebook: null,
+          twitter: null,
+          website: null,
+          linkedin: null
+        }
+      );
+      await manager.update(
+        ServiceRequest,
+        { clientId: userId },
+        {
+          description: 'Conteúdo removido pelo titular da conta.',
+          answers: {},
+          attachments: [],
+          address: '',
+          city: '',
+          state: '',
+          location: null
+        }
+      );
+      await manager.update(
+        Message,
+        { senderId: userId },
+        {
+          type: MessageType.Text,
+          content: 'Mensagem removida pelo titular da conta.',
+          attachment: null
+        }
+      );
+      await manager.update(
+        Proposal,
+        { professionalId: userId },
+        {
+          message: 'Conteúdo removido pelo titular da conta.',
+          paymentMethods: []
+        }
+      );
+      await manager.update(
+        ProfessionalService,
+        { professionalId: userId },
+        {
+          description: null,
+          isActive: false
+        }
+      );
+      await manager.update(
+        ProfessionalProfile,
+        { userId },
+        {
+          bio: 'Conta excluída.',
+          phone: '',
+          city: '',
+          state: '',
+          location: { type: 'Point', coordinates: [0, 0] },
+          isAvailable: false
+        }
+      );
+      await manager
+        .createQueryBuilder()
+        .update(Review)
+        .set({
+          comment: 'Avaliação removida pelo titular da conta.',
+          professionalResponse: null,
+          isPublished: false
+        })
+        .where('client_id = :userId OR professional_id = :userId', { userId })
+        .execute();
+      await manager.delete(Favorite, [{ clientId: userId }, { professionalId: userId }]);
+      await manager.delete(UserBlock, [{ blockerId: userId }, { blockedId: userId }]);
+      await manager.delete(Notification, { userId });
+      await manager.delete(UserPresence, { userId });
+      await manager.delete(PasswordResetToken, { userId });
+      await manager.delete(RefreshToken, { userId });
+      await manager.delete(MediaObject, { ownerId: userId });
+      await manager.update(
+        User,
+        { id: userId },
+        {
+          name: 'Conta excluída',
+          email: `deleted+${userId}@deleted.homeeasy.invalid`,
+          passwordHash: `deleted-${userId}`,
+          googleSubject: null,
+          isActive: false,
+          deletedAt: new Date()
+        }
+      );
+    });
   }
 
   async findPublicIdentity(userId: string) {

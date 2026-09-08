@@ -1,4 +1,15 @@
-import { Body, Controller, Get, NotFoundException, Param, ParseUUIDPipe, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  ParseUUIDPipe,
+  Put
+} from '@nestjs/common';
 
 import { AuthenticatedUser } from '../auth/authenticated-user.decorator';
 import { PublicUser } from '../shared/utils/public-user.utils';
@@ -25,6 +36,12 @@ export class UsersController {
     @Body() updateUserProfileDto: UpdateUserProfileDto
   ) {
     return this.usersService.updateOwnProfile(authenticatedUser.id, updateUserProfileDto);
+  }
+
+  @Delete('me')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteCurrentUser(@AuthenticatedUser() authenticatedUser: PublicUser) {
+    await this.usersService.deleteOwnAccount(authenticatedUser.id);
   }
 
   @Get(':userId/public')

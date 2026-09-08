@@ -8,6 +8,7 @@ import { DatabaseModule } from './database/database.module';
 import { createDatabaseOptions } from './database/database-options';
 import { EngagementModule } from './engagement/engagement.module';
 import { HealthModule } from './health/health.module';
+import { LegalModule } from './legal/legal.module';
 import { MarketplaceModule } from './marketplace/marketplace.module';
 import { ModerationModule } from './moderation/moderation.module';
 import { ProfessionalsModule } from './professionals/professionals.module';
@@ -30,6 +31,7 @@ import { validateEnvironment } from './config/environment.validation';
     }),
     DatabaseModule,
     HealthModule,
+    LegalModule,
     UsersModule,
     AuthModule,
     ServicesModule,

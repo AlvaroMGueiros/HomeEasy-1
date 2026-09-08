@@ -99,6 +99,13 @@ export class StorageService implements OnModuleInit {
     return { downloadUrl, expiresInSeconds: 300 };
   }
 
+  async deleteOwnedObjects(ownerId: string) {
+    const ownedMedia = await this.mediaRepository.find({ where: { ownerId }, select: { objectKey: true } });
+    for (const media of ownedMedia) {
+      await this.client.removeObject(this.bucket, media.objectKey);
+    }
+  }
+
   async openPublicProfilePhoto(mediaId: string) {
     const media = await this.mediaRepository.findOne({ where: { id: mediaId } });
     if (
