@@ -33,7 +33,7 @@ describe('UsersService', () => {
     expect(manager.update).toHaveBeenCalledWith(
       User,
       { id: userId },
-      expect.objectContaining({ isActive: false, googleSubject: null, deletedAt: expect.any(Date) })
+      expect.objectContaining({ isActive: false, googleSubject: null })
     );
     expect(execute).toHaveBeenCalled();
   });

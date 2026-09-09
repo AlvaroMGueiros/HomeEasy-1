@@ -284,8 +284,7 @@ export class UsersService {
           email: `deleted+${userId}@deleted.homeeasy.invalid`,
           passwordHash: `deleted-${userId}`,
           googleSubject: null,
-          isActive: false,
-          deletedAt: new Date()
+          isActive: false
         }
       );
     });
