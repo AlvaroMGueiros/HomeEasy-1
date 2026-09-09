@@ -15,8 +15,7 @@ function createProfile(): ProfessionalProfile {
       role: UserRole.User,
       isActive: true,
       createdAt: new Date('2026-01-01T00:00:00Z'),
-      updatedAt: new Date('2026-01-01T00:00:00Z'),
-      deletedAt: null
+      updatedAt: new Date('2026-01-01T00:00:00Z')
     },
     bio: 'Profissional com experiência em serviços residenciais.',
     phone: '81999999999',
