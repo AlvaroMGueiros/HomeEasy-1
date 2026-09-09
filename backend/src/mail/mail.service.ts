@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { Transporter } from 'nodemailer';
 
 import { buildBrandedMailHtml, buildBrandedMailText, MailDetail } from './mail-template.utils';
 
@@ -22,27 +21,21 @@ export interface MarketplaceMailDetails {
 export class MailService {
   private readonly frontendBaseUrl: string;
   private readonly from: string;
-  private readonly logoPath: string;
-  private readonly transporter: Transporter;
+  private readonly logoContent: string;
+  private readonly resendApiKey: string;
 
   constructor(configService: ConfigService) {
     this.frontendBaseUrl = configService.getOrThrow<string>('FRONTEND_BASE_URL');
     this.from = configService.getOrThrow<string>('SMTP_FROM');
-    this.logoPath = resolve(process.cwd(), '../src/assets/home-easy-logo-v2.png');
-    const user = configService.get<string>('SMTP_USER');
-    const password = configService.get<string>('SMTP_PASSWORD');
-    this.transporter = nodemailer.createTransport({
-      host: configService.getOrThrow<string>('SMTP_HOST'),
-      port: configService.getOrThrow<number>('SMTP_PORT'),
-      secure: configService.getOrThrow<boolean>('SMTP_SECURE'),
-      auth: user && password ? { user, pass: password } : undefined
-    });
+    this.resendApiKey = configService.get<string>('RESEND_API_KEY') || '';
+    this.logoContent = readFileSync(
+      resolve(process.cwd(), '../src/assets/home-easy-logo-v2.png')
+    ).toString('base64');
   }
 
   async sendPasswordReset(email: string, rawToken: string) {
     const resetUrl = `${this.frontendBaseUrl}/redefinir-senha?token=${encodeURIComponent(rawToken)}`;
-    await this.transporter.sendMail({
-      from: this.from,
+    await this.sendMail({
       to: email,
       subject: 'Redefina sua senha do Home Easy',
       text: `Use este link para redefinir sua senha. Ele expira em 30 minutos: ${resetUrl}`,
@@ -147,8 +140,7 @@ export class MailService {
     footer: string;
   }) {
     const { to, subject, ...template } = message;
-    return this.transporter.sendMail({
-      from: this.from,
+    return this.sendMail({
       to,
       subject,
       text: buildBrandedMailText(template),
@@ -156,10 +148,36 @@ export class MailService {
       attachments: [
         {
           filename: 'home-easy-logo.png',
-          path: this.logoPath,
-          cid: 'homeeasy-logo'
+          content: this.logoContent,
+          content_id: 'homeeasy-logo'
         }
       ]
     });
+  }
+
+  private async sendMail(message: {
+    to: string;
+    subject: string;
+    text: string;
+    html: string;
+    attachments?: Array<{ filename: string; content: string; content_id: string }>;
+  }) {
+    if (!this.resendApiKey) {
+      throw new Error('RESEND_API_KEY não foi configurada para o envio de e-mails.');
+    }
+
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.resendApiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ from: this.from, ...message })
+    });
+
+    if (!response.ok) {
+      const responseBody = await response.text();
+      throw new Error(`Resend recusou o envio do e-mail (${response.status}): ${responseBody}`);
+    }
   }
 }
