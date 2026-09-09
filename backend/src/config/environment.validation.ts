@@ -90,7 +90,10 @@ export function validateEnvironment(environment: Record<string, unknown>): Envir
     MINIO_BUCKET: readString(environment.MINIO_BUCKET),
     FRONTEND_BASE_URL: readString(environment.FRONTEND_BASE_URL, 'http://localhost:4200'),
     SMTP_FROM: readString(environment.SMTP_FROM, 'Home Easy <nao-responda@homeeasy.local>'),
-    RESEND_API_KEY: readString(environment.RESEND_API_KEY),
+    RESEND_API_KEY: readString(
+      environment.RESEND_API_KEY,
+      readString(environment.SMTP_PASSWORD)
+    ),
     GOOGLE_OAUTH_CLIENT_IDS: readString(environment.GOOGLE_OAUTH_CLIENT_IDS)
   };
 }
