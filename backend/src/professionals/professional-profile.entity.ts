@@ -10,6 +10,7 @@ import {
   UpdateDateColumn
 } from 'typeorm';
 
+import { ProfessionalPhoto } from './professionalPhoto';
 import { User } from '../users/user.entity';
 import { ProfessionalService } from './professional-service.entity';
 import { ProfessionalVerificationStatus } from './professional-verification-status.enum';
@@ -30,6 +31,12 @@ export class ProfessionalProfile {
 
   @Column({ type: 'text' })
   bio: string;
+
+  @Column({ name: 'cover_photo_media_id', type: 'uuid', nullable: true })
+  coverPhotoMediaId: string | null;
+
+  @Column({ name: 'portfolio_photos', type: 'jsonb', default: () => "'[]'::jsonb" })
+  portfolioPhotos: ProfessionalPhoto[];
 
   @Column({ length: 20 })
   phone: string;

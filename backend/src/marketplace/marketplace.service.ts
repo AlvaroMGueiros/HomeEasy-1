@@ -27,6 +27,7 @@ import { CreateServiceRequestDto } from './dto/create-service-request.dto';
 import { CancellationReason, OrderStatus, ProposalStatus, ServiceRequestStatus } from './marketplace.enums';
 import { Order } from './order.entity';
 import { Proposal } from './proposal.entity';
+import { calculateOpportunityRanking } from './opportunity-ranking.utils';
 import { ServiceRequest } from './service-request.entity';
 import {
   canServiceRequestAcceptProposal,
@@ -225,9 +226,11 @@ export class MarketplaceService {
       throw new NotFoundException('Ative seu perfil profissional para consultar oportunidades.');
     }
 
+    const locationExpression = 'ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography';
     const query = this.requestsRepository
       .createQueryBuilder('request')
       .innerJoinAndSelect('request.service', 'service')
+      .addSelect(`ST_Distance(request.location, ${locationExpression})`, 'distance_meters')
       .innerJoin(
         ProfessionalService,
         'professionalService',
@@ -265,9 +268,31 @@ export class MarketplaceService {
         state: profile.state,
         city: profile.city
       })
-      .orderBy('request.createdAt', 'DESC');
+      .orderBy('CASE WHEN request.preferredProfessionalId = :professionalId THEN 0 ELSE 1 END', 'ASC')
+      .addOrderBy("CASE request.urgency WHEN 'urgent' THEN 0 WHEN 'this_week' THEN 1 ELSE 2 END", 'ASC')
+      .addOrderBy('distance_meters', 'ASC', 'NULLS LAST')
+      .addOrderBy('request.proposalCount', 'ASC')
+      .addOrderBy('request.createdAt', 'DESC');
 
-    return query.getMany();
+    const result = await query.getRawAndEntities();
+    return result.entities.map((request) => {
+      const raw = result.raw.find((row: Record<string, unknown>) => row.request_id === request.id);
+      const distanceMeters = raw?.distance_meters;
+      const distanceKm = distanceMeters === null || distanceMeters === undefined
+        ? null
+        : Math.round(Number(distanceMeters) / 100) / 10;
+      return Object.assign(request, {
+        distanceKm,
+        ...calculateOpportunityRanking({
+          isDirectRequest: request.preferredProfessionalId === professionalId,
+          distanceKm,
+          urgency: request.urgency,
+          proposalCount: request.proposalCount,
+          maximumProposals: request.maximumProposals,
+          createdAt: request.createdAt
+        })
+      });
+    });
   }
 
   async submitProposal(requestId: string, professionalId: string, dto: CreateProposalDto) {
@@ -360,6 +385,30 @@ export class MarketplaceService {
         undefined,
         metrics.get(proposal.professionalId)
       )
+    }));
+  }
+
+  async findOwnProposals(professionalId: string) {
+    await this.expireOpenRecords();
+    const proposals = await this.proposalsRepository.find({
+      where: { professionalId },
+      relations: { request: { service: true } },
+      order: { createdAt: 'DESC' },
+      take: 100
+    });
+    return proposals.map((proposal) => ({
+      id: proposal.id,
+      requestId: proposal.requestId,
+      price: Number(proposal.price),
+      message: proposal.message,
+      estimatedDurationMinutes: proposal.estimatedDurationMinutes,
+      materialsIncluded: proposal.materialsIncluded,
+      travelFee: Number(proposal.travelFee),
+      paymentMethods: proposal.paymentMethods,
+      status: proposal.status,
+      validUntil: proposal.validUntil,
+      createdAt: proposal.createdAt,
+      request: proposal.request
     }));
   }
 

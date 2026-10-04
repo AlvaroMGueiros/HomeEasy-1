@@ -2,6 +2,14 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
 
+import { Order } from '../marketplace/order.entity';
+import { OrderStatus } from '../marketplace/marketplace.enums';
+import { AddCompletedOrderPhotoDto } from './dto/add-completed-order-photo.dto';
+import { ProfessionalPhotoKind } from './professionalPhoto';
+import { validatePortfolioPhotoChanges } from './professionalPhoto.utils';
+import { StorageService } from '../storage/storage.service';
+import { MediaPurpose } from '../storage/media-purpose.enum';
+import { UpdateProfessionalPresentationDto } from './dto/update-professional-presentation.dto';
 import { Service } from '../services/service.entity';
 import { normalizePhone } from '../shared/utils/phone.utils';
 import { FindProfessionalsQueryDto } from './dto/find-professionals-query.dto';
@@ -19,6 +27,7 @@ import {
 export class ProfessionalsService {
   constructor(
     private readonly dataSource: DataSource,
+    private readonly storageService: StorageService,
     @InjectRepository(ProfessionalProfile)
     private readonly profilesRepository: Repository<ProfessionalProfile>,
     @InjectRepository(ProfessionalService)
@@ -120,6 +129,84 @@ export class ProfessionalsService {
     });
     await this.profilesRepository.save(profile);
 
+    return this.findOwn(userId);
+  }
+
+  async updateOwnPresentation(userId: string, dto: UpdateProfessionalPresentationDto) {
+    await this.dataSource.transaction(async (manager) => {
+      const profile = await manager.findOne(ProfessionalProfile, {
+        where: { userId },
+        lock: { mode: 'pessimistic_write' }
+      });
+      if (!profile)
+        throw new NotFoundException('Crie o perfil profissional antes de editar sua apresentação.');
+      if (dto.portfolioPhotos !== undefined)
+        validatePortfolioPhotoChanges(profile.portfolioPhotos || [], dto.portfolioPhotos);
+      const mediaIds = new Set<string>();
+      if (dto.coverPhotoMediaId) mediaIds.add(dto.coverPhotoMediaId);
+      for (const photo of dto.portfolioPhotos || []) mediaIds.add(photo.mediaId);
+      for (const mediaId of mediaIds) {
+        await this.storageService.attachToContext(
+          mediaId,
+          userId,
+          MediaPurpose.ProfilePhoto,
+          userId,
+          manager
+        );
+      }
+      if (dto.bio !== undefined) {
+        const bio = dto.bio.trim();
+        if (bio.length < 40)
+          throw new BadRequestException(
+            'O sobre deve conter pelo menos 40 caracteres sem espaços nas extremidades.'
+          );
+        profile.bio = bio;
+      }
+      if (dto.coverPhotoMediaId !== undefined) profile.coverPhotoMediaId = dto.coverPhotoMediaId;
+      if (dto.portfolioPhotos !== undefined)
+        profile.portfolioPhotos = dto.portfolioPhotos.map((photo) => ({
+          ...photo,
+          caption: photo.caption.trim()
+        }));
+      await manager.save(ProfessionalProfile, profile);
+    });
+    return this.findOwn(userId);
+  }
+
+  async addCompletedOrderPhoto(userId: string, orderId: string, dto: AddCompletedOrderPhotoDto) {
+    await this.dataSource.transaction(async (manager) => {
+      const order = await manager.findOne(Order, {
+        where: { id: orderId, professionalId: userId },
+        lock: { mode: 'pessimistic_write' }
+      });
+      if (!order) throw new NotFoundException('Pedido não encontrado para este profissional.');
+      if (order.status !== OrderStatus.Completed)
+        throw new BadRequestException('Conclua o serviço antes de publicar fotos do resultado.');
+      const profile = await manager.findOne(ProfessionalProfile, {
+        where: { userId },
+        lock: { mode: 'pessimistic_write' }
+      });
+      if (!profile) throw new NotFoundException('Perfil profissional não encontrado.');
+      const photos = profile.portfolioPhotos || [];
+      if (photos.length >= 30)
+        throw new BadRequestException(
+          'Seu portfólio já possui 30 fotos. Remova uma foto antes de publicar outra.'
+        );
+      if (photos.some((photo) => photo.mediaId === dto.mediaId))
+        throw new BadRequestException('Esta foto já foi publicada no seu portfólio.');
+      await this.storageService.attachToContext(
+        dto.mediaId,
+        userId,
+        MediaPurpose.ProfilePhoto,
+        userId,
+        manager
+      );
+      profile.portfolioPhotos = [
+        ...photos,
+        { mediaId: dto.mediaId, caption: dto.caption.trim(), kind: ProfessionalPhotoKind.Completed, orderId }
+      ];
+      await manager.save(ProfessionalProfile, profile);
+    });
     return this.findOwn(userId);
   }
 

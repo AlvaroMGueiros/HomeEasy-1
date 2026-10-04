@@ -1,3 +1,4 @@
+import { ProfessionalPhotoKind } from './professionalPhoto';
 import { ProfessionalProfile } from './professional-profile.entity';
 import { ProfessionalVerificationStatus } from './professional-verification-status.enum';
 import { toPrivateProfessionalProfile, toPublicProfessionalProfile } from './professional-profile.utils';
@@ -5,6 +6,8 @@ import { UserRole } from '../users/user-role.enum';
 
 function createProfile(): ProfessionalProfile {
   return {
+    coverPhotoMediaId: null,
+    portfolioPhotos: [],
     userId: 'professional-id',
     user: {
       id: 'professional-id',
@@ -40,6 +43,15 @@ describe('professional profile responses', () => {
     expect(response).not.toHaveProperty('phone');
     expect(response).not.toHaveProperty('latitude');
     expect(response).not.toHaveProperty('longitude');
+  });
+
+  it('exposes order links only to the profile owner', () => {
+    const profile = createProfile();
+    profile.portfolioPhotos = [
+      { mediaId: 'photo', kind: ProfessionalPhotoKind.Completed, caption: '', orderId: 'order' }
+    ];
+    expect(toPublicProfessionalProfile(profile).portfolioPhotos[0]).not.toHaveProperty('orderId');
+    expect(toPrivateProfessionalProfile(profile).portfolioPhotos[0].orderId).toBe('order');
   });
 
   it('returns private contact and coordinates to the profile owner', () => {

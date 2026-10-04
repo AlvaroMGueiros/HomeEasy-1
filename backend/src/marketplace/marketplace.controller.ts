@@ -64,6 +64,11 @@ export class MarketplaceController {
     return this.marketplaceService.findRequestProposals(requestId, authenticatedUser.id);
   }
 
+  @Get('proposals/me')
+  findOwnProposals(@AuthenticatedUser() authenticatedUser: PublicUser) {
+    return this.marketplaceService.findOwnProposals(authenticatedUser.id);
+  }
+
   @Post('requests/:requestId/proposals/:proposalId/accept')
   acceptProposal(
     @Param('requestId', ParseUUIDPipe) requestId: string,

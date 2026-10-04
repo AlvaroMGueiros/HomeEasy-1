@@ -1,11 +1,13 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Put, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Put, Query } from '@nestjs/common';
 
 import { AuthenticatedUser } from '../auth/authenticated-user.decorator';
 import { Public } from '../auth/public.decorator';
 import { PublicUser } from '../shared/utils/public-user.utils';
+import { AddCompletedOrderPhotoDto } from './dto/add-completed-order-photo.dto';
 import { FindProfessionalsQueryDto } from './dto/find-professionals-query.dto';
 import { ReplaceProfessionalServicesDto } from './dto/replace-professional-services.dto';
 import { UpdateProfessionalProfileDto } from './dto/update-professional-profile.dto';
+import { UpdateProfessionalPresentationDto } from './dto/update-professional-presentation.dto';
 import { ProfessionalsService } from './professionals.service';
 
 @Controller('professionals')
@@ -29,6 +31,23 @@ export class ProfessionalsController {
     @Body() updateProfessionalProfileDto: UpdateProfessionalProfileDto
   ) {
     return this.professionalsService.updateOwn(authenticatedUser.id, updateProfessionalProfileDto);
+  }
+
+  @Patch('me/presentation')
+  updateOwnPresentation(
+    @AuthenticatedUser() authenticatedUser: PublicUser,
+    @Body() presentation: UpdateProfessionalPresentationDto
+  ) {
+    return this.professionalsService.updateOwnPresentation(authenticatedUser.id, presentation);
+  }
+
+  @Post('me/orders/:orderId/photos')
+  addCompletedOrderPhoto(
+    @AuthenticatedUser() authenticatedUser: PublicUser,
+    @Param('orderId', ParseUUIDPipe) orderId: string,
+    @Body() photo: AddCompletedOrderPhotoDto
+  ) {
+    return this.professionalsService.addCompletedOrderPhoto(authenticatedUser.id, orderId, photo);
   }
 
   @Put('me/services')

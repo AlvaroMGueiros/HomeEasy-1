@@ -32,6 +32,12 @@ export function toPublicProfessionalProfile(
     name: profile.user.name,
     profilePhotoMediaId: profile.user.profile?.profilePhotoMediaId || null,
     bio: profile.bio,
+    coverPhotoMediaId: profile.coverPhotoMediaId || null,
+    portfolioPhotos: (profile.portfolioPhotos || []).map(({ mediaId, kind, caption }) => ({
+      mediaId,
+      kind,
+      caption
+    })),
     city: profile.city,
     state: profile.state,
     serviceRadiusKm: profile.serviceRadiusKm,
@@ -48,6 +54,7 @@ export function toPublicProfessionalProfile(
 export function toPrivateProfessionalProfile(profile: ProfessionalProfile, metrics?: ProfessionalMetrics) {
   return {
     ...toPublicProfessionalProfile(profile, undefined, metrics),
+    portfolioPhotos: profile.portfolioPhotos || [],
     phone: profile.phone,
     latitude: profile.location.coordinates[1],
     longitude: profile.location.coordinates[0]

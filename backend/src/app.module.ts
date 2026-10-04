@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 import { AuthModule } from './auth/auth.module';
 import { CommunicationsModule } from './communications/communications.module';
@@ -17,6 +18,7 @@ import { ServicesModule } from './services/services.module';
 import { StorageModule } from './storage/storage.module';
 import { UsersModule } from './users/users.module';
 import { validateEnvironment } from './config/environment.validation';
+import { RequestObservabilityInterceptor } from './shared/interceptors/request-observability.interceptor';
 
 @Module({
   imports: [
@@ -42,6 +44,7 @@ import { validateEnvironment } from './config/environment.validation';
     CommunicationsModule,
     StorageModule,
     ModerationModule
-  ]
+  ],
+  providers: [{ provide: APP_INTERCEPTOR, useClass: RequestObservabilityInterceptor }]
 })
 export class AppModule {}
