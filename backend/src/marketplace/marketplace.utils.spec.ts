@@ -7,6 +7,7 @@ import {
   canServiceRequestReceiveProposal,
   canTransitionOrder,
   validateServiceAnswers,
+  resolveOrderStatusTimestamps,
   validateServiceRequest
 } from './marketplace.utils';
 import { Order } from './order.entity';
@@ -62,5 +63,21 @@ describe('marketplace rules', () => {
     ];
     expect(() => validateServiceAnswers(requestForm, {})).toThrow(BadRequestException);
     expect(() => validateServiceAnswers(requestForm, { propertySize: 80 })).not.toThrow();
+  });
+});
+
+describe('order stage timestamps', () => {
+  const timestamp = new Date('2026-10-03T12:00:00.000Z');
+  it.each([
+    [OrderStatus.Scheduled, 'scheduleConfirmedAt'],
+    [OrderStatus.InProgress, 'startedAt'],
+    [OrderStatus.Completed, 'completedAt']
+  ])('records the actual transition to %s', (status, property) => {
+    expect(resolveOrderStatusTimestamps(status as OrderStatus, timestamp)).toEqual({ [property]: timestamp });
+  });
+  it('does not invent stage dates for acceptance or interruptions', () => {
+    expect(resolveOrderStatusTimestamps(OrderStatus.Accepted, timestamp)).toEqual({});
+    expect(resolveOrderStatusTimestamps(OrderStatus.Disputed, timestamp)).toEqual({});
+    expect(resolveOrderStatusTimestamps(OrderStatus.CancelledByClient, timestamp)).toEqual({});
   });
 });

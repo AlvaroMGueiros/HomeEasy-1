@@ -90,3 +90,19 @@ export function canTransitionOrder(order: Order, actorId: string, nextStatus: Or
   }
   return false;
 }
+
+export function resolveOrderStatusTimestamps(
+  status: OrderStatus,
+  timestamp = new Date()
+): Partial<Pick<Order, 'scheduleConfirmedAt' | 'startedAt' | 'completedAt'>> {
+  switch (status) {
+    case OrderStatus.Scheduled:
+      return { scheduleConfirmedAt: timestamp };
+    case OrderStatus.InProgress:
+      return { startedAt: timestamp };
+    case OrderStatus.Completed:
+      return { completedAt: timestamp };
+    default:
+      return {};
+  }
+}

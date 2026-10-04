@@ -9,6 +9,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 
+import { Review } from '../engagement/review.entity';
 import { ProfessionalProfile } from '../professionals/professional-profile.entity';
 import { resolveCancellationReasonLabel } from '../mail/mail-event-labels.utils';
 import { MailService, MarketplaceMailDetails } from '../mail/mail.service';
@@ -34,6 +35,7 @@ import {
   canServiceRequestReceiveProposal,
   canTransitionOrder,
   validateServiceAnswers,
+  resolveOrderStatusTimestamps,
   validateServiceRequest
 } from './marketplace.utils';
 
@@ -278,9 +280,10 @@ export class MarketplaceService {
     return result.entities.map((request) => {
       const raw = result.raw.find((row: Record<string, unknown>) => row.request_id === request.id);
       const distanceMeters = raw?.distance_meters;
-      const distanceKm = distanceMeters === null || distanceMeters === undefined
-        ? null
-        : Math.round(Number(distanceMeters) / 100) / 10;
+      const distanceKm =
+        distanceMeters === null || distanceMeters === undefined
+          ? null
+          : Math.round(Number(distanceMeters) / 100) / 10;
       return Object.assign(request, {
         distanceKm,
         ...calculateOpportunityRanking({
@@ -460,6 +463,7 @@ export class MarketplaceService {
         agreedPrice: totalPrice.toFixed(2),
         scheduledAt: request.preferredAt,
         status: request.preferredAt ? OrderStatus.Scheduled : OrderStatus.Accepted,
+        ...resolveOrderStatusTimestamps(request.preferredAt ? OrderStatus.Scheduled : OrderStatus.Accepted),
         cancellationReason: null,
         cancellationDetails: null,
         cancelledBy: null
@@ -495,6 +499,35 @@ export class MarketplaceService {
       .where('order.clientId = :userId OR order.professionalId = :userId', { userId })
       .orderBy('order.createdAt', 'DESC')
       .getMany();
+  }
+
+  async findOwnOrder(orderId: string, userId: string) {
+    const order = await this.ordersRepository.findOne({
+      where: { id: orderId },
+      relations: {
+        request: { service: true },
+        proposal: true,
+        professional: { user: { profile: true }, services: { service: true } },
+        client: { profile: true }
+      }
+    });
+    if (!order) throw new NotFoundException('Pedido não encontrado.');
+    this.assertOrderParticipant(order, userId);
+    const [metrics, review] = await Promise.all([
+      this.professionalsService.findMetrics([order.professionalId]),
+      this.dataSource.getRepository(Review).findOne({ where: { orderId } })
+    ]);
+    const { professional, client, ...orderDetails } = order;
+    return {
+      ...orderDetails,
+      professional: toPublicProfessionalProfile(professional, undefined, metrics.get(order.professionalId)),
+      client: {
+        id: client.id,
+        name: client.name,
+        profilePhotoMediaId: client.profile?.profilePhotoMediaId || null
+      },
+      review: review ? { rating: review.rating, comment: review.comment, createdAt: review.createdAt } : null
+    };
   }
 
   async rehire(orderId: string, clientId: string) {
@@ -551,6 +584,7 @@ export class MarketplaceService {
         throw new ConflictException('Esta mudança de status não é permitida para o pedido atual.');
       }
       order.status = nextStatus;
+      Object.assign(order, resolveOrderStatusTimestamps(nextStatus));
       const savedOrder = await manager.save(order);
       await this.notifyOrderParticipant(manager, savedOrder, actorId, 'O status do pedido foi atualizado.');
       return savedOrder;

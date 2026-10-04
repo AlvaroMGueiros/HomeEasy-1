@@ -54,6 +54,15 @@ export class Order {
   @Column({ name: 'scheduled_at', type: 'timestamptz', nullable: true })
   scheduledAt: Date | null;
 
+  @Column({ name: 'schedule_confirmed_at', type: 'timestamptz', nullable: true })
+  scheduleConfirmedAt: Date | null;
+
+  @Column({ name: 'started_at', type: 'timestamptz', nullable: true })
+  startedAt: Date | null;
+
+  @Column({ name: 'completed_at', type: 'timestamptz', nullable: true })
+  completedAt: Date | null;
+
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.Accepted })
   status: OrderStatus;
 

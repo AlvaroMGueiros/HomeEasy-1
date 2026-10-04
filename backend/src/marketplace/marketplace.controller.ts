@@ -92,6 +92,14 @@ export class MarketplaceController {
     return this.marketplaceService.findOwnOrders(authenticatedUser.id);
   }
 
+  @Get('orders/:orderId')
+  findOwnOrder(
+    @Param('orderId', ParseUUIDPipe) orderId: string,
+    @AuthenticatedUser() authenticatedUser: PublicUser
+  ) {
+    return this.marketplaceService.findOwnOrder(orderId, authenticatedUser.id);
+  }
+
   @Post('orders/:orderId/rehire')
   rehire(
     @Param('orderId', ParseUUIDPipe) orderId: string,
