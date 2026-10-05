@@ -69,7 +69,9 @@ export class CommunicationsService {
     const result = await this.conversationsRepository
       .createQueryBuilder('conversation')
       .innerJoinAndSelect('conversation.client', 'client')
+      .leftJoinAndSelect('client.profile', 'clientProfile')
       .innerJoinAndSelect('conversation.professional', 'professional')
+      .leftJoinAndSelect('professional.profile', 'professionalProfile')
       .innerJoinAndSelect('conversation.order', 'order')
       .innerJoinAndSelect('order.request', 'request')
       .innerJoinAndSelect('request.service', 'service')
@@ -94,7 +96,11 @@ export class CommunicationsService {
         service: { id: conversation.order.request.service.id, name: conversation.order.request.service.name },
         orderStatus: conversation.order.status,
         isWritable: isConversationWritable(conversation.order.status),
-        otherUser: { id: otherUser.id, name: otherUser.name },
+        otherUser: {
+          id: otherUser.id,
+          name: otherUser.name,
+          profilePhotoMediaId: otherUser.profile?.profilePhotoMediaId || null
+        },
         unreadCount: Number(raw?.unread_count || 0),
         lastMessageAt: conversation.lastMessageAt,
         createdAt: conversation.createdAt
