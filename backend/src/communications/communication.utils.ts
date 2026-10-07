@@ -16,6 +16,14 @@ export function validateMessage(message: SendMessageDto) {
   }
 }
 
+export function resolveMessageNotificationBody(message: SendMessageDto) {
+  if (message.type === MessageType.Image) return '📷 Enviou uma foto';
+  if (message.type === MessageType.Budget) return 'Enviou um orçamento';
+  const preview = message.content?.trim().replace(/\s+/g, ' ') || 'Enviou uma mensagem';
+  if (preview.length <= 180) return preview;
+  return `${preview.slice(0, 177)}...`;
+}
+
 export function isConversationWritable(orderStatus: OrderStatus) {
   return ![
     OrderStatus.Completed,

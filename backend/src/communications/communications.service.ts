@@ -6,11 +6,12 @@ import { Order } from '../marketplace/order.entity';
 import { OrderStatus } from '../marketplace/marketplace.enums';
 import { MediaPurpose } from '../storage/media-purpose.enum';
 import { StorageService } from '../storage/storage.service';
+import { User } from '../users/user.entity';
 import { SendMessageDto } from './dto/send-message.dto';
 import { RegisterPushDeviceDto } from './dto/register-push-device.dto';
 import { CreateContactMessageDto } from './dto/create-contact-message.dto';
 import { MessageType, NotificationType } from './communication.enums';
-import { isConversationWritable, validateMessage } from './communication.utils';
+import { isConversationWritable, resolveMessageNotificationBody, validateMessage } from './communication.utils';
 import { ContactMessage } from './contact-message.entity';
 import { Conversation } from './conversation.entity';
 import { Message } from './message.entity';
@@ -193,14 +194,12 @@ export class CommunicationsService {
       const savedMessage = await manager.save(message);
       conversation.lastMessageAt = savedMessage.createdAt;
       await manager.save(conversation);
+      const sender = await manager.findOne(User, { where: { id: senderId }, select: { id: true, name: true } });
       await createNotification(manager, {
         userId: recipientId,
         type: NotificationType.NewMessage,
-        title: 'Nova mensagem',
-        body:
-          dto.type === MessageType.Budget
-            ? 'Você recebeu um novo orçamento.'
-            : 'Você recebeu uma nova mensagem.',
+        title: sender?.name.slice(0, 120) || 'Nova mensagem',
+        body: resolveMessageNotificationBody(dto),
         actionUrl: '/conversas'
       });
       return savedMessage;

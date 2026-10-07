@@ -14,6 +14,21 @@ import { Order } from './order.entity';
 import { ServiceRequest } from './service-request.entity';
 
 describe('marketplace rules', () => {
+  it('accepts a future time today but rejects past and current times', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-10-07T19:25:00Z'));
+    const request = {
+      serviceId: 'cleaning', description: 'Preciso de uma limpeza residencial completa.',
+      urgency: ServiceUrgency.Flexible, answers: {}, address: 'Rua de exemplo, 10', city: 'Recife', state: 'PE'
+    };
+    try {
+      expect(() => validateServiceRequest({ ...request, preferredAt: '2026-10-07T17:00:00-03:00' })).not.toThrow();
+      expect(() => validateServiceRequest({ ...request, preferredAt: '2026-10-07T16:24:00-03:00' })).toThrow(BadRequestException);
+      expect(() => validateServiceRequest({ ...request, preferredAt: '2026-10-07T16:25:00-03:00' })).toThrow(BadRequestException);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('rejects an inverted budget range', () => {
     expect(() =>
       validateServiceRequest({
