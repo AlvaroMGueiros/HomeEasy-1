@@ -9,6 +9,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 
 import { NotificationType } from '../communications/communication.enums';
+import { Conversation } from '../communications/conversation.entity';
+import { Message } from '../communications/message.entity';
 import { createNotification } from '../communications/notification.utils';
 import { resolveDisputeReasonLabel } from '../mail/mail-event-labels.utils';
 import { MarketplaceService } from '../marketplace/marketplace.service';
@@ -94,6 +96,39 @@ export class ModerationService {
     if (dto.targetUserId === reporterId) {
       throw new BadRequestException('Você não pode denunciar a própria conta.');
     }
+    let description = dto.description.trim();
+    if (dto.messageId && !dto.conversationId) {
+      throw new BadRequestException('Informe a conversa da mensagem denunciada.');
+    }
+    if (dto.conversationId) {
+      const conversation = await this.dataSource
+        .getRepository(Conversation)
+        .findOne({ where: { id: dto.conversationId } });
+      if (!conversation) throw new NotFoundException('Conversa denunciada não encontrada.');
+      if (conversation.clientId !== reporterId && conversation.professionalId !== reporterId) {
+        throw new ForbiddenException('Você não participa da conversa denunciada.');
+      }
+      const otherUserId =
+        conversation.clientId === reporterId ? conversation.professionalId : conversation.clientId;
+      if (dto.targetUserId && dto.targetUserId !== otherUserId) {
+        throw new BadRequestException(
+          'A pessoa denunciada não corresponde ao outro participante da conversa.'
+        );
+      }
+      if (dto.messageId) {
+        const message = await this.dataSource
+          .getRepository(Message)
+          .findOne({ where: { id: dto.messageId, conversationId: dto.conversationId } });
+        if (!message || message.senderId !== otherUserId)
+          throw new BadRequestException(
+            'A mensagem denunciada não foi enviada por esta pessoa nesta conversa.'
+          );
+        const evidence =
+          message.content?.slice(0, 1000) || 'Anexo: ' + (message.attachment?.mediaId || message.type);
+        description =
+          'Mensagem denunciada: ' + message.id + '\nConteúdo: ' + evidence + '\n\nRelato: ' + description;
+      }
+    }
     return this.reportsRepository.save(
       this.reportsRepository.create({
         reporterId,
@@ -102,7 +137,7 @@ export class ModerationService {
         conversationId: dto.conversationId || null,
         reviewId: dto.reviewId || null,
         category: dto.category,
-        description: dto.description.trim(),
+        description,
         status: ModerationStatus.Pending,
         resolutionNotes: null,
         reviewedBy: null

@@ -16,7 +16,7 @@ export class RequestObservabilityInterceptor implements NestInterceptor {
     const startedAt = Date.now();
     const request = context.switchToHttp().getRequest<ObservedRequest>();
     const response = context.switchToHttp().getResponse<{ statusCode: number }>();
-    const route = request.originalUrl || request.url;
+    const route = (request.originalUrl || request.url).split('?')[0];
 
     return next.handle().pipe(
       tap(() => this.writeLog('request_completed', request, route, response.statusCode, startedAt)),
@@ -27,15 +27,23 @@ export class RequestObservabilityInterceptor implements NestInterceptor {
     );
   }
 
-  private writeLog(event: string, request: ObservedRequest, route: string, statusCode: number, startedAt: number) {
-    this.logger.log(JSON.stringify({
-      event,
-      method: request.method,
-      route,
-      statusCode,
-      durationMs: Date.now() - startedAt,
-      userId: request.user?.id || null,
-      timestamp: new Date().toISOString()
-    }));
+  private writeLog(
+    event: string,
+    request: ObservedRequest,
+    route: string,
+    statusCode: number,
+    startedAt: number
+  ) {
+    this.logger.log(
+      JSON.stringify({
+        event,
+        method: request.method,
+        route,
+        statusCode,
+        durationMs: Date.now() - startedAt,
+        userId: request.user?.id || null,
+        timestamp: new Date().toISOString()
+      })
+    );
   }
 }

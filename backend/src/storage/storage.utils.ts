@@ -13,6 +13,20 @@ export function validateMediaType(purpose: MediaPurpose, contentType: string) {
   }
 }
 
+export function validateMediaContent(contentType: string, header: Buffer) {
+  const signatures: Record<string, boolean> = {
+    'image/jpeg': header.length >= 3 && header[0] === 0xff && header[1] === 0xd8 && header[2] === 0xff,
+    'image/png': header.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])),
+    'image/webp':
+      header.subarray(0, 4).toString('ascii') === 'RIFF' &&
+      header.subarray(8, 12).toString('ascii') === 'WEBP',
+    'application/pdf': header.subarray(0, 5).toString('ascii') === '%PDF-'
+  };
+  if (!signatures[contentType.toLowerCase()]) {
+    throw new BadRequestException('O conteúdo do arquivo não corresponde ao formato autorizado.');
+  }
+}
+
 export function sanitizeFileName(fileName: string) {
   const sanitized = fileName
     .normalize('NFD')

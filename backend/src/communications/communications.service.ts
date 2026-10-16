@@ -11,7 +11,11 @@ import { SendMessageDto } from './dto/send-message.dto';
 import { RegisterPushDeviceDto } from './dto/register-push-device.dto';
 import { CreateContactMessageDto } from './dto/create-contact-message.dto';
 import { MessageType, NotificationType } from './communication.enums';
-import { isConversationWritable, resolveMessageNotificationBody, validateMessage } from './communication.utils';
+import {
+  isConversationWritable,
+  resolveMessageNotificationBody,
+  validateMessage
+} from './communication.utils';
 import { ContactMessage } from './contact-message.entity';
 import { Conversation } from './conversation.entity';
 import { Message } from './message.entity';
@@ -194,7 +198,10 @@ export class CommunicationsService {
       const savedMessage = await manager.save(message);
       conversation.lastMessageAt = savedMessage.createdAt;
       await manager.save(conversation);
-      const sender = await manager.findOne(User, { where: { id: senderId }, select: { id: true, name: true } });
+      const sender = await manager.findOne(User, {
+        where: { id: senderId },
+        select: { id: true, name: true }
+      });
       await createNotification(manager, {
         userId: recipientId,
         type: NotificationType.NewMessage,
@@ -222,7 +229,12 @@ export class CommunicationsService {
 
   async updatePresence(userId: string, conversationId: string | null, isTyping: boolean) {
     if (conversationId) {
-      await this.findAccessibleConversation(conversationId, userId);
+      const conversation = await this.findAccessibleConversation(conversationId, userId);
+      const otherUserId =
+        conversation.clientId === userId ? conversation.professionalId : conversation.clientId;
+      if (isTyping && !(await this.findBlockStatus(userId, otherUserId)).canMessage) {
+        throw new ForbiddenException('Não é possível indicar digitação em uma conversa bloqueada.');
+      }
     }
     const now = new Date();
     await this.presenceRepository.upsert(
@@ -255,6 +267,8 @@ export class CommunicationsService {
     const conversation = await this.findAccessibleConversation(conversationId, userId);
     const otherUserId =
       conversation.clientId === userId ? conversation.professionalId : conversation.clientId;
+    const blockStatus = await this.findBlockStatus(userId, otherUserId);
+    if (!blockStatus.canMessage) return { isOnline: false, isTyping: false, lastSeenAt: null };
     const presence = await this.presenceRepository.findOne({ where: { userId: otherUserId } });
     const now = Date.now();
     return {
@@ -268,10 +282,27 @@ export class CommunicationsService {
     };
   }
 
+  async findBlockStatus(userId: string, otherUserId: string) {
+    const blocks = await this.blocksRepository.find({
+      where: [
+        { blockerId: userId, blockedId: otherUserId },
+        { blockerId: otherUserId, blockedId: userId }
+      ]
+    });
+    return {
+      isBlocked: blocks.some((block) => block.blockerId === userId),
+      canMessage: userId !== otherUserId && blocks.length === 0
+    };
+  }
+
   async blockUser(blockerId: string, blockedId: string) {
     if (blockerId === blockedId) {
       throw new ConflictException('Você não pode bloquear a própria conta.');
     }
+    const targetExists = await this.dataSource
+      .getRepository(User)
+      .exists({ where: { id: blockedId, isActive: true } });
+    if (!targetExists) throw new NotFoundException('A conta que você tentou bloquear não foi encontrada.');
     await this.blocksRepository.upsert({ blockerId, blockedId }, ['blockerId', 'blockedId']);
     return { isBlocked: true };
   }

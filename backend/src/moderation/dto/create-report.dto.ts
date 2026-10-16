@@ -19,6 +19,10 @@ export class CreateReportDto {
   @IsUUID()
   reviewId?: string;
 
+  @IsOptional()
+  @IsUUID()
+  messageId?: string;
+
   @IsEnum(ReportCategory)
   category: ReportCategory;
 

@@ -17,7 +17,7 @@ function createPage(title: string, content: string) {
 export const privacyPolicyDocument = createPage(
   'Política de Privacidade',
   `<h1>Política de Privacidade do Home Easy</h1>
-  <p><strong>Última atualização:</strong> 8 de setembro de 2026.</p>
+  <p><strong>Última atualização:</strong> 16 de outubro de 2026.</p>
   <p>O Home Easy conecta clientes e profissionais de serviços residenciais. Esta política explica como tratamos dados pessoais no aplicativo e em seus serviços associados.</p>
   <h2>Dados que tratamos</h2>
   <ul>
@@ -30,6 +30,7 @@ export const privacyPolicyDocument = createPage(
   <p>Usamos os dados para criar e proteger contas, aproximar clientes e profissionais, processar solicitações, oferecer comunicação entre participantes, moderar a plataforma, prestar suporte e cumprir obrigações legais.</p>
   <h2>Compartilhamento e operadores</h2>
   <p>Não vendemos dados pessoais. Dados podem ser exibidos aos participantes de uma contratação quando isso for necessário ao serviço. Também utilizamos fornecedores de infraestrutura, banco de dados, armazenamento e envio de e-mail, sujeitos às finalidades e medidas de segurança aplicáveis.</p>
+  <p>Após autorização no aplicativo, consultas de endereços de atendimento são enviadas ao Photon/Komoot. Mapas usam imagens do OpenStreetMap. Esses fornecedores recebem o endereço IP e informações sobre o endereço ou região consultada.</p>
   <h2>Armazenamento e segurança</h2>
   <p>Adotamos conexão criptografada, autenticação por tokens, armazenamento privado de arquivos e controles de acesso. Mantemos os dados enquanto a conta estiver ativa ou pelo período necessário às finalidades informadas e às obrigações legais.</p>
   <h2>Exclusão e retenção</h2>

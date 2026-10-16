@@ -9,7 +9,7 @@ import { UserRole } from '../users/user-role.enum';
 import { CreateUploadDto } from './dto/create-upload.dto';
 import { MediaObject } from './media-object.entity';
 import { MediaPurpose } from './media-purpose.enum';
-import { sanitizeFileName, validateMediaType } from './storage.utils';
+import { sanitizeFileName, validateMediaContent, validateMediaType } from './storage.utils';
 
 @Injectable()
 export class StorageService implements OnModuleInit {
@@ -66,6 +66,22 @@ export class StorageService implements OnModuleInit {
       await this.client.removeObject(this.bucket, media.objectKey);
       throw new ForbiddenException('O tamanho enviado não corresponde ao arquivo autorizado.');
     }
+    const headerStream = await this.client.getPartialObject(
+      this.bucket,
+      media.objectKey,
+      0,
+      Math.min(16, media.size)
+    );
+    try {
+      const headerChunks: Buffer[] = [];
+      for await (const chunk of headerStream) headerChunks.push(Buffer.from(chunk));
+      validateMediaContent(media.contentType, Buffer.concat(headerChunks));
+    } catch (error) {
+      await this.client.removeObject(this.bucket, media.objectKey);
+      throw error;
+    } finally {
+      headerStream.destroy();
+    }
     media.uploadedAt = new Date();
     return this.mediaRepository.save(media);
   }
@@ -79,6 +95,7 @@ export class StorageService implements OnModuleInit {
     if (file.size !== media.size || file.mimetype.toLowerCase() !== media.contentType) {
       throw new ForbiddenException('O arquivo enviado não corresponde ao arquivo autorizado.');
     }
+    validateMediaContent(media.contentType, file.buffer.subarray(0, 16));
     await this.client.putObject(this.bucket, media.objectKey, file.buffer, file.size, {
       'Content-Type': media.contentType
     });

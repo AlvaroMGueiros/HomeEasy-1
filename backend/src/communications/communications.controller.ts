@@ -91,6 +91,14 @@ export class CommunicationsController {
     return this.communicationsService.findPresence(conversationId, authenticatedUser.id);
   }
 
+  @Get('blocks/:userId')
+  findBlockStatus(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @AuthenticatedUser() authenticatedUser: PublicUser
+  ) {
+    return this.communicationsService.findBlockStatus(authenticatedUser.id, userId);
+  }
+
   @Put('blocks/:userId')
   blockUser(
     @Param('userId', ParseUUIDPipe) userId: string,
