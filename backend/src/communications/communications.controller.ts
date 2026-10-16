@@ -139,6 +139,11 @@ export class CommunicationsController {
     );
   }
 
+  @Patch('notifications/read-all')
+  markAllNotificationsRead(@AuthenticatedUser() authenticatedUser: PublicUser) {
+    return this.communicationsService.markAllNotificationsRead(authenticatedUser.id);
+  }
+
   @Patch('notifications/:notificationId/read')
   markNotificationRead(
     @Param('notificationId', ParseUUIDPipe) notificationId: string,

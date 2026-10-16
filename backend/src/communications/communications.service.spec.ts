@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, IsNull, Repository } from 'typeorm';
 
 import { Order } from '../marketplace/order.entity';
 import { OrderStatus } from '../marketplace/marketplace.enums';
@@ -88,5 +88,39 @@ describe('Conversation profile photos', () => {
     const { service } = createService(false);
     const conversations = await service.findConversations('client');
     expect(conversations[0].otherUser.profilePhotoMediaId).toBeNull();
+  });
+});
+
+describe('mark all notifications read', () => {
+  function createService(update: jest.Mock) {
+    return new CommunicationsService(
+      {} as DataSource,
+      {} as Repository<Conversation>,
+      {} as Repository<Message>,
+      { update } as unknown as Repository<Notification>,
+      {} as Repository<UserBlock>,
+      {} as Repository<UserPresence>,
+      {} as Repository<Order>,
+      {} as Repository<ContactMessage>,
+      {} as StorageService,
+      {} as PushNotificationService
+    );
+  }
+
+  it('updates only unread notifications owned by the authenticated user without the list limit', async () => {
+    const update = jest.fn().mockResolvedValue({ affected: 80 });
+    const result = await createService(update).markAllNotificationsRead('currentUser');
+    expect(result.readAt).toBeInstanceOf(Date);
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledWith(
+      { userId: 'currentUser', readAt: IsNull() },
+      { readAt: result.readAt }
+    );
+  });
+
+  it('does not report success when persistence fails', async () => {
+    const failure = new Error('Notification storage unavailable');
+    const update = jest.fn().mockRejectedValue(failure);
+    await expect(createService(update).markAllNotificationsRead('currentUser')).rejects.toThrow(failure);
   });
 });

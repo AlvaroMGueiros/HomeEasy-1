@@ -1,6 +1,6 @@
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, IsNull, Repository } from 'typeorm';
 
 import { Order } from '../marketplace/order.entity';
 import { OrderStatus } from '../marketplace/marketplace.enums';
@@ -326,6 +326,12 @@ export class CommunicationsService {
 
   unregisterPushDevice(userId: string, token: string) {
     return this.pushNotificationService.unregisterDevice(userId, token);
+  }
+
+  async markAllNotificationsRead(userId: string) {
+    const readAt = new Date();
+    await this.notificationsRepository.update({ userId, readAt: IsNull() }, { readAt });
+    return { readAt };
   }
 
   async markNotificationRead(notificationId: string, userId: string) {
