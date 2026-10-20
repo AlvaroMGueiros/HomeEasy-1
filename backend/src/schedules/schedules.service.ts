@@ -7,6 +7,8 @@ import { AvailabilityException } from './availability-exception.entity';
 import { AvailabilityPeriod } from './availability-period.entity';
 import { ReplaceScheduleDto } from './dto/replace-schedule.dto';
 import { validateSchedule } from './schedule.utils';
+import { FindAvailabilityQueryDto } from './dto/find-availability-query.dto';
+import { professionalAvailabilitySql, resolveAvailabilityParameters } from './availability.utils';
 
 @Injectable()
 export class SchedulesService {
@@ -19,6 +21,16 @@ export class SchedulesService {
     @InjectRepository(ProfessionalProfile)
     private readonly profilesRepository: Repository<ProfessionalProfile>
   ) {}
+
+  async findAvailability(professionalId: string, query: FindAvailabilityQueryDto) {
+    const parameters = resolveAvailabilityParameters(query.availableAt, query.durationMinutes);
+    const profileExists = await this.profilesRepository.exists({ where: { userId: professionalId } });
+    if (!profileExists) throw new NotFoundException('Perfil profissional não encontrado.');
+    const isAvailable = await this.profilesRepository.createQueryBuilder('profile')
+      .where('profile.userId = :professionalId AND profile.isAvailable = true', { professionalId })
+      .andWhere(professionalAvailabilitySql, parameters).getExists();
+    return { isAvailable, availableAt: parameters.availableAt, durationMinutes: query.durationMinutes, timeZone: 'America/Sao_Paulo' };
+  }
 
   async findByProfessional(professionalId: string) {
     const profileExists = await this.profilesRepository.exists({ where: { userId: professionalId } });

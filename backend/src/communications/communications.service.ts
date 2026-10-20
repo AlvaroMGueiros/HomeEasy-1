@@ -20,6 +20,7 @@ import { ContactMessage } from './contact-message.entity';
 import { Conversation } from './conversation.entity';
 import { Message } from './message.entity';
 import { Notification } from './notification.entity';
+import { UpdateNotificationPreferencesDto } from './dto/update-notification-preferences.dto';
 import { createNotification } from './notification.utils';
 import { PushNotificationService } from './push-notification.service';
 import { UserBlock } from './user-block.entity';
@@ -49,6 +50,14 @@ export class CommunicationsService {
     private readonly storageService: StorageService,
     private readonly pushNotificationService: PushNotificationService
   ) {}
+
+  findNotificationPreferences(userId: string) {
+    return this.pushNotificationService.findPreferences(userId);
+  }
+
+  updateNotificationPreferences(userId: string, preferences: UpdateNotificationPreferencesDto) {
+    return this.pushNotificationService.updatePreferences(userId, preferences);
+  }
 
   async createFromOrder(orderId: string, userId: string) {
     const order = await this.ordersRepository.findOne({ where: { id: orderId } });

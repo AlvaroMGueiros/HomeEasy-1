@@ -196,11 +196,11 @@ export class MarketplaceService {
       if (request.clientId !== clientId) {
         throw new ForbiddenException('Somente o cliente pode anexar imagens à solicitação.');
       }
-      if (request.attachments.length >= 8) {
-        throw new ConflictException('A solicitação já atingiu o limite de oito imagens.');
-      }
       if (request.attachments.some((attachment) => attachment.mediaId === mediaId)) {
         return request;
+      }
+      if (request.attachments.length >= 8) {
+        throw new ConflictException('A solicitação já atingiu o limite de oito imagens.');
       }
       const media = await this.storageService.attachToContext(
         mediaId,

@@ -1,4 +1,5 @@
 import { ProfessionalProfile } from './professional-profile.entity';
+import { VerificationDocumentType } from '../moderation/moderation.enums';
 
 export interface ProfessionalMetrics {
   completedServices: number;
@@ -25,7 +26,8 @@ function mapServices(profile: ProfessionalProfile) {
 export function toPublicProfessionalProfile(
   profile: ProfessionalProfile,
   distanceMeters?: number,
-  metrics?: ProfessionalMetrics
+  metrics?: ProfessionalMetrics,
+  verifiedDocuments?: VerificationDocumentType[]
 ) {
   return {
     id: profile.userId,
@@ -44,6 +46,7 @@ export function toPublicProfessionalProfile(
     yearsOfExperience: profile.yearsOfExperience,
     isAvailable: profile.isAvailable,
     verificationStatus: profile.verificationStatus,
+    verifiedDocuments,
     memberSince: profile.createdAt,
     distanceKm: distanceMeters === undefined ? null : Math.round(distanceMeters / 100) / 10,
     metrics: metrics || null,

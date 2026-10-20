@@ -22,6 +22,7 @@ import { SendMessageDto } from './dto/send-message.dto';
 import { UpdateTypingDto } from './dto/update-typing.dto';
 import { UnregisterPushDeviceDto } from './dto/unregister-push-device.dto';
 import { CommunicationsService } from './communications.service';
+import { UpdateNotificationPreferencesDto } from './dto/update-notification-preferences.dto';
 
 @Controller()
 export class CommunicationsController {
@@ -113,6 +114,19 @@ export class CommunicationsController {
     @AuthenticatedUser() authenticatedUser: PublicUser
   ) {
     return this.communicationsService.unblockUser(authenticatedUser.id, userId);
+  }
+
+  @Get('notifications/preferences')
+  findNotificationPreferences(@AuthenticatedUser() authenticatedUser: PublicUser) {
+    return this.communicationsService.findNotificationPreferences(authenticatedUser.id);
+  }
+
+  @Put('notifications/preferences')
+  updateNotificationPreferences(
+    @AuthenticatedUser() authenticatedUser: PublicUser,
+    @Body() preferences: UpdateNotificationPreferencesDto
+  ) {
+    return this.communicationsService.updateNotificationPreferences(authenticatedUser.id, preferences);
   }
 
   @Get('notifications')

@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsInt,
+  IsISO8601,
   IsLatitude,
   IsLongitude,
   IsOptional,
@@ -12,6 +13,17 @@ import {
 } from 'class-validator';
 
 export class FindProfessionalsQueryDto {
+  @IsOptional()
+  @IsISO8601({ strict: true })
+  availableAt?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(30)
+  @Max(480)
+  durationMinutes = 60;
+
   @IsOptional()
   @IsString()
   @MaxLength(12)

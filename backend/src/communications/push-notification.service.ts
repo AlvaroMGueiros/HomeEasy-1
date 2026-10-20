@@ -4,6 +4,9 @@ import { Repository } from 'typeorm';
 
 import { Notification } from './notification.entity';
 import { PushDevice } from './push-device.entity';
+import { NotificationPreference } from './notification-preference.entity';
+import { UpdateNotificationPreferencesDto } from './dto/update-notification-preferences.dto';
+import { allowsPushNotification, defaultNotificationPreferences } from './notification-preference.utils';
 
 interface ExpoPushTicket {
   status: 'ok' | 'error';
@@ -14,8 +17,23 @@ interface ExpoPushTicket {
 export class PushNotificationService {
   constructor(
     @InjectRepository(PushDevice)
-    private readonly pushDevicesRepository: Repository<PushDevice>
+    private readonly pushDevicesRepository: Repository<PushDevice>,
+    @InjectRepository(NotificationPreference)
+    private readonly preferencesRepository: Repository<NotificationPreference>
   ) {}
+
+  async findPreferences(userId: string): Promise<UpdateNotificationPreferencesDto> {
+    const savedPreferences = await this.preferencesRepository.findOne({ where: { userId } });
+    if (!savedPreferences) return { ...defaultNotificationPreferences };
+    const { pushEnabled, messages, quotes, serviceUpdates, reviews, opportunities } = savedPreferences;
+    return { pushEnabled, messages, quotes, serviceUpdates, reviews, opportunities };
+  }
+
+  async updatePreferences(userId: string, preferences: UpdateNotificationPreferencesDto) {
+    const { pushEnabled, messages, quotes, serviceUpdates, reviews, opportunities } = preferences;
+    await this.preferencesRepository.upsert({ userId, pushEnabled, messages, quotes, serviceUpdates, reviews, opportunities }, ['userId']);
+    return this.findPreferences(userId);
+  }
 
   async registerDevice(userId: string, token: string, platform: string) {
     const existingDevice = await this.pushDevicesRepository.findOne({ where: { token } });
@@ -33,6 +51,8 @@ export class PushNotificationService {
   }
 
   async sendNotification(notification: Notification): Promise<void> {
+    const preferences = await this.findPreferences(notification.userId);
+    if (!allowsPushNotification(preferences, notification.type)) return;
     const devices = await this.pushDevicesRepository.find({
       where: { userId: notification.userId, isActive: true }
     });

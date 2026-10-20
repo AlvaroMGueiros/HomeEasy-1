@@ -10,6 +10,7 @@ import { ContactMessage } from './contact-message.entity';
 import { Conversation } from './conversation.entity';
 import { Message } from './message.entity';
 import { Notification } from './notification.entity';
+import { NotificationPreference } from './notification-preference.entity';
 import { NotificationSubscriber } from './notification.subscriber';
 import { PushDevice } from './push-device.entity';
 import { PushNotificationService } from './push-notification.service';
@@ -22,6 +23,7 @@ import { UserPresence } from './user-presence.entity';
       Conversation,
       Message,
       Notification,
+      NotificationPreference,
       PushDevice,
       UserBlock,
       UserPresence,

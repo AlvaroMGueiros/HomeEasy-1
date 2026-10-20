@@ -3,6 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
 
 import { Order } from '../marketplace/order.entity';
+import { professionalAvailabilitySql, resolveAvailabilityParameters } from '../schedules/availability.utils';
+import { VerificationDocument } from '../moderation/verification-document.entity';
+import { ModerationStatus, VerificationDocumentType } from '../moderation/moderation.enums';
 import { OrderStatus } from '../marketplace/marketplace.enums';
 import { AddCompletedOrderPhotoDto } from './dto/add-completed-order-photo.dto';
 import { ProfessionalPhotoKind } from './professionalPhoto';
@@ -44,6 +47,9 @@ export class ProfessionalsService {
       .skip((query.page - 1) * query.limit)
       .take(query.limit);
 
+    if (query.availableAt) {
+      queryBuilder.andWhere(professionalAvailabilitySql, resolveAvailabilityParameters(query.availableAt, query.durationMinutes));
+    }
     if (query.serviceId) {
       queryBuilder.andWhere('professionalService.serviceId = :serviceId', { serviceId: query.serviceId });
     }
@@ -73,6 +79,7 @@ export class ProfessionalsService {
 
     const [result, total] = await Promise.all([queryBuilder.getRawAndEntities(), queryBuilder.getCount()]);
     const metrics = await this.findMetrics(result.entities.map((profile) => profile.userId));
+    const verifiedDocuments = await this.findVerifiedDocuments(result.entities.map(profile => profile.userId));
     const professionals = result.entities.map((profile) => {
       const matchingRow = result.raw.find(
         (row: Record<string, unknown>) => row.profile_user_id === profile.userId
@@ -81,7 +88,8 @@ export class ProfessionalsService {
       return toPublicProfessionalProfile(
         profile,
         distanceMeters === undefined ? undefined : Number(distanceMeters),
-        metrics.get(profile.userId)
+        metrics.get(profile.userId),
+        verifiedDocuments.get(profile.userId) || []
       );
     });
 
@@ -98,7 +106,8 @@ export class ProfessionalsService {
     }
 
     const metrics = await this.findMetrics([professionalId]);
-    return toPublicProfessionalProfile(profile, undefined, metrics.get(professionalId));
+    const verifiedDocuments = await this.findVerifiedDocuments([professionalId]);
+    return toPublicProfessionalProfile(profile, undefined, metrics.get(professionalId), verifiedDocuments.get(professionalId) || []);
   }
 
   async findOwn(userId: string) {
@@ -247,6 +256,20 @@ export class ProfessionalsService {
     });
 
     return this.findOwn(userId);
+  }
+
+  private async findVerifiedDocuments(professionalIds: string[]) {
+    const verifiedDocuments = new Map<string, VerificationDocumentType[]>();
+    if (!professionalIds.length) return verifiedDocuments;
+    const documents = await this.dataSource.getRepository(VerificationDocument).find({
+      where: { professionalId: In(professionalIds), status: ModerationStatus.Approved }, select: { professionalId: true, type: true }
+    });
+    for (const document of documents) {
+      const types = verifiedDocuments.get(document.professionalId) || [];
+      if (!types.includes(document.type)) types.push(document.type);
+      verifiedDocuments.set(document.professionalId, types);
+    }
+    return verifiedDocuments;
   }
 
   async findMetrics(professionalIds: string[]) {
