@@ -13,6 +13,7 @@ import { Favorite } from '../engagement/favorite.entity';
 import { Review } from '../engagement/review.entity';
 import { Proposal } from '../marketplace/proposal.entity';
 import { ServiceRequest } from '../marketplace/service-request.entity';
+import { ProfessionalHighlight } from '../professionals/professional-highlight.entity';
 import { VerificationDocument } from '../moderation/verification-document.entity';
 import { ProfessionalProfile } from '../professionals/professional-profile.entity';
 import { ProfessionalService } from '../professionals/professional-service.entity';
@@ -190,6 +191,7 @@ export class UsersService {
     }
     await this.dataSource.transaction(async (manager) => {
       await manager.delete(VerificationDocument, { professionalId: userId });
+      await manager.update(ProfessionalHighlight, { professionalId: userId }, { title: 'Publicação removida', description: 'Conteúdo removido pelo titular.', mediaIds: [], archivedAt: new Date() });
       await manager.update(
         UserProfile,
         { userId },

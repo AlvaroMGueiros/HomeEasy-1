@@ -110,6 +110,13 @@ export class ProfessionalsService {
     return toPublicProfessionalProfile(profile, undefined, metrics.get(professionalId), verifiedDocuments.get(professionalId) || []);
   }
 
+  async findPublicProfilesByIds(professionalIds: string[]) {
+    if (!professionalIds.length) return [];
+    const profiles = await this.createProfileQuery(true).where('profile.userId IN (:...professionalIds)', { professionalIds }).andWhere('profile.isAvailable = true').getMany();
+    const [metrics, verifiedDocuments] = await Promise.all([this.findMetrics(professionalIds), this.findVerifiedDocuments(professionalIds)]);
+    return profiles.map(profile => toPublicProfessionalProfile(profile, undefined, metrics.get(profile.userId), verifiedDocuments.get(profile.userId) || []));
+  }
+
   async findOwn(userId: string) {
     const profile = await this.createProfileQuery(false)
       .where('profile.userId = :userId', { userId })

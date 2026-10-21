@@ -21,6 +21,7 @@ import { ProfessionalVerificationStatus } from '../professionals/professional-ve
 import { MediaPurpose } from '../storage/media-purpose.enum';
 import { StorageService } from '../storage/storage.service';
 import { CreateDisputeDto } from './dto/create-dispute.dto';
+import { ProfessionalHighlight } from '../professionals/professional-highlight.entity';
 import { CreateReportDto } from './dto/create-report.dto';
 import { SubmitDocumentDto } from './dto/submit-document.dto';
 import { Dispute } from './dispute.entity';
@@ -90,13 +91,22 @@ export class ModerationService {
   }
 
   async createReport(reporterId: string, dto: CreateReportDto) {
-    if (!dto.targetUserId && !dto.orderId && !dto.conversationId && !dto.reviewId) {
+    if (!dto.targetUserId && !dto.orderId && !dto.conversationId && !dto.reviewId && !dto.highlightId) {
       throw new BadRequestException('Informe o perfil, pedido, conversa ou avaliação denunciada.');
     }
     if (dto.targetUserId === reporterId) {
       throw new BadRequestException('Você não pode denunciar a própria conta.');
     }
     let description = dto.description.trim();
+    let targetUserId = dto.targetUserId;
+    if (dto.highlightId) {
+      const highlight = await this.dataSource.getRepository(ProfessionalHighlight).findOne({ where: { id: dto.highlightId, status: ModerationStatus.Approved } });
+      if (!highlight || highlight.archivedAt) throw new NotFoundException('Publicação denunciada não encontrada.');
+      if (highlight.professionalId === reporterId) throw new BadRequestException('Você não pode denunciar sua própria publicação.');
+      if (targetUserId && targetUserId !== highlight.professionalId) throw new BadRequestException('O profissional não corresponde à publicação denunciada.');
+      targetUserId = highlight.professionalId;
+      description = 'Publicação denunciada: ' + highlight.id + '\nTítulo: ' + highlight.title + '\nConteúdo: ' + highlight.description.slice(0, 700) + '\n\nRelato: ' + description;
+    }
     if (dto.messageId && !dto.conversationId) {
       throw new BadRequestException('Informe a conversa da mensagem denunciada.');
     }
@@ -132,7 +142,8 @@ export class ModerationService {
     return this.reportsRepository.save(
       this.reportsRepository.create({
         reporterId,
-        targetUserId: dto.targetUserId || null,
+        targetUserId: targetUserId || null,
+        highlightId: dto.highlightId || null,
         orderId: dto.orderId || null,
         conversationId: dto.conversationId || null,
         reviewId: dto.reviewId || null,
@@ -256,6 +267,7 @@ export class ModerationService {
       reports: reports.map((report) => ({
         id: report.id,
         category: report.category,
+        highlightId: report.highlightId,
         description: report.description
       })),
       disputes: disputes.map((dispute) => ({

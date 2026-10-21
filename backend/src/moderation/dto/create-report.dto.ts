@@ -5,6 +5,10 @@ import { ReportCategory } from '../moderation.enums';
 export class CreateReportDto {
   @IsOptional()
   @IsUUID()
+  highlightId?: string;
+
+  @IsOptional()
+  @IsUUID()
   targetUserId?: string;
 
   @IsOptional()

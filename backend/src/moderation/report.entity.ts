@@ -35,6 +35,9 @@ export class Report {
   @Column({ name: 'review_id', type: 'uuid', nullable: true })
   reviewId: string | null;
 
+  @Column({ name: 'highlight_id', type: 'uuid', nullable: true })
+  highlightId: string | null;
+
   @Column({ type: 'enum', enum: ReportCategory })
   category: ReportCategory;
 
