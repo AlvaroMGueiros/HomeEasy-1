@@ -2,6 +2,9 @@ import { BadRequestException, ConflictException, ForbiddenException, Injectable,
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, IsNull, Repository } from 'typeorm';
 
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
+import { ProfessionalSubscription } from '../subscriptions/professional-subscription.entity';
+import { toSubscriptionStatus } from '../subscriptions/subscription.utils';
 import { ModerationStatus } from '../moderation/moderation.enums';
 import { ReviewModerationDto } from '../moderation/dto/review-moderation.dto';
 import { CreateHighlightDto } from './dto/create-highlight.dto';
@@ -16,7 +19,8 @@ import { ProfessionalsService } from './professionals.service';
 export class HighlightsService {
   constructor(private readonly dataSource: DataSource,
     @InjectRepository(ProfessionalHighlight) private readonly highlightsRepository: Repository<ProfessionalHighlight>,
-    private readonly professionalsService: ProfessionalsService) {}
+    private readonly professionalsService: ProfessionalsService,
+    private readonly subscriptionsService: SubscriptionsService) {}
 
   async findFeed(userId: string, query: FindHighlightsQueryDto) {
     const feedQuery = this.highlightsRepository.createQueryBuilder('highlight')
@@ -55,6 +59,7 @@ export class HighlightsService {
   }
 
   async create(userId: string, dto: CreateHighlightDto) {
+    if (this.subscriptionsService.enabled) await this.subscriptionsService.findOwn(userId);
     return this.dataSource.transaction(async manager => {
       const profile = await manager.findOne(ProfessionalProfile, { where: { userId }, lock: { mode: 'pessimistic_write' } });
       if (!profile) throw new NotFoundException('Cadastre seu perfil profissional antes de publicar.');
@@ -63,8 +68,10 @@ export class HighlightsService {
       assertHighlightPhotos(dto.mediaIds, profile.portfolioPhotos || []);
       if (!dto.hasPublicationConsent) throw new BadRequestException('Confirme a autorização para publicar as fotos.');
       if (dto.title.trim().length < 5 || dto.description.trim().length < 20) throw new BadRequestException('Informe um título com 5 caracteres e uma descrição com pelo menos 20.');
+      const subscription = this.subscriptionsService.enabled ? await manager.findOne(ProfessionalSubscription, { where: { userId } }) : null;
+      const { publicationLimit } = toSubscriptionStatus(subscription);
       const activeCount = await manager.count(ProfessionalHighlight, { where: { professionalId: userId, archivedAt: IsNull() } });
-      if (activeCount >= 4) throw new ConflictException('Você pode manter até quatro publicações. Remova uma antes de criar outra.');
+      if (activeCount >= publicationLimit) throw new ConflictException(`Seu plano permite até ${publicationLimit} publicações. Remova uma antes de criar outra.`);
       return toHighlightSummary(await manager.save(manager.create(ProfessionalHighlight, { professionalId: userId, serviceId: dto.serviceId,
         title: dto.title.trim(), description: dto.description.trim(), mediaIds: dto.mediaIds, status: ModerationStatus.Pending,
         sponsorshipConfirmedAt: null, sponsoredUntil: null, archivedAt: null, reviewNotes: null, reviewedBy: null })));

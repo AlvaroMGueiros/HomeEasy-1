@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
 
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { Order } from '../marketplace/order.entity';
 import { professionalAvailabilitySql, resolveAvailabilityParameters } from '../schedules/availability.utils';
 import { VerificationDocument } from '../moderation/verification-document.entity';
@@ -36,7 +37,8 @@ export class ProfessionalsService {
     @InjectRepository(ProfessionalService)
     private readonly professionalServicesRepository: Repository<ProfessionalService>,
     @InjectRepository(Service)
-    private readonly servicesRepository: Repository<Service>
+    private readonly servicesRepository: Repository<Service>,
+    private readonly subscriptionsService: SubscriptionsService
   ) {}
 
   async findPublic(query: FindProfessionalsQueryDto) {
@@ -126,7 +128,8 @@ export class ProfessionalsService {
     }
 
     const metrics = await this.findMetrics([userId]);
-    return toPrivateProfessionalProfile(profile, metrics.get(userId));
+    const { portfolioLimit, publicationLimit } = await this.subscriptionsService.findOwn(userId);
+    return { ...toPrivateProfessionalProfile(profile, metrics.get(userId)), portfolioLimit, publicationLimit };
   }
 
   async updateOwn(userId: string, dto: UpdateProfessionalProfileDto) {
@@ -156,6 +159,12 @@ export class ProfessionalsService {
       });
       if (!profile)
         throw new NotFoundException('Crie o perfil profissional antes de editar sua apresentação.');
+      if (dto.portfolioPhotos !== undefined) {
+        const { portfolioLimit } = await this.subscriptionsService.findOwn(userId);
+        const currentIds = new Set((profile.portfolioPhotos || []).map(photo => photo.mediaId));
+        if (dto.portfolioPhotos.length > portfolioLimit && dto.portfolioPhotos.some(photo => !currentIds.has(photo.mediaId)))
+          throw new BadRequestException(`Seu plano permite até ${portfolioLimit} fotos. Remova fotos antes de adicionar outras.`);
+      }
       if (dto.portfolioPhotos !== undefined)
         validatePortfolioPhotoChanges(profile.portfolioPhotos || [], dto.portfolioPhotos);
       const mediaIds = new Set<string>();
@@ -204,9 +213,10 @@ export class ProfessionalsService {
       });
       if (!profile) throw new NotFoundException('Perfil profissional não encontrado.');
       const photos = profile.portfolioPhotos || [];
-      if (photos.length >= 30)
+      const { portfolioLimit } = await this.subscriptionsService.findOwn(userId);
+      if (photos.length >= portfolioLimit)
         throw new BadRequestException(
-          'Seu portfólio já possui 30 fotos. Remova uma foto antes de publicar outra.'
+          `Seu plano permite até ${portfolioLimit} fotos. Remova uma foto antes de publicar outra.`
         );
       if (photos.some((photo) => photo.mediaId === dto.mediaId))
         throw new BadRequestException('Esta foto já foi publicada no seu portfólio.');

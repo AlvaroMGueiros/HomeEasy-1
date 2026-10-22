@@ -9,12 +9,13 @@ import { ProfessionalProfile } from './professional-profile.entity';
 import { ProfessionalService } from './professional-service.entity';
 import { ProfessionalPhotoKind } from './professionalPhoto';
 import { ProfessionalsService } from './professionals.service';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 
 describe('Completed order photos', () => {
   const userId = 'professional';
   const orderId = 'order';
   const photo = { mediaId: 'media', caption: '  Resultado final  ' };
-  function createService(status: OrderStatus | null = OrderStatus.Completed, photoCount = 0) {
+  function createService(status: OrderStatus | null = OrderStatus.Completed, photoCount = 0, portfolioLimit = 30) {
     const profile = {
       portfolioPhotos: Array.from({ length: photoCount }, (_, index) => ({
         mediaId: String(index),
@@ -39,7 +40,8 @@ describe('Completed order photos', () => {
       storage as unknown as StorageService,
       {} as Repository<ProfessionalProfile>,
       {} as Repository<ProfessionalService>,
-      {} as Repository<Service>
+      {} as Repository<Service>,
+      { findOwn: jest.fn().mockResolvedValue({ portfolioLimit, publicationLimit: 4 }) } as unknown as SubscriptionsService
     );
     jest
       .spyOn(service, 'findOwn')
@@ -86,5 +88,13 @@ describe('Completed order photos', () => {
     const { service, storage } = createService(OrderStatus.Completed, 30);
     await expect(service.addCompletedOrderPhoto(userId, orderId, photo)).rejects.toThrow('30 fotos');
     expect(storage.attachToContext).not.toHaveBeenCalled();
+  });
+  it('honors the paid portfolio limit while retaining ownership checks', async () => {
+    const paid = createService(OrderStatus.Completed, 59, 60);
+    await paid.service.addCompletedOrderPhoto(userId, orderId, photo);
+    expect(paid.profile.portfolioPhotos).toHaveLength(60);
+    const full = createService(OrderStatus.Completed, 60, 60);
+    await expect(full.service.addCompletedOrderPhoto(userId, orderId, photo)).rejects.toThrow('60 fotos');
+    expect(full.storage.attachToContext).not.toHaveBeenCalled();
   });
 });

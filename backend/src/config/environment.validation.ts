@@ -44,6 +44,12 @@ export function validateEnvironment(environment: Record<string, unknown>): Envir
   }
   const missingKeys = requiredKeys.filter((key) => !readString(environment[key]).trim());
 
+  if (readString(environment.HOME_EASY_PLUS_ENABLED) === 'true') {
+    for (const key of ['REVENUECAT_SECRET_KEY', 'REVENUECAT_WEBHOOK_AUTH']) {
+      if (readString(environment[key]).length < 32) throw new Error(`${key} deve ter pelo menos 32 caracteres para ativar o HomeEasy+.`);
+    }
+  }
+
   if (missingKeys.length) {
     throw new Error(`Variáveis de ambiente obrigatórias ausentes: ${missingKeys.join(', ')}.`);
   }

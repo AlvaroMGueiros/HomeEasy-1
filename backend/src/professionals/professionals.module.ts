@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 
 import { AdminGuard } from '../auth/admin.guard';
 import { ProfessionalHighlight } from './professional-highlight.entity';
@@ -13,7 +14,7 @@ import { ProfessionalsController } from './professionals.controller';
 import { ProfessionalsService } from './professionals.service';
 
 @Module({
-  imports: [StorageModule, TypeOrmModule.forFeature([ProfessionalProfile, ProfessionalService, Service, ProfessionalHighlight])],
+  imports: [SubscriptionsModule, StorageModule, TypeOrmModule.forFeature([ProfessionalProfile, ProfessionalService, Service, ProfessionalHighlight])],
   controllers: [ProfessionalsController, HighlightsController],
   providers: [ProfessionalsService, HighlightsService, AdminGuard],
   exports: [ProfessionalsService]

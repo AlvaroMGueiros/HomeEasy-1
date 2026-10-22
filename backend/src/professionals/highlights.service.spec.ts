@@ -6,20 +6,22 @@ import { CreateHighlightDto } from './dto/create-highlight.dto';
 import { HighlightsService } from './highlights.service';
 import { ProfessionalHighlight } from './professional-highlight.entity';
 import { ProfessionalsService } from './professionals.service';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
+import { ProfessionalSubscription } from '../subscriptions/professional-subscription.entity';
 import { ProfessionalPhotoKind } from './professionalPhoto';
 
 describe('Highlight ownership and moderation', () => {
   const photoId = '319ce16e-e842-4b46-a3d3-3e28a6b3e53e';
   const publication = { serviceId: 'service', title: 'Serviço de montagem', description: 'Montagem de móveis realizada na região.', mediaIds: [photoId], hasPublicationConsent: true };
-  function createService(activeCount = 0) {
+  function createService(activeCount = 0, subscription?: { isActive: boolean; expiresAt: Date }) {
     const manager = {
-      findOne: jest.fn().mockResolvedValue({ userId: 'owner', isAvailable: true, portfolioPhotos: [{ mediaId: photoId, kind: ProfessionalPhotoKind.Offered, caption: '' }] }),
+      findOne: jest.fn().mockImplementation(async entity => entity === ProfessionalSubscription ? subscription : { userId: 'owner', isAvailable: true, portfolioPhotos: [{ mediaId: photoId, kind: ProfessionalPhotoKind.Offered, caption: '' }] }),
       exists: jest.fn().mockResolvedValue(true), count: jest.fn().mockResolvedValue(activeCount),
       create: jest.fn((_, attributes) => Object.assign(new ProfessionalHighlight(), attributes)), save: jest.fn(async entity => ({ ...entity, id: 'created' }))
     };
     const repository = { findOne: jest.fn(), update: jest.fn() };
     const dataSource = { transaction: jest.fn(handler => handler(manager)) };
-    const service = new HighlightsService(dataSource as unknown as DataSource, repository as unknown as Repository<ProfessionalHighlight>, {} as ProfessionalsService);
+    const service = new HighlightsService(dataSource as unknown as DataSource, repository as unknown as Repository<ProfessionalHighlight>, {} as ProfessionalsService, { enabled: Boolean(subscription), findOwn: jest.fn().mockResolvedValue({}) } as unknown as SubscriptionsService);
     return { service, manager, repository };
   }
   it('creates only pending and unpaid posts owned by the authenticated user', async () => {
@@ -30,8 +32,14 @@ describe('Highlight ownership and moderation', () => {
   });
   it('rejects the fifth active publication', async () => {
     const { service, manager } = createService(4);
-    await expect(service.create('owner', publication)).rejects.toThrow('quatro publicações');
+    await expect(service.create('owner', publication)).rejects.toThrow('4 publicações');
     expect(manager.save).not.toHaveBeenCalled();
+  });
+  it('allows the twelfth publication only while the paid entitlement is active', async () => {
+    const active = { isActive: true, expiresAt: new Date(Date.now() + 60000) };
+    await expect(createService(11, active).service.create('owner', publication)).resolves.toMatchObject({ professionalId: 'owner' });
+    await expect(createService(12, active).service.create('owner', publication)).rejects.toThrow('12 publicações');
+    await expect(createService(4, { ...active, expiresAt: new Date(0) }).service.create('owner', publication)).rejects.toThrow('4 publicações');
   });
   it('does not allow deletion by a different professional', async () => {
     const { service, repository } = createService();

@@ -17,6 +17,7 @@ import { SchedulesModule } from './schedules/schedules.module';
 import { ServicesModule } from './services/services.module';
 import { StorageModule } from './storage/storage.module';
 import { UsersModule } from './users/users.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { validateEnvironment } from './config/environment.validation';
 import { RequestObservabilityInterceptor } from './shared/interceptors/request-observability.interceptor';
 
@@ -32,6 +33,7 @@ import { RequestObservabilityInterceptor } from './shared/interceptors/request-o
       })
     }),
     DatabaseModule,
+    SubscriptionsModule,
     HealthModule,
     LegalModule,
     UsersModule,

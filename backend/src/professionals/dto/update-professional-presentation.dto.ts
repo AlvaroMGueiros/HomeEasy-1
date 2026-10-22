@@ -42,7 +42,7 @@ export class UpdateProfessionalPresentationDto {
 
   @ValidateIf((_, value) => value !== undefined)
   @IsArray()
-  @ArrayMaxSize(30)
+  @ArrayMaxSize(60)
   @ArrayUnique((photo: ProfessionalPhotoDto) => photo.mediaId)
   @ValidateNested({ each: true })
   @Type(() => ProfessionalPhotoDto)
