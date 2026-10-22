@@ -34,6 +34,11 @@ export class HighlightsService {
       .orderBy('highlight.createdAt', 'DESC').addOrderBy('highlight.id', 'DESC')
       .skip((query.page - 1) * query.limit).take(query.limit + 1);
     if (query.serviceId) feedQuery.andWhere('highlight.serviceId = :serviceId', { serviceId: query.serviceId });
+    if (query.category) feedQuery.andWhere('service.category = :category', { category: query.category });
+    if (query.search?.trim()) {
+      const search = '%' + query.search.trim().replace(/[\\%_]/g, character => String.fromCharCode(92) + character) + '%';
+      feedQuery.andWhere('(highlight.title ILIKE :search OR highlight.description ILIKE :search OR user.name ILIKE :search OR service.name ILIKE :search)', { search });
+    }
     const highlights = await feedQuery.getMany();
     const hasMore = highlights.length > query.limit;
     const pageHighlights = highlights.slice(0, query.limit);

@@ -12,6 +12,14 @@ export class FindHighlightsQueryDto {
   @Length(1, 12)
   serviceId?: string;
   @IsOptional()
+  @IsString()
+  @Length(1, 80)
+  search?: string;
+  @IsOptional()
+  @IsString()
+  @Length(1, 80)
+  category?: string;
+  @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)

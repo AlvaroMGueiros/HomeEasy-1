@@ -69,7 +69,9 @@ describe('Highlight public review preview', () => {
     const service = new HighlightsService({ getRepository } as unknown as DataSource,
       { createQueryBuilder: jest.fn().mockReturnValue(feedQuery) } as unknown as Repository<ProfessionalHighlight>,
       { findPublicProfilesByIds: jest.fn().mockResolvedValue([{ id: 'owner' }]) } as unknown as ProfessionalsService);
-    const response = await service.findFeed('viewer', { city: 'Recife', state: 'PE', page: 1, limit: 10 });
+    const response = await service.findFeed('viewer', { city: 'Recife', state: 'PE', page: 1, limit: 10, search: '100%_feito', category: 'Reformas' });
+    expect(feedQuery.andWhere).toHaveBeenCalledWith('service.category = :category', { category: 'Reformas' });
+    expect(feedQuery.andWhere).toHaveBeenCalledWith(expect.stringContaining('ILIKE :search'), { search: '%' + '100' + String.fromCharCode(92) + '%' + String.fromCharCode(92) + '_feito%' });
     expect(reviewQuery.where).toHaveBeenCalledWith('review.professionalId IN (:...professionalIds) AND review.isPublished = true', { professionalIds: ['owner'] });
     expect(getRepository).toHaveBeenCalledTimes(1);
     expect(response.highlights[0].latestReview).toEqual({ id: 'review', clientName: 'Cliente real', rating: 4, comment: 'Serviço bem executado.' });
