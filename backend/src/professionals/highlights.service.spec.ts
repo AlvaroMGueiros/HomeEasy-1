@@ -53,3 +53,25 @@ describe('Highlight ownership and moderation', () => {
     await expect(pipe.transform({ ...publication, hasPublicationConsent: false }, { type: 'body', metatype: CreateHighlightDto })).rejects.toThrow();
   });
 });
+
+describe('Highlight public review preview', () => {
+  it('loads published reviews in one batch and associates each with its professional', async () => {
+    function queryBuilder() {
+      const builder: Record<string, jest.Mock> = {};
+      for (const method of ['innerJoinAndSelect', 'innerJoin', 'where', 'andWhere', 'orderBy', 'addOrderBy', 'skip', 'take', 'distinctOn', 'select', 'addSelect']) builder[method] = jest.fn().mockReturnValue(builder);
+      return builder;
+    }
+    const feedQuery = queryBuilder();
+    feedQuery.getMany = jest.fn().mockResolvedValue([{ id: 'post', professionalId: 'owner', mediaIds: ['photo'], professional: { portfolioPhotos: [{ mediaId: 'photo' }] } }]);
+    const reviewQuery = queryBuilder();
+    reviewQuery.getRawMany = jest.fn().mockResolvedValue([{ professionalId: 'owner', id: 'review', clientName: 'Cliente real', rating: 4, comment: 'Serviço bem executado.' }]);
+    const getRepository = jest.fn().mockReturnValue({ createQueryBuilder: jest.fn().mockReturnValue(reviewQuery) });
+    const service = new HighlightsService({ getRepository } as unknown as DataSource,
+      { createQueryBuilder: jest.fn().mockReturnValue(feedQuery) } as unknown as Repository<ProfessionalHighlight>,
+      { findPublicProfilesByIds: jest.fn().mockResolvedValue([{ id: 'owner' }]) } as unknown as ProfessionalsService);
+    const response = await service.findFeed('viewer', { city: 'Recife', state: 'PE', page: 1, limit: 10 });
+    expect(reviewQuery.where).toHaveBeenCalledWith('review.professionalId IN (:...professionalIds) AND review.isPublished = true', { professionalIds: ['owner'] });
+    expect(getRepository).toHaveBeenCalledTimes(1);
+    expect(response.highlights[0].latestReview).toEqual({ id: 'review', clientName: 'Cliente real', rating: 4, comment: 'Serviço bem executado.' });
+  });
+});

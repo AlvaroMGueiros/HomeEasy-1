@@ -2,6 +2,7 @@ import { BadRequestException, ConflictException, ForbiddenException, Injectable,
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, IsNull, Repository } from 'typeorm';
 
+import { Review } from '../engagement/review.entity';
 import { ModerationStatus } from '../moderation/moderation.enums';
 import { ReviewModerationDto } from '../moderation/dto/review-moderation.dto';
 import { CreateHighlightDto } from './dto/create-highlight.dto';
@@ -38,13 +39,25 @@ export class HighlightsService {
     const pageHighlights = highlights.slice(0, query.limit);
     const professionals = await this.professionalsService.findPublicProfilesByIds([...new Set(pageHighlights.map(highlight => highlight.professionalId))]);
     const profilesById = new Map(professionals.map(professional => [professional.id, professional]));
+    const latestReviews = professionals.length ? await this.dataSource.getRepository(Review).createQueryBuilder('review')
+      .innerJoin('review.client', 'client')
+      .distinctOn(['review.professionalId'])
+      .select('review.professionalId', 'professionalId').addSelect('review.id', 'id')
+      .addSelect('review.orderId', 'orderId').addSelect('client.name', 'clientName')
+      .addSelect('review.rating', 'rating').addSelect('review.comment', 'comment')
+      .addSelect('review.professionalResponse', 'professionalResponse').addSelect('review.respondedAt', 'respondedAt')
+      .addSelect('review.createdAt', 'createdAt')
+      .where('review.professionalId IN (:...professionalIds) AND review.isPublished = true', { professionalIds: [...profilesById.keys()] })
+      .orderBy('review.professionalId', 'ASC').addOrderBy('review.createdAt', 'DESC').addOrderBy('review.id', 'DESC')
+      .getRawMany() : [];
+    const reviewsByProfessional = new Map(latestReviews.map(({ professionalId, ...review }) => [professionalId, review]));
     const visibleHighlights = pageHighlights.flatMap(highlight => {
       const professional = profilesById.get(highlight.professionalId);
       if (!professional) return [];
       const currentPhotoIds = new Set((highlight.professional.portfolioPhotos || []).map(photo => photo.mediaId));
       const mediaIds = highlight.mediaIds.filter(mediaId => currentPhotoIds.has(mediaId));
       if (!mediaIds.length) return [];
-      return [{ ...toHighlightSummary(highlight), mediaIds, professional }];
+      return [{ ...toHighlightSummary(highlight), mediaIds, professional, latestReview: reviewsByProfessional.get(highlight.professionalId) || null }];
     });
     return { highlights: visibleHighlights, page: query.page, hasMore };
   }
