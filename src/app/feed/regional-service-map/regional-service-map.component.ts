@@ -3,6 +3,7 @@ import * as L from 'leaflet';
 
 import { CityGeocodingService } from '../../Servicos/city-geocoding.service';
 import { ServiceRegion } from '../../shared/models/service-region';
+import { ProfessionalMapLocation } from '../../shared/models/professional-map-location';
 
 @Component({
   standalone: false,
@@ -14,6 +15,7 @@ export class RegionalServiceMapComponent implements OnChanges, OnDestroy {
   @Input() regions = new Array<ServiceRegion>();
   @Input() isLoading = false;
   @Input() embedded = false;
+  @Input() professionals: ProfessionalMapLocation[] = [];
   @Output() regionSelected = new EventEmitter<ServiceRegion>();
   @ViewChild('mapContainer') mapContainer: ElementRef;
 
@@ -38,7 +40,7 @@ export class RegionalServiceMapComponent implements OnChanges, OnDestroy {
       return;
     }
 
-    if (changes.regions && !changes.regions.firstChange) {
+    if (changes.regions || changes.professionals) {
       this.renderRegions();
     }
   }
@@ -100,7 +102,51 @@ export class RegionalServiceMapComponent implements OnChanges, OnDestroy {
     this.mapFeedback = '';
     this.isLocatingCities = this.regions.length > 0;
 
+    const locatedCities = new Set<string>();
+    const fallbackCounts = new Map<string, number>();
+    const markerGroups = new Map<string, ProfessionalMapLocation[]>();
+    for (const professional of this.professionals) {
+      const location = professional.publicLocation;
+      if (!location || !Number.isFinite(location.latitude) || !Number.isFinite(location.longitude)) {
+        const city = professional.city.toLocaleLowerCase();
+        fallbackCounts.set(city, (fallbackCounts.get(city) || 0) + 1);
+        continue;
+      }
+      const key = `${location.latitude},${location.longitude}`;
+      const group = markerGroups.get(key);
+      if (group) group.push(professional);
+      else markerGroups.set(key, [professional]);
+      locatedCities.add(professional.city.toLocaleLowerCase());
+    }
+    for (const professionals of markerGroups.values()) {
+      const location = professionals[0].publicLocation;
+      const coordinates: L.LatLngTuple = [location.latitude, location.longitude];
+      const popup = document.createElement('div');
+      const notice = document.createElement('p');
+      notice.textContent = 'Localização aproximada · não é o endereço de atendimento';
+      popup.appendChild(notice);
+      for (const professional of professionals) {
+        const link = document.createElement('a');
+        link.href = `/profissionais/${encodeURIComponent(professional.professionalId)}`;
+        link.textContent = `${professional.professionalName} · ${professional.serviceName}`;
+        link.style.display = 'block';
+        popup.appendChild(link);
+      }
+      const title = professionals.length === 1 ? professionals[0].professionalName : `${professionals.length} profissionais nesta área`;
+      const label = document.createElement('span');
+      label.textContent = professionals.length === 1 ? professionals[0].professionalName.charAt(0).toLocaleUpperCase() : String(professionals.length);
+      const icon = L.divIcon({ className: 'regional-map-marker', html: label, iconSize: [46, 46], iconAnchor: [23, 23] });
+      L.marker(coordinates, { icon, keyboard: true, title, alt: title }).bindPopup(popup).addTo(this.markerLayer);
+      locatedCoordinates.push(coordinates);
+    }
+
     for (const region of this.regions) {
+      const hasLocatedProfessionals = locatedCities.has(region.city.toLocaleLowerCase());
+      let fallbackCount = region.professionalCount;
+      if (hasLocatedProfessionals) {
+        fallbackCount = fallbackCounts.get(region.city.toLocaleLowerCase()) || 0;
+        if (!fallbackCount) continue;
+      }
       try {
         const coordinates = await this.cityGeocodingService.getCityCoordinates(region.city, region.state);
 
@@ -111,7 +157,7 @@ export class RegionalServiceMapComponent implements OnChanges, OnDestroy {
         const markerCoordinates: L.LatLngTuple = [coordinates.latitude, coordinates.longitude];
         const markerIcon = L.divIcon({
           className: 'regional-map-marker',
-          html: `<span>${region.professionalCount}</span>`,
+          html: `<span>${fallbackCount}</span>`,
           iconSize: [46, 46],
           iconAnchor: [23, 23]
         });

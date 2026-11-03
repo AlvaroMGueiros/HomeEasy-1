@@ -37,3 +37,14 @@
 @media (prefers-reduced-motion: reduce) { .map-progress span { animation: none; } }
 @media (max-width: 860px) { .region-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 620px) { .regional-map { padding: 18px; } .regional-map-header { align-items: flex-start; flex-direction: column; } .map-toggle { width: 100%; } .map-canvas { height: 330px; } .region-list { grid-template-columns: 1fr; } }
+@media (min-width: 1101px) {
+  .embedded-map .regional-map-header { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); padding: 0; border: 0; }
+  .embedded-map .regional-map-content { position: relative; }
+  .embedded-map .map-canvas { height: calc(100dvh - 120px); min-height: 550px; }
+  .embedded-map .region-list { position: absolute; top: 12px; left: 52px; right: 12px; z-index: 500; display: flex; gap: 8px; overflow-x: auto; padding: 0 0 6px; pointer-events: none; }
+  .embedded-map .region-list button { display: flex; min-height: 40px; flex: 0 0 auto; gap: 8px; padding: 8px 14px; border-radius: 24px; box-shadow: 0 2px 8px var(--color-shadow); pointer-events: auto; }
+  .embedded-map .region-pin, .embedded-map .region-copy small, .embedded-map .region-count small { display: none; }
+  .embedded-map .region-copy strong, .embedded-map .region-count strong { font-size: .8rem; font-weight: 500; }
+  .embedded-map .region-count { padding-left: 8px; border-left: 1px solid var(--color-border); }
+  .embedded-map .map-feedback { position: absolute; bottom: 28px; left: 12px; right: 12px; z-index: 500; margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--color-surface); }
+}

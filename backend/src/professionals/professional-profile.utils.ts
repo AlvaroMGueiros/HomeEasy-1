@@ -1,5 +1,6 @@
 import { ProfessionalProfile } from './professional-profile.entity';
 import { VerificationDocumentType } from '../moderation/moderation.enums';
+import { toApproximatePublicLocation } from './public-location.utils';
 
 export interface ProfessionalMetrics {
   completedServices: number;
@@ -42,6 +43,7 @@ export function toPublicProfessionalProfile(
     })),
     city: profile.city,
     state: profile.state,
+    publicLocation: toApproximatePublicLocation(profile.location),
     serviceRadiusKm: profile.serviceRadiusKm,
     yearsOfExperience: profile.yearsOfExperience,
     isAvailable: profile.isAvailable,

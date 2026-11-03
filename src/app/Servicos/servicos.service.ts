@@ -7,6 +7,7 @@ import { environment } from '../../environments/environment';
 import { Servico } from '../Usuarios/servico';
 import { Usuario } from '../Usuarios/usuario';
 import { ServiceRequestField } from '../shared/models/service-request-field';
+import { PublicLocation } from '../shared/models/professional-map-location';
 import { CityGeocodingService } from './city-geocoding.service';
 import { ApiSessionService } from './api-session.service';
 import { UsuarioService } from './usuario.service';
@@ -22,6 +23,7 @@ interface ApiService {
 }
 
 interface ApiProfessionalProfile {
+  publicLocation?: PublicLocation;
   id: string;
   profilePhotoMediaId?: string;
   name: string;
@@ -140,6 +142,7 @@ export class ServicosService {
             estado: profile.state,
             availableForService: profile.isAvailable,
             serviceBasePrice: selectedService?.basePrice,
+            publicLocation: profile.publicLocation,
             serviceDescription: selectedService?.description,
             averageRating: profile.metrics?.averageRating,
             ratingCount: profile.metrics?.verifiedReviewCount,

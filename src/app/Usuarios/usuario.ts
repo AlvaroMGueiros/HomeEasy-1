@@ -1,3 +1,5 @@
+import { PublicLocation } from '../shared/models/professional-map-location';
+
 export enum ProfessionalVerificationStatus {
     NotSubmitted = 'not_submitted',
     Pending = 'pending',
@@ -35,6 +37,7 @@ export class Usuario {
     linkedIn? : string;
     availableForService? : boolean;
     serviceBasePrice?: number;
+    publicLocation?: PublicLocation;
     serviceDescription?: string;
     averageRating?: number;
     ratingCount?: number;

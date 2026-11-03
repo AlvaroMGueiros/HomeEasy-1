@@ -6,10 +6,9 @@
       <form class="feed-search" (ngSubmit)="searchService()" role="search">
         <app-page-icon name="search"></app-page-icon><label class="sr-only" for="serviceSearch">Buscar serviço ou problema</label>
         <input id="serviceSearch" name="serviceSearch" type="search" [(ngModel)]="serviceSearch" (ngModelChange)="onSearchChange()" placeholder="Qual serviço você precisa?" autocomplete="off">
-        <button class="button-primary" type="submit">Buscar</button>
-      </form>
+
       <label class="location-picker" for="cityFilter"><app-page-icon name="location"></app-page-icon><span class="sr-only">Cidade</span><select id="cityFilter" name="cityFilter" [(ngModel)]="cityFilter" (ngModelChange)="onFilterChange()" [disabled]="isFilterMetadataLoading"><option value="">Todas as cidades</option><option *ngFor="let city of availableCities" [value]="city">{{ city }}</option></select></label>
-      <button class="filter-toggle button-secondary" type="button" (click)="toggleFilterPanel()" [attr.aria-expanded]="isFilterPanelOpen" aria-controls="advancedFilters"><app-page-icon name="settings"></app-page-icon>{{ isFilterPanelOpen ? 'Ocultar filtros' : 'Mais filtros' }}</button>
+      <button class="filter-toggle button-secondary" type="button" (click)="toggleFilterPanel()" [attr.aria-expanded]="isFilterPanelOpen" aria-controls="advancedFilters"><app-page-icon name="settings"></app-page-icon>{{ isFilterPanelOpen ? 'Ocultar filtros' : 'Filtros' }}</button><button class="button-primary searchSubmit" type="submit">Buscar</button></form>
     </section>
 
     <section class="filter-panel" id="advancedFilters" *ngIf="isFilterPanelOpen" aria-labelledby="filterTitle">
@@ -53,7 +52,7 @@
         </div>
         <section class="empty-state" *ngIf="!hasCatalogLoadError && !isFilterMetadataLoading && !matchingProfessionals.length"><div><app-page-icon name="search"></app-page-icon><h3>Nenhum profissional encontrado</h3><p>Tente outro serviço ou amplie a região da busca.</p><button *ngIf="hasActiveFilters()" class="button-secondary" (click)="clearFilters()">Limpar filtros</button></div></section>
       </section>
-      <aside class="map-panel" aria-label="Profissionais por região"><app-regional-service-map *ngIf="!hasCatalogLoadError" [embedded]="true" [regions]="serviceRegions" [isLoading]="isFilterMetadataLoading" (regionSelected)="openRegion($event)"></app-regional-service-map></aside>
+      <aside class="map-panel" aria-label="Profissionais por região"><app-regional-service-map *ngIf="!hasCatalogLoadError" [embedded]="true" [regions]="serviceRegions" [professionals]="matchingProfessionals" [isLoading]="isFilterMetadataLoading" (regionSelected)="openRegion($event)"></app-regional-service-map></aside>
     </div>
   </main>
   <app-floating-chat [authenticated]="entrarSair" [userId]="userId" [docked]="false"></app-floating-chat>

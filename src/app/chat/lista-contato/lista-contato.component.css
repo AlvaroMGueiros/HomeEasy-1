@@ -1,1 +1,5 @@
 :host { display: block; min-height: 100vh; background: var(--color-background); }
+:host .app-page .page-shell { max-width: 1200px; margin-inline: auto; }
+.conversationRow { min-height: 96px; }
+.conversationRow:hover { background: var(--color-surfaceMuted); }
+.conversationRow .icon-badge { border-radius: 50%; }

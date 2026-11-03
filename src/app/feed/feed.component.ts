@@ -7,9 +7,11 @@ import { LoginServiceService } from '../Servicos/login-service.service';
 import { ServicosService } from '../Servicos/servicos.service';
 import { Servico } from '../Usuarios/servico';
 import { ServiceRegion } from '../shared/models/service-region';
+import { PublicLocation } from '../shared/models/professional-map-location';
 import { matchesServiceSearch, normalizeSearchText } from '../shared/utils/text-search.utils';
 
 interface ProfessionalFilterMetadata {
+  publicLocation?: PublicLocation;
   professionalId: string;
   professionalName: string;
   professionalPhoto: string;
@@ -26,6 +28,7 @@ interface ProfessionalFilterMetadata {
 }
 
 interface ProfessionalSearchResult {
+  publicLocation?: PublicLocation;
   description: string;
   professionalId: string;
   professionalName: string;
@@ -263,6 +266,7 @@ export class FeedComponent implements OnInit, OnDestroy {
         .map(professional => ({
         professionalId: professional.id,
         professionalName: professional.nome || 'Profissional Home Easy',
+        publicLocation: professional.publicLocation,
         professionalPhoto: professional.foto || '',
         serviceId: service.id,
         serviceName: service.nome,
@@ -436,6 +440,7 @@ export class FeedComponent implements OnInit, OnDestroy {
 
         professionalById[professional.professionalId] = {
           description: professional.description,
+          publicLocation: professional.publicLocation,
           professionalId: professional.professionalId,
           professionalName: professional.professionalName,
           professionalPhoto: professional.professionalPhoto,

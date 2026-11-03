@@ -1,5 +1,8 @@
-.highlightsLayout { display: grid; grid-template-columns: minmax(0, 700px) minmax(240px, 1fr); align-items: start; gap: 32px; }
+.highlightsLayout { display: grid; grid-template-columns: minmax(0, 720px) 300px; justify-content: center; align-items: start; gap: 24px; }
 .timeline { min-width: 0; }
+:host .app-page .page-shell { max-width: 1044px; margin-inline: auto; }
+.publicationActions button:hover { color: var(--color-primary); background: var(--color-primarySoft); }
+.publicationActions button:focus-visible, .publicationPhotos:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
 .publicationComposer { display: flex; align-items: center; gap: 14px; padding: 20px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-surface); }
 .composerIcon { display: grid; width: 42px; height: 42px; flex: 0 0 42px; place-items: center; border-radius: 50%; color: var(--color-primary); background: var(--color-primarySoft); font-size: 1.6rem; }
 .publicationComposer > div { flex: 1; min-width: 0; }
@@ -9,7 +12,7 @@
 .timelineHeading { display: flex; justify-content: space-between; gap: 12px; padding: 18px 0 12px; color: var(--color-textMuted); font-size: .75rem; }
 .timelineHeading > span:last-child { font-size: .7rem; }
 .publications { display: grid; gap: 20px; margin-bottom: 24px; }
-.publication { min-width: 0; overflow: hidden; border: 1px solid var(--color-border); border-radius: 20px; background: var(--color-surface); box-shadow: 0 6px 24px var(--color-shadow); }
+.publication { min-width: 0; overflow: hidden; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface); }
 .publicationHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 20px 22px 14px; }
 .author { display: flex; gap: 12px; align-items: center; min-width: 0; color: var(--color-text); }
 .author > div { min-width: 0; }
@@ -37,7 +40,7 @@ blockquote small { color: var(--color-textMuted); font-size: .68rem; }
 .publicationActions button { display: inline-flex; gap: 7px; font-size: .75rem; padding: 9px 8px; min-height: 40px; font-weight: 600; }
 .publicationActions svg { width: 18px; height: 18px; }
 .publicationActions .button-primary { margin-left: auto; font-size: .75rem; padding: 10px 12px; min-height: 40px; }
-.feedFilters { position: sticky; top: 100px; min-width: 0; padding: 22px; border: 1px solid var(--color-border); border-radius: 20px; background: var(--color-surface); }
+.feedFilters { position: sticky; top: 96px; min-width: 0; padding: 22px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface); }
 .feedFilters summary { font-weight: 700; font-size: .9rem; padding-bottom: 18px; }
 .filterForm { display: grid; gap: 18px; }
 .filterForm label { display: grid; gap: 6px; font-size: .76rem; font-weight: 500; }
