@@ -1,4 +1,4 @@
-<span class="service-icon" aria-hidden="true">
+<span class="service-icon" [ngClass]="colorful ? 'service-icon-' + iconType : ''" aria-hidden="true">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" [ngSwitch]="iconType">
     <g *ngSwitchCase="'babysitting'"><circle cx="12" cy="7" r="3"></circle><path d="M7 21v-4a5 5 0 0 1 10 0v4M9 12l-3 3m9-3 3 3"></path></g>
     <g *ngSwitchCase="'cooking'"><path d="M7 3v7m-3-7v4a3 3 0 0 0 6 0V3M7 10v11M17 3c-2 3-2 7 0 9v9M17 3c3 2 4 7 0 9"></path></g>
@@ -14,6 +14,21 @@
     <g *ngSwitchCase="'masonry'"><path d="M3 6h18v12H3zM3 10h18M3 14h18M8 6v4m8-4v4m-5 0v4m-5 0v4m10-4v4"></path></g>
     <g *ngSwitchCase="'renovation'"><path d="M14.5 6.5a4 4 0 0 0-5-5l2.2 2.2-3 3L6.5 4.5a4 4 0 0 0 5 5L20 18a2 2 0 0 1-2 2zM5 21l5-5"></path></g>
     <g *ngSwitchCase="'domestic'"><path d="M3 11l9-8 9 8M5 10v10h14V10M9 20v-6h6v6"></path></g>
+    <g *ngSwitchCase="'animalCare'"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"></path></g>
+    <g *ngSwitchCase="'elderlyCare'"><path d="M2 12h5l3-9 4 18 3-9h5"></path></g>
+    <g *ngSwitchCase="'airConditioning'"><path d="M3 8h12a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h6a3 3 0 1 1-3 3"></path></g>
+    <g *ngSwitchCase="'pestControl'"><path d="m8 3-5 5v8l5 5h8l5-5V8l-5-5zM12 7v6m0 4h.01"></path></g>
+    <g *ngSwitchCase="'solar'"><path d="M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></g>
+    <g *ngSwitchCase="'postConstruction'"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"></path></g>
+    <g *ngSwitchCase="'furnitureAssembly'"><path d="m12 3 10 5-10 5L2 8zM2 12l10 5 10-5M2 16l10 5 10-5"></path></g>
+    <g *ngSwitchCase="'locksmith'"><path d="M14 8a5 5 0 1 1-10 0 5 5 0 0 1 10 0m-1 3 8 8m-4-4 2-2m0 4 2-2"></path></g>
+    <g *ngSwitchCase="'cameras'"><path d="M8 5l2-3h4l2 3h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM16 13a4 4 0 1 1-8 0 4 4 0 0 1 8 0"></path></g>
+    <g *ngSwitchCase="'appliances'"><path d="M4 5h16v14H4zM8 2l4 3 4-3M2 5v14m20-14v14"></path></g>
+    <g *ngSwitchCase="'moving'"><path d="M1 4h14v13H1zM15 9h4l4 4v4h-8M8 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0m13 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0"></path></g>
+    <g *ngSwitchCase="'drywall'"><path d="M3 3h18v18H3zM3 12h18M12 3v9M8 12v9M17 12v9"></path></g>
+    <g *ngSwitchCase="'glazing'"><path d="M3 9V3h6m6 0h6v6M3 15v6h6m6 0h6v-6M3 3l6 6m12-6-6 6M3 21l6-6m12 6-6-6"></path></g>
+    <g *ngSwitchCase="'roofing'"><path d="M3 11l9-8 9 8M5 10v11h14V10M9 21v-7h6v7M4 7l8-5 8 5"></path></g>
+    <g *ngSwitchCase="'architecture'"><path d="M3 3h18v18H3zM3 9h18M9 9v12"></path></g>
     <g *ngSwitchDefault><path d="M14.5 6.5a4 4 0 0 0-5-5l2.2 2.2-3 3L6.5 4.5a4 4 0 0 0 5 5L20 18a2 2 0 0 1-2 2zM5 21l5-5"></path></g>
   </svg>
 </span>

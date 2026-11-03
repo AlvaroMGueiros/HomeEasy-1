@@ -7,6 +7,7 @@ import { environment } from '../../environments/environment';
 import { Chat } from '../Usuarios/chat';
 import { Usuario } from '../Usuarios/usuario';
 import { ApiSessionService } from './api-session.service';
+import { UsuarioService } from './usuario.service';
 
 interface ApiConversation {
   id: string;
@@ -14,7 +15,7 @@ interface ApiConversation {
   service: { id: string; name: string };
   orderStatus: string;
   isWritable: boolean;
-  otherUser: { id: string; name: string };
+  otherUser: { id: string; name: string; profilePhotoMediaId?: string };
   unreadCount: number;
   lastMessageAt?: string;
 }
@@ -26,11 +27,16 @@ interface ApiMessage {
   budgetAmount?: string;
   createdAt: string;
   readAt?: string;
+  attachment?: { mediaId: string; fileName: string; contentType: string };
 }
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
-  constructor(private http: HttpClient, private sessionService: ApiSessionService) {}
+  markConversationRead(conversationId: string) { return this.http.patch(`${environment.apiUrl}/conversations/${conversationId}/read`, {}); }
+  sendImage(conversationId: string, mediaId: string) { return this.http.post<ApiMessage>(`${environment.apiUrl}/conversations/${conversationId}/messages`, { type: 'image', mediaId }); }
+  getPresence(conversationId: string) { return timer(0, 5000).pipe(switchMap(() => this.http.get<{ isOnline: boolean; isTyping: boolean }>(`${environment.apiUrl}/conversations/${conversationId}/presence`))); }
+  setTyping(conversationId: string, isTyping: boolean) { return this.http.put(`${environment.apiUrl}/presence`, { conversationId, isTyping }); }
+  constructor(private http: HttpClient, private sessionService: ApiSessionService, private users: UsuarioService) {}
 
   addMensagem(clientId: string, professionalId: string, message: Chat) {
     return this.sendMessageByParticipant(professionalId, message);
@@ -94,6 +100,8 @@ export class ChatService {
         conversations.map(conversation => ({
           id: conversation.otherUser.id,
           nome: conversation.otherUser.name,
+          profilePhotoMediaId: conversation.otherUser.profilePhotoMediaId,
+          foto: conversation.otherUser.profilePhotoMediaId ? this.users.getProfilePhotoUrl(conversation.otherUser.profilePhotoMediaId) : undefined,
           conversationId: conversation.id,
           conversationOrderId: conversation.orderId,
           conversationServiceName: conversation.service.name,
@@ -146,7 +154,9 @@ export class ChatService {
       data: createdAt.getTime(),
       hora: createdAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
       senderId: message.senderId,
-      readAt: message.readAt
+      readAt: message.readAt,
+      attachmentMediaId: message.attachment?.mediaId,
+      attachmentName: message.attachment?.fileName
     };
   }
 

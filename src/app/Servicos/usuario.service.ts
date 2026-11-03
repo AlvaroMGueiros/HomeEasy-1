@@ -34,6 +34,7 @@ interface ApiProfessionalList {
 
 @Injectable({ providedIn: 'root' })
 export class UsuarioService {
+  deleteOwnAccount() { return this.http.delete<void>(`${environment.apiUrl}/users/me`); }
   constructor(private http: HttpClient, private sessionService: ApiSessionService) {}
 
   getUsuarios() {

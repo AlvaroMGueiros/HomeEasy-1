@@ -1,7 +1,8 @@
 import { getCurrentUser } from '../../shared/utils/session-user.utils';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
+import { ServicoPedidoService } from '../../Servicos/servico-pedido.service';
 
 import { BrazilCity, BrazilLocationService, BrazilState } from '../../Servicos/brazil-location.service';
 import { LoginServiceService } from '../../Servicos/login-service.service';
@@ -65,7 +66,8 @@ export class ServiceRequestFormComponent implements OnInit, OnDestroy {
     private requestService: ServiceRequestService,
     private servicesService: ServicosService,
     private userService: UsuarioService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private orders: ServicoPedidoService
   ) { }
 
   ngOnInit() {
@@ -98,6 +100,31 @@ export class ServiceRequestFormComponent implements OnInit, OnDestroy {
     this.unsubscribe(this.professionalSubscription);
     this.unsubscribe(this.statesSubscription);
     this.unsubscribe(this.citiesSubscription);
+  }
+
+  private async loadPreviousOrder() {
+    const sourceOrderId = this.activeRoute.snapshot.queryParamMap.get('sourceOrderId');
+    if (!sourceOrderId) return;
+    try {
+      const order = await firstValueFrom(this.orders.findOrder(sourceOrderId));
+      if (order.clientId !== this.userId || order.request.serviceId !== this.serviceId || order.professionalId !== this.professionalId) {
+        throw new Error('O atendimento anterior não corresponde ao serviço e profissional escolhidos.');
+      }
+      const previousRequest = await firstValueFrom(this.requestService.getRequest(order.requestId));
+      this.request.description = previousRequest.description;
+      this.request.address = previousRequest.address;
+      this.request.city = previousRequest.city;
+      this.request.state = previousRequest.state;
+      this.request.budgetMinimum = previousRequest.budgetMinimum;
+      this.request.budgetMaximum = previousRequest.budgetMaximum;
+      this.specificValues = {};
+      for (const answer of previousRequest.answers || []) this.specificValues[answer.key] = answer.value as string | number;
+      this.loadCitiesPreservingSelection(this.request.state, this.request.city);
+      this.feedbackType = 'info';
+      this.feedbackMessage = 'Revise os dados do serviço anterior e escolha uma nova data.';
+    } catch (failure) {
+      this.feedbackType = 'error'; this.feedbackMessage = resolveHttpErrorMessage(failure, 'Não foi possível recuperar os dados do serviço anterior.');
+    }
   }
 
   onStateChange() {
@@ -246,6 +273,7 @@ export class ServiceRequestFormComponent implements OnInit, OnDestroy {
       this.request.address = this.user.endereco || '';
       this.request.state = normalizeBrazilStateCode(this.user.estado);
       this.request.city = this.user.cidade || '';
+        void this.loadPreviousOrder();
 
       if (this.request.state) {
         this.loadCitiesPreservingSelection(this.request.state, this.request.city);

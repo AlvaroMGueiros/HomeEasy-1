@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { AdminCasesComponent } from './cases/admin-cases.component';
 import { FormsModule } from '@angular/forms';
 
 import { SharedModule } from '../shared/shared.module';
@@ -8,6 +9,6 @@ import { AdminVerificationComponent } from './admin-verification.component';
 
 @NgModule({
   imports: [CommonModule, FormsModule, SharedModule, AdminRoutingModule],
-  declarations: [AdminVerificationComponent]
+  declarations: [AdminVerificationComponent, AdminCasesComponent]
 })
 export class AdminModule { }

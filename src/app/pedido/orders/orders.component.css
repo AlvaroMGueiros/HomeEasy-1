@@ -1,0 +1,9 @@
+.form-actions { margin-bottom: 24px; }
+.entity-card { gap: 12px; }
+.entity-card h2, .entity-card p { margin: 0; }
+.viewTabs { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; margin: 0 0 24px; border-bottom: 1px solid var(--color-border); }
+.viewTabs button { min-height: 48px; padding: 12px 0; border: 0; border-bottom: 2px solid transparent; color: var(--color-textMuted); background: transparent; font-size: .9rem; font-weight: 600; }
+.viewTabs button.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+.viewTabs a { margin-left: auto; padding-right: 0; font-size: .8rem; }
+.order-status-chip { justify-self: start; }
+@media (max-width: 560px) { .viewTabs { gap: 16px; } .viewTabs a { flex-basis: 100%; margin: 0; justify-content: flex-start; padding-top: 0; } }

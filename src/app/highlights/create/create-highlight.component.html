@@ -1,0 +1,26 @@
+<app-navbar [authenticated]="true" [userId]="userId" (logout)="logout()"></app-navbar>
+<main class="app-page"><div class="page-shell page-shell-narrow">
+  <app-back-link route="/destaques/minhas" label="Minhas publicações"></app-back-link>
+  <header class="page-heading"><span class="pageEmblem"><app-page-icon name="star"></app-page-icon></span><div><span class="page-kicker">Área profissional</span><h1>Publicar trabalho</h1></div></header>
+  <app-loading-state *ngIf="isLoading" message="Carregando portfólio..."></app-loading-state>
+  <app-action-feedback type="error" [message]="error"></app-action-feedback>
+  <a class="button-secondary" *ngIf="!isLoading && !profile" routerLink="/serprofissional">Criar perfil profissional</a>
+  <form *ngIf="profile" class="surface-card form-stack publicationForm" #publicationForm="ngForm" (ngSubmit)="publish()">
+    <div class="field-group"><label for="publicationService">Serviço <span class="requiredMark">*</span></label><select id="publicationService" name="serviceId" [(ngModel)]="serviceId" required [disabled]="isSaving"><option value="">Escolha o serviço</option><option *ngFor="let service of profile.services" [value]="service.id" [disabled]="!service.isActive">{{ service.name }}</option></select></div>
+    <div class="field-group"><label for="publicationTitle">Título <span class="requiredMark">*</span></label><input id="publicationTitle" name="title" [(ngModel)]="title" required minlength="5" maxlength="80" [disabled]="isSaving" aria-describedby="publicationTitleHelp"><app-character-count hintId="publicationTitleHelp" [value]="title" [minimum]="5" [maximum]="80"></app-character-count></div>
+    <div class="field-group"><label for="publicationDescription">Sobre o trabalho <span class="requiredMark">*</span></label><textarea id="publicationDescription" name="description" [(ngModel)]="description" required minlength="20" maxlength="700" [disabled]="isSaving" aria-describedby="publicationDescriptionHelp"></textarea><app-character-count [value]="description" [minimum]="20" [maximum]="700" hintId="publicationDescriptionHelp"></app-character-count></div>
+    <fieldset class="portfolioSelection"><legend>Fotos do trabalho <span class="requiredMark">*</span></legend>
+      <div class="selectionSummary"><p>Selecione até 3 fotos do portfólio.</p><span aria-live="polite">{{ selectedMediaIds.length }} / 3 selecionadas</span></div>
+      <div class="photoPicker">
+        <label class="photoOption" *ngFor="let photo of profile.portfolioPhotos; let photoIndex = index" [class.selected]="selectedMediaIds.includes(photo.mediaId)" [class.unavailable]="isSaving || (selectedMediaIds.length >= 3 && !selectedMediaIds.includes(photo.mediaId))">
+          <input type="checkbox" [attr.aria-label]="photo.caption || 'Selecionar foto ' + (photoIndex + 1)" [checked]="selectedMediaIds.includes(photo.mediaId)" [disabled]="isSaving || (selectedMediaIds.length >= 3 && !selectedMediaIds.includes(photo.mediaId))" (change)="togglePhoto(photo.mediaId)">
+          <img [src]="mediaUrl(photo.mediaId)" [alt]="photo.caption || 'Foto do portfólio'" loading="lazy"><span>{{ photo.caption || 'Foto ' + (photoIndex + 1) }}</span>
+        </label>
+      </div>
+      <p class="field-help" *ngIf="!profile.portfolioPhotos?.length">Adicione fotos ao portfólio antes de publicar.</p>
+      <a class="portfolioLink" [routerLink]="['/usuario', userId]">Gerenciar fotos do portfólio <app-arrow-icon></app-arrow-icon></a>
+    </fieldset>
+    <label class="checkboxRow consentRow"><input name="consent" type="checkbox" [(ngModel)]="consent" required [disabled]="isSaving"><span>Tenho autorização para publicar estas fotos e elas não expõem dados privados dos clientes.</span></label>
+    <div class="form-actions publicationActions"><button class="button-primary" [disabled]="!canPublish || publicationForm.invalid">{{ isSaving ? 'Enviando...' : 'Enviar para aprovação' }}</button><a class="button-quiet" routerLink="/destaques/minhas">Cancelar</a></div>
+  </form>
+</div></main>

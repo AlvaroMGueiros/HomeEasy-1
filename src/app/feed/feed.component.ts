@@ -1,19 +1,13 @@
 import { getCurrentUser } from '../shared/utils/session-user.utils';
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 
 import { LoginServiceService } from '../Servicos/login-service.service';
 import { ServicosService } from '../Servicos/servicos.service';
-import { Avaliacao } from '../Usuarios/avaliacao';
 import { Servico } from '../Usuarios/servico';
-import { ServicoPedido } from '../Usuarios/serico-pedido';
-import { Usuario } from '../Usuarios/usuario';
 import { ServiceRegion } from '../shared/models/service-region';
 import { matchesServiceSearch, normalizeSearchText } from '../shared/utils/text-search.utils';
-
-type ServiceCategoryFilter = 'all' | 'domestic' | 'renovation';
 
 interface ProfessionalFilterMetadata {
   professionalId: string;
@@ -27,9 +21,12 @@ interface ProfessionalFilterMetadata {
   averageRating: number;
   ratingCount: number;
   hasRating: boolean;
+  isAvailable: boolean;
+  description: string;
 }
 
-interface RecommendedProfessional {
+interface ProfessionalSearchResult {
+  description: string;
   professionalId: string;
   professionalName: string;
   professionalPhoto: string;
@@ -59,20 +56,20 @@ interface ServiceRegionAccumulator {
   styleUrls: ['./feed.component.css']
 })
 export class FeedComponent implements OnInit, OnDestroy {
-  domesticServices = new Array<Servico>();
-  filteredDomesticServices = new Array<Servico>();
-  domesticServicesSubscription: Subscription;
-  renovationServices = new Array<Servico>();
-  filteredRenovationServices = new Array<Servico>();
+  services = new Array<Servico>();
+  serviceCategories = new Array<string>();
+  servicesSubscription: Subscription;
   filteredServices = new Array<Servico>();
-  popularServices = new Array<Servico>();
-  recommendedProfessionals = new Array<RecommendedProfessional>();
-  renovationServicesSubscription: Subscription;
+  visibleServices = new Array<Servico>();
+  servicesExpanded = false;
+  mobileView: 'list' | 'map' = 'list';
+  readonly initialServiceCount = 6;
+  matchingProfessionals = new Array<ProfessionalSearchResult>();
   queryParamsSubscription: Subscription;
   entrarSair: boolean;
   userId: string;
   serviceSearch = '';
-  categoryFilter: ServiceCategoryFilter = 'all';
+  categoryFilter = 'all';
   cityFilter = '';
   minimumPrice: number;
   maximumPrice: number;
@@ -81,19 +78,20 @@ export class FeedComponent implements OnInit, OnDestroy {
   isFilterPanelOpen = false;
   availableCities = new Array<string>();
   serviceRegions = new Array<ServiceRegion>();
-  isDomesticLoading = true;
-  isRenovationLoading = true;
+  isCatalogLoading = true;
   isFilterMetadataLoading = true;
+  hasCatalogLoadError = false;
+  hasMetadataLoadError = false;
   serviceMetadata: { [serviceId: string]: ServiceFilterMetadata } = {};
   private searchDebounce: any;
   private metadataInitialized = false;
+  private catalogLoadVersion = 0;
 
   constructor(
     public servico: ServicosService,
     public loginService: LoginServiceService,
     public router: Router,
-    public active: ActivatedRoute,
-    @Inject(DOCUMENT) private document: Document
+    public active: ActivatedRoute
   ) { }
 
   ngOnInit() {
@@ -116,25 +114,41 @@ export class FeedComponent implements OnInit, OnDestroy {
       this.applyFilters();
     });
 
-    this.domesticServicesSubscription = this.servico.getDomestico().subscribe(services => {
-      this.domesticServices = services;
-      this.isDomesticLoading = false;
-      this.applyFilters();
-      this.initializeFilterMetadata();
-    });
-
-    this.renovationServicesSubscription = this.servico.getReforma().subscribe(services => {
-      this.renovationServices = services;
-      this.isRenovationLoading = false;
-      this.applyFilters();
-      this.initializeFilterMetadata();
-    });
+    this.loadServiceCategories();
 
   }
 
+  loadServiceCategories() {
+    this.catalogLoadVersion += 1;
+    this.servicesSubscription?.unsubscribe();
+    this.hasCatalogLoadError = false;
+    this.hasMetadataLoadError = false;
+    this.isCatalogLoading = true;
+    this.isFilterMetadataLoading = true;
+    this.metadataInitialized = false;
+    this.serviceMetadata = {};
+    this.matchingProfessionals = [];
+    this.servicesSubscription = this.servico.getServicos().subscribe({
+      next: services => {
+        this.services = services;
+        this.serviceCategories = Array.from(new Set(services.map(service => service.tipo).filter(Boolean)))
+          .sort((firstCategory, secondCategory) => firstCategory.localeCompare(secondCategory, 'pt-BR'));
+        this.isCatalogLoading = false;
+        this.applyFilters();
+        this.initializeFilterMetadata();
+      },
+      error: () => this.showCatalogLoadError()
+    });
+  }
+
+  private showCatalogLoadError() {
+    this.hasCatalogLoadError = true;
+    this.isCatalogLoading = false;
+    this.isFilterMetadataLoading = false;
+  }
+
   ngOnDestroy() {
-    this.domesticServicesSubscription?.unsubscribe();
-    this.renovationServicesSubscription?.unsubscribe();
+    this.servicesSubscription?.unsubscribe();
     this.queryParamsSubscription?.unsubscribe();
 
     if (this.searchDebounce) {
@@ -175,17 +189,8 @@ export class FeedComponent implements OnInit, OnDestroy {
     this.isFilterPanelOpen = !this.isFilterPanelOpen;
   }
 
-  selectCityFromMap(city: string) {
-    this.cityFilter = city;
-    this.onFilterChange();
-  }
-
-  selectCategory(categoryFilter: ServiceCategoryFilter) {
-    this.categoryFilter = categoryFilter;
-    this.applyFilters();
-    this.syncFiltersToUrl().then(() => {
-      setTimeout(() => this.scrollToCategory(categoryFilter));
-    });
+  openRegion(region: ServiceRegion) {
+    void this.router.navigate(['/profissionais/regiao'], { queryParams: { city: region.city, state: region.state } });
   }
 
   clearFilters() {
@@ -232,23 +237,27 @@ export class FeedComponent implements OnInit, OnDestroy {
   }
 
   private initializeFilterMetadata() {
-    if (this.isDomesticLoading || this.isRenovationLoading || this.metadataInitialized) {
+    if (this.hasCatalogLoadError || this.isCatalogLoading || this.metadataInitialized) {
       return;
     }
 
     this.metadataInitialized = true;
-    const allServices = this.domesticServices.concat(this.renovationServices);
+    const catalogLoadVersion = this.catalogLoadVersion;
+    const allServices = this.services;
     const metadataRequests = allServices.map(service => this.loadServiceMetadata(service));
 
-    Promise.all(metadataRequests).then(
-      () => this.finishFilterMetadataLoading(),
-      () => this.finishFilterMetadataLoading()
-    );
+    Promise.all(metadataRequests).finally(() => {
+      if (catalogLoadVersion === this.catalogLoadVersion) {
+        this.finishFilterMetadataLoading();
+      }
+    });
   }
 
   private async loadServiceMetadata(service: Servico) {
+    const catalogLoadVersion = this.catalogLoadVersion;
     try {
       const users = await firstValueFrom(this.servico.getUsuarios(service.id));
+      if (catalogLoadVersion !== this.catalogLoadVersion) return;
       const professionals: ProfessionalFilterMetadata[] = (users || [])
         .filter(professional => professional.id !== this.userId)
         .map(professional => ({
@@ -259,42 +268,49 @@ export class FeedComponent implements OnInit, OnDestroy {
         serviceName: service.nome,
         city: professional.cidade || '',
         state: professional.estado || '',
-        price: NaN,
-        averageRating: 0,
-        ratingCount: 0,
-        hasRating: false
+        price: professional.serviceBasePrice == null ? NaN : Number(professional.serviceBasePrice),
+        averageRating: professional.averageRating || 0,
+        ratingCount: professional.ratingCount || 0,
+        hasRating: Boolean(professional.ratingCount),
+        isAvailable: professional.availableForService !== false,
+        description: professional.serviceDescription || ''
         }));
       this.serviceMetadata[service.id] = { professionals };
     } catch {
+      if (catalogLoadVersion !== this.catalogLoadVersion) return;
+      this.hasMetadataLoadError = true;
       this.serviceMetadata[service.id] = { professionals: [] };
     }
   }
 
   private applyFilters() {
-    this.filteredDomesticServices = this.filterServices(this.domesticServices, 'domestic');
-    this.filteredRenovationServices = this.filterServices(this.renovationServices, 'renovation');
-    this.filteredServices = this.filteredDomesticServices.concat(this.filteredRenovationServices);
-
-    if (!this.isDomesticLoading && !this.isRenovationLoading && !this.popularServices.length) {
-      this.popularServices = this.domesticServices.concat(this.renovationServices).slice(0, 5);
-    }
+    this.filteredServices = this.filterServices(this.services);
+    this.visibleServices = this.servicesExpanded ? this.services : this.services.slice(0, this.initialServiceCount);
 
     if (!this.isFilterMetadataLoading) {
       this.serviceRegions = this.resolveServiceRegions();
+      this.matchingProfessionals = this.resolveProfessionalSearchResults();
     }
   }
 
-  private filterServices(services: Servico[], serviceCategory: ServiceCategoryFilter) {
+  toggleServices() {
+    this.servicesExpanded = !this.servicesExpanded;
+    this.visibleServices = this.servicesExpanded ? this.services : this.services.slice(0, this.initialServiceCount);
+  }
+
+  clearServiceSelection() {
+    this.serviceSearch = '';
+    this.categoryFilter = 'all';
+    this.onFilterChange();
+  }
+
+  private filterServices(services: Servico[]) {
     if (this.hasInvalidPriceRange) {
       return [];
     }
 
-    if (this.categoryFilter !== 'all' && this.categoryFilter !== serviceCategory) {
-      return [];
-    }
-
     return services.filter(service => {
-      if (!matchesServiceSearch(service.nome, this.serviceSearch)) {
+      if ((this.categoryFilter !== 'all' && this.categoryFilter !== service.tipo) || !matchesServiceSearch(service.nome, this.serviceSearch)) {
         return false;
       }
 
@@ -316,6 +332,7 @@ export class FeedComponent implements OnInit, OnDestroy {
   }
 
   private matchesProfessionalCriteria(professional: ProfessionalFilterMetadata, includeCity: boolean) {
+    if (this.availableOnly && !professional.isAvailable) return false;
     if (includeCity && this.cityFilter && normalizeSearchText(professional.city) !== normalizeSearchText(this.cityFilter)) {
       return false;
     }
@@ -363,20 +380,6 @@ export class FeedComponent implements OnInit, OnDestroy {
     });
   }
 
-  private scrollToCategory(categoryFilter: ServiceCategoryFilter) {
-    let categorySectionId = 'domesticServices';
-
-    if (categoryFilter === 'renovation') {
-      categorySectionId = 'renovationServices';
-    }
-
-    const categorySection = this.document.getElementById(categorySectionId);
-
-    if (categorySection) {
-      categorySection.scrollIntoView({ block: 'start' });
-    }
-  }
-
   private resolveAvailableCities() {
     const uniqueCities: { [normalizedCity: string]: string } = {};
 
@@ -396,12 +399,13 @@ export class FeedComponent implements OnInit, OnDestroy {
 
   private finishFilterMetadataLoading() {
     this.availableCities = this.resolveAvailableCities();
-    this.recommendedProfessionals = this.resolveRecommendedProfessionals();
+    this.matchingProfessionals = this.resolveProfessionalSearchResults();
     this.isFilterMetadataLoading = false;
     this.applyFilters();
   }
 
-  selectPopularService(serviceName: string) {
+  selectService(serviceName: string) {
+    this.categoryFilter = 'all';
     this.serviceSearch = serviceName;
     this.searchService();
   }
@@ -414,21 +418,24 @@ export class FeedComponent implements OnInit, OnDestroy {
     return price !== undefined && price !== null && !isNaN(Number(price));
   }
 
-  hideUnavailableProfessionalPhoto(professional: RecommendedProfessional) {
+  hideUnavailableProfessionalPhoto(professional: ProfessionalSearchResult) {
     professional.professionalPhoto = '';
   }
 
-  private resolveRecommendedProfessionals() {
-    const professionalById: { [professionalId: string]: RecommendedProfessional } = {};
+  private resolveProfessionalSearchResults() {
+    const professionalById: { [professionalId: string]: ProfessionalSearchResult } = {};
 
-    Object.keys(this.serviceMetadata).forEach(serviceId => {
-      this.serviceMetadata[serviceId].professionals.forEach(professional => {
+    this.filteredServices.forEach(service => {
+      const serviceId = service.id;
+      (this.serviceMetadata[serviceId]?.professionals || []).forEach(professional => {
+        if (!this.matchesProfessionalCriteria(professional, true)) return;
         const currentProfessional = professionalById[professional.professionalId];
         if (currentProfessional && currentProfessional.averageRating >= professional.averageRating) {
           return;
         }
 
         professionalById[professional.professionalId] = {
+          description: professional.description,
           professionalId: professional.professionalId,
           professionalName: professional.professionalName,
           professionalPhoto: professional.professionalPhoto,
@@ -444,19 +451,17 @@ export class FeedComponent implements OnInit, OnDestroy {
 
     return Object.keys(professionalById)
       .map(professionalId => professionalById[professionalId])
-      .sort((firstProfessional, secondProfessional) => secondProfessional.averageRating - firstProfessional.averageRating)
-      .slice(0, 4);
+      .sort((firstProfessional, secondProfessional) => secondProfessional.averageRating - firstProfessional.averageRating);
   }
 
   private resolveServiceRegions() {
     const regionAccumulators: { [normalizedCity: string]: ServiceRegionAccumulator } = {};
 
-    this.collectServiceRegions(this.domesticServices, 'domestic', regionAccumulators);
-    this.collectServiceRegions(this.renovationServices, 'renovation', regionAccumulators);
+    this.collectServiceRegions(this.services, regionAccumulators);
 
     return Object.keys(regionAccumulators)
-      .map(normalizedCity => {
-        const regionAccumulator = regionAccumulators[normalizedCity];
+      .map(regionKey => {
+        const regionAccumulator = regionAccumulators[regionKey];
         return {
           city: regionAccumulator.city,
           state: regionAccumulator.state,
@@ -475,15 +480,10 @@ export class FeedComponent implements OnInit, OnDestroy {
 
   private collectServiceRegions(
     services: Servico[],
-    serviceCategory: ServiceCategoryFilter,
     regionAccumulators: { [normalizedCity: string]: ServiceRegionAccumulator }
   ) {
-    if (this.categoryFilter !== 'all' && this.categoryFilter !== serviceCategory) {
-      return;
-    }
-
     services.forEach(service => {
-      if (!matchesServiceSearch(service.nome, this.serviceSearch)) {
+      if ((this.categoryFilter !== 'all' && this.categoryFilter !== service.tipo) || !matchesServiceSearch(service.nome, this.serviceSearch)) {
         return;
       }
 
@@ -494,12 +494,13 @@ export class FeedComponent implements OnInit, OnDestroy {
 
       metadata.professionals.forEach(professional => {
         const normalizedCity = normalizeSearchText(professional.city);
-        if (!normalizedCity || !this.matchesProfessionalCriteria(professional, false)) {
+        if (!normalizedCity || !this.matchesProfessionalCriteria(professional, true)) {
           return;
         }
 
-        if (!regionAccumulators[normalizedCity]) {
-          regionAccumulators[normalizedCity] = {
+        const regionKey = normalizedCity + '|' + normalizeSearchText(professional.state);
+        if (!regionAccumulators[regionKey]) {
+          regionAccumulators[regionKey] = {
             city: professional.city,
             state: professional.state,
             professionalIds: {},
@@ -507,18 +508,16 @@ export class FeedComponent implements OnInit, OnDestroy {
           };
         }
 
-        regionAccumulators[normalizedCity].professionalIds[professional.professionalId] = true;
-        regionAccumulators[normalizedCity].serviceIds[service.id] = true;
+        regionAccumulators[regionKey].professionalIds[professional.professionalId] = true;
+        regionAccumulators[regionKey].serviceIds[service.id] = true;
       });
     });
   }
 
-  private resolveCategoryFilter(categoryFilter: string): ServiceCategoryFilter {
-    if (categoryFilter === 'domestic' || categoryFilter === 'renovation') {
-      return categoryFilter;
-    }
-
-    return 'all';
+  private resolveCategoryFilter(categoryFilter: string): string {
+    if (categoryFilter === 'domestic') return 'Serviços domésticos';
+    if (categoryFilter === 'renovation') return 'Reforma';
+    return categoryFilter?.trim() || 'all';
   }
 
   private parseOptionalNumber(value: string): number {

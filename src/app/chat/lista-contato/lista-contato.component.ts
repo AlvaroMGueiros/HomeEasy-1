@@ -25,6 +25,9 @@ export class ListaContatoComponent implements OnInit, OnDestroy {
   usuario: Usuario = {};
   userSubscription: Subscription;
   isLoading = true;
+  showClosed = false;
+  loadError = '';
+  get visibleConversations() { return this.listaContatos.filter(contact => Boolean(contact.conversationWritable) !== this.showClosed); }
 
   constructor(
     public loginService: LoginServiceService,
@@ -47,9 +50,10 @@ export class ListaContatoComponent implements OnInit, OnDestroy {
 
     this.listaContatosSubscription = this.chatService.getContatos(this.userId).pipe(
       switchMap(contacts => this.usuarioService.resolveProfilePhotos(contacts))
-    ).subscribe(data => {
+    ).subscribe({ next: data => {
       this.listaContatos = data;
       this.isLoading = false;
+    }, error: () => { this.isLoading = false; this.loadError = 'Não foi possível carregar as conversas. Atualize a página para tentar novamente.'; }
     });
     this.userSubscription = this.usuarioService.getUsuario(this.userId).subscribe(data => {
       this.usuario = data;

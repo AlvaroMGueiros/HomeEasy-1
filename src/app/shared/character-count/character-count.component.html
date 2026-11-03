@@ -1,0 +1,1 @@
+<div class="characterHint" [attr.id]="hintId || null" [class.belowMinimum]="belowMinimum"><span *ngIf="minimum">Mínimo de {{ minimum }} {{ minimum === 1 ? 'caractere' : 'caracteres' }}.</span><span *ngIf="!minimum">Campo opcional.</span><span class="characterTotal">{{ characterCount }}<ng-container *ngIf="maximum"> / {{ maximum }}</ng-container> caracteres</span></div>

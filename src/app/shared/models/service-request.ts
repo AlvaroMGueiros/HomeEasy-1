@@ -15,6 +15,8 @@ export enum ServiceProposalStatus {
   Expired = 'expired'
 }
 
+export interface OwnProposal { id: string; requestId: string; price: number; status: ServiceProposalStatus; request: { service?: { name: string }; city: string; state: string }; }
+
 export class ServiceRequest {
   id?: string;
   clientId?: string;

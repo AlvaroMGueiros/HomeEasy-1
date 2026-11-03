@@ -1,7 +1,7 @@
 <app-navbar [authenticated]="authenticated" [userId]="userId" (logout)="logout()"></app-navbar>
 <main class="app-page">
-  <div class="page-shell">
-    <header class="page-heading">
+  <div class="page-shell page-shell-narrow">
+    <header class="page-heading"><span class="pageEmblem"><app-page-icon name="heart"></app-page-icon></span>
       <div class="page-heading-copy"><span class="page-kicker">Sua seleção</span><h1>Profissionais favoritos</h1><p>Encontre novamente quem você salvou para comparar ou contratar depois.</p></div>
       <a class="button-primary" routerLink="/feed">Encontrar profissionais</a>
     </header>

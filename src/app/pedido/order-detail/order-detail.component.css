@@ -1,0 +1,9 @@
+.page-shell { display: grid; gap: 24px; }
+.page-heading { margin: 0; }
+.page-heading > strong { font-size: 1.5rem; }
+.orderFacts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 24px 0; }
+.orderFacts dt { color: var(--color-textMuted); font-weight: 500; }
+.orderFacts dd { margin: 4px 0 0; overflow-wrap: anywhere; }
+details > summary { font-weight: 700; margin-bottom: 16px; }
+.requiredMark { color: var(--color-danger); }
+@media (max-width: 560px) { .orderFacts { grid-template-columns: 1fr; } }

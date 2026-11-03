@@ -7,6 +7,9 @@ import { AddprofissioanlComponent } from './addprofissioanl/addprofissioanl.comp
 import { EditarInfoComponent } from './editar-info/editar-info.component';
 import { ProfissionalRoutingModule } from './profissional.routing.module';
 import { SharedModule } from '../shared/shared.module';
+import { ScheduleComponent } from './schedule/schedule.component';
+import { ProfessionalDashboardComponent } from './dashboard/professional-dashboard.component';
+import { VerificationComponent } from './verification/verification.component';
 
 @NgModule({
     imports:[
@@ -16,6 +19,9 @@ import { SharedModule } from '../shared/shared.module';
         SharedModule
     ],
     declarations:[
+        ScheduleComponent,
+        ProfessionalDashboardComponent,
+        VerificationComponent,
         ProfissionalComponent,
         AddprofissioanlComponent,
         EditarInfoComponent

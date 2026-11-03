@@ -13,14 +13,18 @@ import { ServiceOpportunityListComponent } from './service-opportunity-list/serv
 import { ServiceRequestDetailComponent } from './service-request-detail/service-request-detail.component';
 import { ServiceRequestFormComponent } from './service-request-form/service-request-form.component';
 import { ServiceRequestListComponent } from './service-request-list/service-request-list.component';
+import { OrderDetailComponent } from './order-detail/order-detail.component';
+import { OrdersComponent } from './orders/orders.component';
 
 const pedidoRoutes : Routes = [
+    {path: 'meus-servicos', component: OrdersComponent, canActivate: [AuthGuardGuard]},
+    {path: 'atendimentos/:orderId', component: OrderDetailComponent, canActivate: [AuthGuardGuard]},
     {path : 'serviço/:id/usuario/:idd/pedido', redirectTo : 'solicitar/:id/profissional/:idd', pathMatch : 'full' },
     {path : 'pedido-info', component : PedidoInfoComponent },
     {path : 'usuario/:id/pedidos-feitos', component : PedidoFeitoComponent, canActivate : [AuthGuardGuard] },
-    {path : 'usuario/:id/pedidos-feitos/:idd', component : PedidoFeitoDetalheComponent, canActivate : [AuthGuardGuard] },
+    {path : 'usuario/:id/pedidos-feitos/:idd', component : OrderDetailComponent, canActivate : [AuthGuardGuard] },
     {path : 'usuario/:id/pedidos-recebidos', component : PedidoRecebidoComponent, canActivate : [AuthGuardGuard] },
-    {path : 'usuario/:id/pedidos-recebidos/:idd', component : PedidoRecebidoDetalheComponent, canActivate : [AuthGuardGuard] },
+    {path : 'usuario/:id/pedidos-recebidos/:idd', component : OrderDetailComponent, canActivate : [AuthGuardGuard] },
     {path : 'solicitar/:serviceId/profissional/:professionalId', component : ServiceRequestFormComponent, canActivate : [AuthGuardGuard] },
     {path : 'solicitar/:serviceId', component : ServiceRequestFormComponent, canActivate : [AuthGuardGuard] },
     {path : 'solicitacoes', component : ServiceRequestListComponent, canActivate : [AuthGuardGuard] },

@@ -8,12 +8,17 @@ export enum ReportCategory {
   Harassment = 'harassment',
   InappropriateContent = 'inappropriate_content',
   SuspiciousRequest = 'suspicious_request',
+  OffPlatformPayment = 'off_platform_payment',
   Other = 'other'
 }
 
 @Injectable({ providedIn: 'root' })
 export class SafetyService {
   constructor(private http: HttpClient) {}
+  findBlockStatus(targetUserId: string) {
+    return this.http.get<{ isBlocked: boolean; canMessage: boolean }>(`${environment.apiUrl}/blocks/${targetUserId}`);
+  }
+  reportContext(context: { targetUserId?: string; conversationId?: string; messageId?: string; highlightId?: string }, category: ReportCategory, description: string) { return this.http.post(`${environment.apiUrl}/reports`, { ...context, category, description }); }
 
   reportUser(targetUserId: string, category: ReportCategory, description: string) {
     return this.http.post(`${environment.apiUrl}/reports`, { targetUserId, category, description });

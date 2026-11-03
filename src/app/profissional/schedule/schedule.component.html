@@ -1,0 +1,39 @@
+<app-navbar [authenticated]="true" [userId]="userId" (logout)="logout()"></app-navbar>
+<main class="app-page"><div class="page-shell scheduleShell">
+  <header class="page-heading scheduleHero">
+    <span class="pageEmblem"><app-page-icon name="calendar"></app-page-icon></span>
+    <div class="page-heading-copy"><span class="page-kicker">Área profissional</span><h1>Minha agenda</h1><p>Seus horários de trabalho e dias de descanso.</p></div>
+  </header>
+  <app-loading-state *ngIf="isLoading" message="Carregando agenda..."></app-loading-state>
+  <app-action-feedback type="error" [message]="error"></app-action-feedback>
+  <app-action-feedback type="success" [message]="feedback"></app-action-feedback>
+  <button class="button-secondary" *ngIf="error && !schedule" (click)="load()">Tentar novamente</button>
+  <form class="form-stack" *ngIf="schedule" #scheduleForm="ngForm" (ngSubmit)="save()">
+    <section class="section-card" aria-labelledby="weeklyTitle">
+      <header class="sectionHeading"><span class="sectionEmblem"><app-page-icon name="calendar"></app-page-icon></span><div><h2 id="weeklyTitle">Horários da semana</h2><p>Defina quando você está disponível para atender.</p></div><span class="scheduleTimezone"><app-page-icon name="clock"></app-page-icon> Horário de Brasília</span></header>
+      <div class="scheduleRow" *ngFor="let period of schedule.periods; let index = index">
+        <label [for]="'weekday' + index">Dia<select [id]="'weekday' + index" [name]="'weekday' + index" [(ngModel)]="period.weekday" [disabled]="isSaving"><option *ngFor="let weekday of weekdays; let day = index" [ngValue]="day">{{ weekday }}</option></select></label>
+        <label [for]="'startTime' + index">Das<input [id]="'startTime' + index" type="time" [name]="'startTime' + index" [(ngModel)]="period.startTime" required [disabled]="isSaving"></label>
+        <label [for]="'endTime' + index">Até<input [id]="'endTime' + index" type="time" [name]="'endTime' + index" [(ngModel)]="period.endTime" required [disabled]="isSaving"></label>
+        <button class="button-quiet iconAction dangerAction" type="button" [attr.aria-label]="'Remover horário ' + (index + 1)" title="Remover horário" [disabled]="isSaving" (click)="schedule.periods.splice(index, 1)"><app-page-icon name="trash"></app-page-icon></button>
+      </div>
+      <p class="scheduleEmpty" *ngIf="!schedule.periods.length">Você ainda não definiu horários de atendimento.</p>
+      <button class="button-secondary addSchedule" type="button" [disabled]="isSaving || schedule.periods.length >= 42" (click)="addPeriod()"><app-page-icon name="plus"></app-page-icon>Adicionar horário</button>
+    </section>
+    <section class="section-card" aria-labelledby="exceptionsTitle">
+      <header class="sectionHeading"><span class="sectionEmblem"><app-page-icon name="blocked"></app-page-icon></span><div><h2 id="exceptionsTitle">Exceções por data</h2><p>Ajuste sua disponibilidade em dias específicos.</p></div></header>
+      <div class="exceptionRow" *ngFor="let exception of schedule.exceptions; let index = index">
+        <label [for]="'exceptionDate' + index">Data<input [id]="'exceptionDate' + index" type="date" [name]="'exceptionDate' + index" [(ngModel)]="exception.date" required [disabled]="isSaving"></label>
+        <label class="switchRow"><input class="switchControl" type="checkbox" role="switch" [name]="'unavailable' + index" [(ngModel)]="exception.isUnavailable" [disabled]="isSaving"><span>Não vou atender neste dia</span></label>
+        <ng-container *ngIf="!exception.isUnavailable">
+          <label [for]="'exceptionStart' + index">Das<input [id]="'exceptionStart' + index" type="time" [name]="'exceptionStart' + index" [(ngModel)]="exception.startTime" required [disabled]="isSaving"></label>
+          <label [for]="'exceptionEnd' + index">Até<input [id]="'exceptionEnd' + index" type="time" [name]="'exceptionEnd' + index" [(ngModel)]="exception.endTime" required [disabled]="isSaving"></label>
+        </ng-container>
+        <button class="button-quiet iconAction dangerAction" type="button" [attr.aria-label]="'Remover exceção ' + (index + 1)" title="Remover exceção" [disabled]="isSaving" (click)="schedule.exceptions.splice(index, 1)"><app-page-icon name="trash"></app-page-icon></button>
+      </div>
+      <p class="scheduleEmpty" *ngIf="!schedule.exceptions.length">Nenhuma exceção. Seus horários da semana continuam valendo.</p>
+      <button class="button-secondary addSchedule" type="button" [disabled]="isSaving || schedule.exceptions.length >= 120" (click)="addException()"><app-page-icon name="plus"></app-page-icon>Adicionar exceção</button>
+    </section>
+    <div class="form-actions"><button class="button-primary saveSchedule" [disabled]="isSaving || scheduleForm.invalid"><app-page-icon name="check"></app-page-icon>{{ isSaving ? 'Salvando agenda...' : 'Salvar agenda' }}</button></div>
+  </form>
+</div></main>

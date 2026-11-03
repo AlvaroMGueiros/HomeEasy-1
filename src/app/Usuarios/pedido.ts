@@ -2,6 +2,7 @@ export enum OrderStatus {
     Requested = 'requested',
     ProposalReceived = 'proposal_received',
     Accepted = 'accepted',
+    Scheduled = 'scheduled',
     InProgress = 'in_progress',
     Completed = 'completed',
     CancelledByClient = 'cancelled_by_client',

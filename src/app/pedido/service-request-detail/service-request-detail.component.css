@@ -2,8 +2,8 @@
 .request-proposals { margin-top: 28px; }
 .request-proposals > header { margin-bottom: 16px; }
 .request-proposals h2 { margin: 6px 0 0; }
-.proposal-comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.proposal-comparison article { display: flex; min-width: 0; flex-direction: column; padding: 22px; border: 1px solid var(--color-border); border-radius: 17px; background: var(--color-surface); }
+.proposal-comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; }
+.proposal-comparison article { display: flex; min-width: 0; flex-direction: column; padding: 24px 0; border: 0; border-top: 1px solid var(--color-border); border-radius: 0; background: transparent; }
 .proposal-professional { display: flex; align-items: center; gap: 12px; }
 .proposal-professional h3 { margin: 0; }
 .proposal-professional small { color: var(--color-textMuted); }

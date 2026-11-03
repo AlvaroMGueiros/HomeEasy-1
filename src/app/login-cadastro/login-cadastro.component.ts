@@ -33,6 +33,15 @@ export class LoginCadastroComponent implements OnInit {
   returnUrl = '/feed';
   registrationBirthDateInput = '';
   isRegistrationBirthDateValid = false;
+  isGoogleSubmitting = false;
+  async signInWithGoogle(idToken: string) {
+    if (this.isGoogleSubmitting || this.isLoginSubmitting || this.isRegistrationSubmitting) return;
+    this.isGoogleSubmitting = true; this.feedbackMessage = '';
+    try { await this.loginService.loginWithGoogle(idToken, this.registrationUser.birthDate || undefined); await this.router.navigateByUrl(this.returnUrl); }
+    catch (failure) { this.feedbackType = 'error'; this.feedbackMessage = resolveAuthErrorMessage(failure, 'login'); }
+    finally { this.isGoogleSubmitting = false; }
+  }
+  showGoogleError(message: string) { this.feedbackType = 'error'; this.feedbackMessage = message; }
 
   constructor(
     private loginService: LoginServiceService,
@@ -67,7 +76,7 @@ export class LoginCadastroComponent implements OnInit {
   }
 
   async signIn() {
-    if (this.isLoginSubmitting) {
+    if (this.isLoginSubmitting || this.isGoogleSubmitting) {
       return;
     }
 

@@ -1,6 +1,13 @@
+import { PageIconComponent } from './page-icon/page-icon.component';
 import { CommonModule } from '@angular/common';
+import { CharacterCountComponent } from './character-count/character-count.component';
+import { ArrowIconComponent } from './arrow-icon/arrow-icon.component';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { ProfessionalPresentationComponent } from './professional-presentation/professional-presentation.component';
+import { CommunityRulesGateComponent } from './community-rules-gate/community-rules-gate.component';
+import { UserSafetyActionsComponent } from './user-safety-actions/user-safety-actions.component';
 
 import { NavbarComponent } from './navbar/navbar.component';
 import { ServiceIconComponent } from './service-icon/service-icon.component';
@@ -13,9 +20,10 @@ import { RequestAttachmentGalleryComponent } from './request-attachment-gallery/
 @NgModule({
   imports: [
     CommonModule,
+    FormsModule,
     RouterModule
   ],
-  declarations: [NavbarComponent, ServiceIconComponent, ActionFeedbackComponent, LoadingStateComponent, BackLinkComponent, DialogComponent, RequestAttachmentGalleryComponent],
-  exports: [NavbarComponent, ServiceIconComponent, ActionFeedbackComponent, LoadingStateComponent, BackLinkComponent, DialogComponent, RequestAttachmentGalleryComponent]
+  declarations: [PageIconComponent, CharacterCountComponent, ArrowIconComponent, NavbarComponent, ServiceIconComponent, ActionFeedbackComponent, LoadingStateComponent, BackLinkComponent, DialogComponent, RequestAttachmentGalleryComponent, ProfessionalPresentationComponent, CommunityRulesGateComponent, UserSafetyActionsComponent],
+  exports: [PageIconComponent, CharacterCountComponent, ArrowIconComponent, NavbarComponent, ServiceIconComponent, ActionFeedbackComponent, LoadingStateComponent, BackLinkComponent, DialogComponent, RequestAttachmentGalleryComponent, ProfessionalPresentationComponent, CommunityRulesGateComponent, UserSafetyActionsComponent]
 })
 export class SharedModule {}

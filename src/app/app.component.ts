@@ -5,6 +5,7 @@ import { RouterModule, Router } from '@angular/router';
 import { colors } from './shared/colors';
 import { NotificationService } from './shared/notification/notification.service';
 import { OnlinePresenceService } from './Servicos/online-presence.service';
+import { ApiSessionService } from './Servicos/api-session.service';
 
 @Component({
   standalone: false,
@@ -19,7 +20,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private router : Router,
     @Inject(DOCUMENT) private document : Document,
     public notificationService: NotificationService,
-    private onlinePresenceService: OnlinePresenceService
+    private onlinePresenceService: OnlinePresenceService,
+    public sessionService: ApiSessionService
   ){
 
   }

@@ -15,6 +15,8 @@ import { ServiceOpportunityListComponent } from './service-opportunity-list/serv
 import { ServiceRequestDetailComponent } from './service-request-detail/service-request-detail.component';
 import { ServiceRequestFormComponent } from './service-request-form/service-request-form.component';
 import { ServiceRequestListComponent } from './service-request-list/service-request-list.component';
+import { OrderDetailComponent } from './order-detail/order-detail.component';
+import { OrdersComponent } from './orders/orders.component';
 
 @NgModule({
     imports:[
@@ -24,6 +26,8 @@ import { ServiceRequestListComponent } from './service-request-list/service-requ
         SharedModule
     ],
     declarations:[
+        OrderDetailComponent,
+        OrdersComponent,
         PedidoComponent,
         PedidoInfoComponent,
         PedidoFeitoComponent,

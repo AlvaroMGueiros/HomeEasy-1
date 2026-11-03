@@ -1,7 +1,7 @@
 <app-navbar [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
 <main class="app-page">
   <div class="page-shell">
-    <header class="page-heading"><div class="page-heading-copy"><span class="page-kicker">Painel profissional</span><h1>Meus serviços</h1><p>Gerencie as ofertas publicadas no seu perfil.</p></div><a class="button-primary" routerLink="/serprofissional">Adicionar serviço</a></header>
+    <header class="page-heading"><span class="pageEmblem"><app-page-icon name="briefcase"></app-page-icon></span><div class="page-heading-copy"><span class="page-kicker">Painel profissional</span><h1>Meus serviços</h1><p>Gerencie as ofertas publicadas no seu perfil.</p></div><a class="button-primary" routerLink="/serprofissional">Adicionar serviço</a></header>
 
     <app-action-feedback [message]="feedbackMessage" [type]="feedbackType"></app-action-feedback>
 

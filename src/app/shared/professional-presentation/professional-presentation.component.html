@@ -1,0 +1,12 @@
+<section class="section-card"><h2>{{ orderId ? 'Fotos do resultado' : 'Minha apresentação profissional' }}</h2>
+  <app-loading-state *ngIf="isLoading" message="Carregando portfólio..."></app-loading-state>
+  <app-action-feedback type="error" [message]="error"></app-action-feedback><app-action-feedback type="success" [message]="feedback"></app-action-feedback>
+  <button *ngIf="error && !profile" class="button-secondary" (click)="load()">Tentar novamente</button>
+  <ng-container *ngIf="profile && !isLoading">
+    <form *ngIf="!orderId" class="form-stack" #presentationForm="ngForm" (ngSubmit)="saveBio()"><div class="field-group"><label for="professionalBio">Sobre seu trabalho</label><textarea id="professionalBio" name="professionalBio" [(ngModel)]="bio" required minlength="40" maxlength="2000" [disabled]="isSaving" aria-describedby="professionalBioHelp"></textarea><app-character-count [value]="bio" [minimum]="40" [maximum]="2000" hintId="professionalBioHelp"></app-character-count></div><button class="button-primary" [disabled]="isSaving || presentationForm.invalid || bio.trim().length < 40">Salvar apresentação</button></form>
+    <div class="field-group" *ngIf="!orderId"><label for="professionalCover">Foto de capa</label><img class="coverPreview" *ngIf="profile.coverPhotoMediaId" [src]="mediaUrl(profile.coverPhotoMediaId)" alt="Capa do seu perfil"><input id="professionalCover" type="file" accept="image/jpeg,image/png,image/webp" [disabled]="isSaving" (change)="uploadPhoto($event, true)"></div>
+    <div class="photoGrid"><figure *ngFor="let photo of photos"><img [src]="mediaUrl(photo.mediaId)" [alt]="photo.caption || 'Foto do portfólio'" loading="lazy"><figcaption>{{ photo.caption }}</figcaption><button class="button-quiet" [disabled]="isSaving" (click)="removePhoto(photo.mediaId)">Remover foto</button></figure></div>
+    <div class="field-group"><label for="photoCaption">Legenda</label><input id="photoCaption" [(ngModel)]="caption" maxlength="200" [disabled]="isSaving"></div>
+    <label class="field-group"><span>{{ isSaving ? 'Enviando foto...' : 'Adicionar foto' }}</span><input type="file" accept="image/jpeg,image/png,image/webp" [disabled]="isSaving" (change)="uploadPhoto($event)"></label>
+  </ng-container>
+</section>

@@ -9,6 +9,7 @@ import { ProcurarServicoComponent } from './procurar-servico/procurar-servico.co
 import { SharedModule } from '../shared/shared.module';
 import { FloatingChatComponent } from './floating-chat/floating-chat.component';
 import { RegionalServiceMapComponent } from './regional-service-map/regional-service-map.component';
+import { RegionalProfessionalsComponent } from './regional-professionals/regional-professionals.component';
 
 @NgModule({
     imports:[
@@ -22,7 +23,8 @@ import { RegionalServiceMapComponent } from './regional-service-map/regional-ser
         ServicoDetalheComponent,
         ProcurarServicoComponent,
         FloatingChatComponent,
-        RegionalServiceMapComponent
+        RegionalServiceMapComponent,
+        RegionalProfessionalsComponent
     ], 
     exports:[
 

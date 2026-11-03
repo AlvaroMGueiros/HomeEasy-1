@@ -34,6 +34,10 @@ export class Usuario {
     site? : string;
     linkedIn? : string;
     availableForService? : boolean;
+    serviceBasePrice?: number;
+    serviceDescription?: string;
+    averageRating?: number;
+    ratingCount?: number;
     verificationStatus? : ProfessionalVerificationStatus;
     verificationRequestedAt? : any;
     verificationReviewedAt? : any;

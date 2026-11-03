@@ -72,6 +72,8 @@ export function getStatusLabel(status: OrderStatus): string {
       return 'Proposta recebida';
     case OrderStatus.Accepted:
       return 'Pedido aceito';
+    case OrderStatus.Scheduled:
+      return 'Agendado';
     case OrderStatus.InProgress:
       return 'Serviço em andamento';
     case OrderStatus.Completed:

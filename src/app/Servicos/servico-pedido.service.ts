@@ -11,6 +11,8 @@ import { ServicoPedido } from '../Usuarios/serico-pedido';
 import { ScheduleService } from './schedule.service';
 import { ServicosService } from './servicos.service';
 import { CancellationReason } from '../shared/models/cancellation-reason';
+import { MarketplaceOrder, OrderDetail, OrderDispute } from '../shared/models/order-detail';
+import { ProfessionalReview } from '../shared/models/professional-profile';
 
 interface ApiOrder {
   id: string;
@@ -34,6 +36,12 @@ interface ApiOrder {
 
 @Injectable({ providedIn: 'root' })
 export class ServicoPedidoService {
+  findOrder(orderId: string) { return this.http.get<OrderDetail>(`${environment.apiUrl}/marketplace/orders/${orderId}`); }
+  findOwnOrders() { return this.http.get<MarketplaceOrder[]>(`${environment.apiUrl}/marketplace/orders/me`); }
+  changeStatus(orderId: string, status: OrderStatus) { return this.http.patch<MarketplaceOrder>(`${environment.apiUrl}/marketplace/orders/${orderId}/status`, { status }); }
+  cancelOrder(orderId: string, reason: CancellationReason, details: string) { return this.http.post<MarketplaceOrder>(`${environment.apiUrl}/marketplace/orders/${orderId}/cancel`, { reason, details: details || undefined }); }
+  findDispute(orderId: string) { return this.http.get<OrderDispute>(`${environment.apiUrl}/orders/${orderId}/dispute`); }
+  reviewOrder(orderId: string, rating: number, comment: string) { return this.http.post<ProfessionalReview>(`${environment.apiUrl}/orders/${orderId}/reviews`, { rating, comment }); }
   constructor(
     private http: HttpClient,
     private scheduleService: ScheduleService,

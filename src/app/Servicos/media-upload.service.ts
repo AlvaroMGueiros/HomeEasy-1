@@ -29,6 +29,7 @@ export class MediaUploadService {
   uploadFile(file: File, purpose: MediaPurpose) {
     return this.uploadBlob(file, file.name, file.type, purpose);
   }
+  getDownloadUrl(mediaId: string) { return this.http.get<{ downloadUrl: string; expiresInSeconds: number }>(`${environment.apiUrl}/media/${mediaId}/download`); }
 
   private async uploadBlob(blob: Blob, fileName: string, contentType: string, purpose: MediaPurpose) {
     const authorization = await firstValueFrom(

@@ -1,1 +1,8 @@
 :host { display: block; min-height: 100vh; background: var(--color-background); }
+.accountLinkList { display: grid; align-content: start; }
+.accountLinkList .section-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 24px; padding: 20px 0; }
+.accountLinkList h2 { font-size: 1rem; margin: 0 0 5px; }
+.accountLinkList p { grid-column: 1; margin: 0; font-size: .83rem; }
+.accountLinkList .button-primary, .accountLinkList .form-actions { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+.accountLinkList label { grid-column: 1 / -1; margin-top: 18px; }
+@media (max-width: 800px) { .accountLinkList .section-card { display: flex; flex-direction: column; gap: 10px; } .accountLinkList .button-primary, .accountLinkList .form-actions { align-self: flex-start; } }

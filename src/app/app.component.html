@@ -1,4 +1,5 @@
 <router-outlet></router-outlet>
+<app-community-rules-gate [userId]="(sessionService.user$ | async)?.id || ''"></app-community-rules-gate>
 
 <ng-container *ngIf="notificationService.state$ | async as notification">
   <app-dialog

@@ -1,63 +1,41 @@
 <app-navbar [authenticated]="authenticated" [userId]="userId" (logout)="logout()"></app-navbar>
-
 <main class="home-page">
-
-  <section class="hero">
+  <section class="hero" aria-labelledby="homeTitle">
     <div class="hero-copy">
-      <span class="eyebrow">Sua casa, bem cuidada</span>
-      <h1>O profissional certo, sem complicação.</h1>
-      <p>Encontre especialistas de confiança para limpeza, reparos e reformas. Compare opções, converse e contrate em um só lugar.</p>
+      <span class="eyebrow">Serviços para sua casa</span>
+      <h1 id="homeTitle">Encontre profissionais<br>para sua casa</h1>
+      <p>Encontre profissionais na sua região, compare propostas e acompanhe o serviço do primeiro contato à conclusão.</p>
       <div class="hero-actions">
-        <a class="primary-action" routerLink="/feed">Encontrar um serviço</a>
-        <a class="secondary-action" routerLink="/profissional">Quero trabalhar</a>
+        <a class="button-primary" routerLink="/feed">Encontrar profissionais <app-arrow-icon></app-arrow-icon></a>
+        <a class="hero-secondary" routerLink="/profissional">Quero oferecer serviços <app-arrow-icon direction="external"></app-arrow-icon></a>
       </div>
-      <div class="trust-row" aria-label="Benefícios da plataforma">
-        <span><i aria-hidden="true">✓</i> Profissionais avaliados</span>
-        <span><i aria-hidden="true">✓</i> Contato direto</span>
-      </div>
+      <div class="hero-proof"><span><app-page-icon name="location"></app-page-icon>Busca por região</span><span><app-page-icon name="star"></app-page-icon>Avaliações de clientes</span><span><app-page-icon name="message"></app-page-icon>Conversa pelo app</span></div>
     </div>
-
-    <div class="hero-visual" aria-label="Demonstração dos serviços Home Easy">
-      <div class="hero-logo-panel">
-        <img src="assets/home-easy-logo-v2.png" alt="Logo Home Easy">
+    <div class="service-explorer">
+      <header><span class="explorer-icon"><app-page-icon name="search"></app-page-icon></span><div><span class="eyebrow">Por onde começar</span><h2>O que você precisa resolver?</h2></div></header>
+      <div class="explorer-services">
+        <a routerLink="/feed" [queryParams]="{ q: 'Limpeza' }"><app-service-icon serviceName="Limpeza" [colorful]="true"></app-service-icon><span><strong>Limpeza</strong><small>Mais cuidado com cada ambiente</small></span><app-arrow-icon direction="chevron"></app-arrow-icon></a>
+        <a routerLink="/feed" [queryParams]="{ q: 'Eletricista' }"><app-service-icon serviceName="Eletricista" [colorful]="true"></app-service-icon><span><strong>Elétrica</strong><small>Instalações e pequenos reparos</small></span><app-arrow-icon direction="chevron"></app-arrow-icon></a>
+        <a routerLink="/feed" [queryParams]="{ q: 'Encanador' }"><app-service-icon serviceName="Encanador" [colorful]="true"></app-service-icon><span><strong>Hidráulica</strong><small>Vazamentos e manutenção</small></span><app-arrow-icon direction="chevron"></app-arrow-icon></a>
+        <a routerLink="/feed" [queryParams]="{ q: 'Marceneiro' }"><app-service-icon serviceName="Marceneiro" [colorful]="true"></app-service-icon><span><strong>Marcenaria</strong><small>Montagem, ajustes e móveis</small></span><app-arrow-icon direction="chevron"></app-arrow-icon></a>
       </div>
-      <div class="service-chip chip-top"><span>01</span> Limpeza</div>
-      <div class="service-chip chip-bottom"><span>02</span> Reparos</div>
-      <div class="rating-card"><strong>4,9</strong><span>avaliação média</span></div>
+      <a class="explorer-footer" routerLink="/feed">Explorar todos os serviços <app-arrow-icon></app-arrow-icon></a>
     </div>
   </section>
 
-  <section class="how-it-works">
-    <div class="section-heading">
-      <span class="eyebrow">Simples de verdade</span>
-      <h2>Resolva em três passos</h2>
-    </div>
-    <div class="steps-grid">
-      <article>
-        <span class="step-number">01</span>
-        <h3>Escolha o serviço</h3>
-        <p>Conte o que sua casa precisa e encontre profissionais disponíveis.</p>
-      </article>
-      <article>
-        <span class="step-number">02</span>
-        <h3>Converse e combine</h3>
-        <p>Veja perfis, avaliações e alinhe todos os detalhes diretamente.</p>
-      </article>
-      <article>
-        <span class="step-number">03</span>
-        <h3>Pronto, resolvido</h3>
-        <p>Agende com tranquilidade e avalie o atendimento ao final.</p>
-      </article>
-    </div>
+  <section class="how-it-works" aria-labelledby="stepsTitle">
+    <div class="section-heading"><div><span class="eyebrow">Do pedido ao serviço concluído</span><h2 id="stepsTitle">Como contratar um serviço</h2></div><p>Você escolhe o profissional e acompanha os próximos passos pela Home Easy.</p></div>
+    <ol class="steps-grid">
+      <li><div class="step-top"><span class="step-icon"><app-page-icon name="document"></app-page-icon></span><span class="step-number">01</span></div><h3>Conte o que precisa</h3><p>Escolha o serviço, informe o local e descreva os detalhes do seu pedido.</p></li>
+      <li><div class="step-top"><span class="step-icon"><app-page-icon name="message"></app-page-icon></span><span class="step-number">02</span></div><h3>Compare e combine</h3><p>Conheça os perfis, confira as propostas e alinhe o atendimento com o profissional.</p></li>
+      <li><div class="step-top"><span class="step-icon"><app-page-icon name="check"></app-page-icon></span><span class="step-number">03</span></div><h3>Acompanhe e avalie</h3><p>Mantenha a conversa e os detalhes organizados. Ao final, compartilhe sua experiência.</p></li>
+    </ol>
   </section>
+
+  <section class="professional-callout" aria-labelledby="professionalTitle"><span class="callout-icon"><app-page-icon name="briefcase"></app-page-icon></span><div><span class="eyebrow">Para profissionais</span><h2 id="professionalTitle">Ofereça serviços na sua região</h2><p>Apresente seus serviços, publique seu portfólio e encontre oportunidades na sua região.</p></div><a class="button-secondary" routerLink="/profissional">Conhecer a área profissional <app-arrow-icon></app-arrow-icon></a></section>
 
   <footer class="home-footer">
-    <a class="home-brand" routerLink="/home">
-      <span class="brand-logo-frame" aria-hidden="true">
-        <img class="brand-logo" src="assets/home-easy-logo-v2.png" alt="">
-      </span>
-    </a>
-    <p>Cuidar da casa pode ser mais simples.</p>
-    <span>© 2026 Home Easy</span>
+    <div class="footer-main"><div><a class="home-brand" routerLink="/home"><span class="brand-logo-frame" aria-hidden="true"><img class="brand-logo" src="assets/home-easy-logo-v2.png" alt=""></span><strong>home easy</strong></a><p>Serviços residenciais, orçamentos e atendimentos.</p></div><nav aria-label="Links do rodapé"><a routerLink="/feed">Encontrar serviços</a><a routerLink="/profissional">Para profissionais</a><a routerLink="/contato">Falar com a equipe</a></nav></div>
+    <div class="footer-bottom"><span>© 2026 Home Easy</span><a routerLink="/login">Acessar minha conta <app-arrow-icon direction="external"></app-arrow-icon></a></div>
   </footer>
 </main>

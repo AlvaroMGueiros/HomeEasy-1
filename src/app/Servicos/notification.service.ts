@@ -12,6 +12,8 @@ export interface ApiNotification {
   createdAt: string;
 }
 
+export interface NotificationPreferences { pushEnabled: boolean; messages: boolean; quotes: boolean; serviceUpdates: boolean; reviews: boolean; opportunities: boolean; }
+
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
   constructor(private http: HttpClient) {}
@@ -23,4 +25,7 @@ export class NotificationService {
   markRead(notificationId: string) {
     return this.http.patch(`${environment.apiUrl}/notifications/${notificationId}/read`, {});
   }
+  markAllRead() { return this.http.patch<{ readAt: string }>(`${environment.apiUrl}/notifications/read-all`, {}); }
+  getPreferences() { return this.http.get<NotificationPreferences>(`${environment.apiUrl}/notifications/preferences`); }
+  savePreferences(preferences: NotificationPreferences) { return this.http.put<NotificationPreferences>(`${environment.apiUrl}/notifications/preferences`, preferences); }
 }

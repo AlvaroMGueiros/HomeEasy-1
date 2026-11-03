@@ -37,6 +37,11 @@ export class ApiSessionService {
       map(() => this.currentUser)
     );
   }
+  loginWithGoogle(idToken: string, birthDate?: string) {
+    return this.http.post<ApiAuthResponse>(`${environment.apiUrl}/auth/google`, { idToken, birthDate }).pipe(
+      tap(response => this.updateSession(response)), map(() => this.currentUser)
+    );
+  }
 
   register(name: string, email: string, password: string, birthDate: string) {
     return this.http.post<ApiAuthResponse>(`${environment.apiUrl}/auth/register`, {

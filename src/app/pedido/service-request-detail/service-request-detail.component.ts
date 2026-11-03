@@ -9,6 +9,9 @@ import { ServiceRequestService } from '../../Servicos/service-request.service';
 import { FeedbackType } from '../../shared/action-feedback/action-feedback.component';
 import { ServiceProposal, ServiceProposalStatus, ServiceRequest } from '../../shared/models/service-request';
 import { OrderStatus } from '../../Usuarios/pedido';
+import { canAcceptProposal, compareProposals, proposalTotal, ProposalSort } from '../../shared/utils/proposal-comparison.utils';
+import { ServicoPedidoService } from '../../Servicos/servico-pedido.service';
+import { firstValueFrom } from 'rxjs';
 import { getStatusClass, getStatusLabel } from '../../shared/utils/order-status.utils';
 import {
   CancellationReason,
@@ -28,6 +31,13 @@ export class ServiceRequestDetailComponent implements OnInit, OnDestroy {
   request: ServiceRequest = {};
   proposals = new Array<ServiceProposal>();
   selectedProposal: ServiceProposal;
+  orderId = '';
+  proposalSort = ProposalSort.LowestTotal;
+  readonly proposalSortOptions = ProposalSort;
+  readonly proposalTotal = proposalTotal;
+  readonly canAcceptProposal = canAcceptProposal;
+  sortedProposals: ServiceProposal[] = [];
+  sortProposals() { this.sortedProposals = compareProposals(this.proposals, this.proposalSort); }
   isLoading = true;
   isSubmitting = false;
   isConfirmingProposal = false;
@@ -47,7 +57,8 @@ export class ServiceRequestDetailComponent implements OnInit, OnDestroy {
     private activeRoute: ActivatedRoute,
     private loginService: LoginServiceService,
     private requestService: ServiceRequestService,
-    private router: Router
+    private router: Router,
+    private orders: ServicoPedidoService
   ) { }
 
   ngOnInit() {
@@ -84,7 +95,8 @@ export class ServiceRequestDetailComponent implements OnInit, OnDestroy {
 
     this.isSubmitting = true;
     try {
-      await this.requestService.acceptProposal(this.requestId, this.selectedProposal.id, this.userId);
+      const order = await this.requestService.acceptProposal(this.requestId, this.selectedProposal.id, this.userId);
+      await this.router.navigate(['/atendimentos', order.id]);
       this.feedbackType = 'success';
       this.feedbackMessage = 'Proposta aceita. O profissional foi informado e o pedido está confirmado.';
     } catch (error) {
@@ -111,6 +123,8 @@ export class ServiceRequestDetailComponent implements OnInit, OnDestroy {
       );
       this.feedbackType = 'success';
       this.feedbackMessage = 'Solicitação cancelada e mantida no seu histórico.';
+      this.loadRequest();
+      this.loadProposals();
     } catch (error) {
       this.feedbackType = 'error';
       this.feedbackMessage = error && error.message ? error.message : 'Não foi possível cancelar a solicitação.';
@@ -139,17 +153,30 @@ export class ServiceRequestDetailComponent implements OnInit, OnDestroy {
 
   private loadRequest() {
     this.unsubscribe(this.requestSubscription);
-    this.requestSubscription = this.requestService.getRequest(this.requestId).subscribe(request => {
-      this.request = request || {};
+    this.requestSubscription = this.requestService.getRequest(this.requestId).subscribe({ next: request => {
+      this.request = request || {}; this.isLoading = false;
+      if (request.status === OrderStatus.Accepted) void this.findAcceptedOrder();
+    }, error: failure => {
       this.isLoading = false;
+      this.feedbackMessage = resolveHttpErrorMessage(failure, 'Não foi possível carregar a solicitação.');
+    }
     });
   }
 
   private loadProposals() {
     this.unsubscribe(this.proposalsSubscription);
-    this.proposalsSubscription = this.requestService.getRequestProposals(this.requestId).subscribe(proposals => {
+    this.proposalsSubscription = this.requestService.getRequestProposals(this.requestId).subscribe({ next: proposals => {
       this.proposals = proposals;
+      this.sortProposals();
+    }, error: failure => {
+      this.feedbackMessage = resolveHttpErrorMessage(failure, 'Não foi possível consultar as propostas.');
+    }
     });
+  }
+
+  private async findAcceptedOrder() {
+    try { const orders = await firstValueFrom(this.orders.findOwnOrders()); this.orderId = orders.find(order => order.requestId === this.requestId)?.id || ''; }
+    catch (failure) { this.feedbackMessage = resolveHttpErrorMessage(failure, 'Não foi possível localizar o atendimento criado.'); }
   }
 
   private unsubscribe(subscription: Subscription) {

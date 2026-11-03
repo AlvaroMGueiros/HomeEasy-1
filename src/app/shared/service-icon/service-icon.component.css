@@ -1,4 +1,17 @@
 :host { display: inline-flex; }
-.service-icon { display: inline-grid; width: 52px; height: 52px; flex: 0 0 52px; place-items: center; border-radius: 15px; color: var(--color-primary); background: var(--color-primarySoft); transition: color 180ms ease, background-color 180ms ease, transform 180ms ease; }
+:host-context(.category-card) .service-icon { width: 24px; height: 24px; flex-basis: 24px; border-radius: 0; color: inherit; background: transparent; }
+:host-context(.category-card) .service-icon svg { width: 24px; height: 24px; }
+.service-icon { display: inline-grid; width: 52px; height: 52px; flex: 0 0 52px; place-items: center; border-radius: 15px; color: var(--color-primary); background: var(--color-primarySoft); transition: color var(--durationFast) ease, background-color var(--durationFast) ease; }
 .service-icon svg { width: 27px; height: 27px; }
-:host-context(.service-card:hover) .service-icon { color: var(--color-surface); background: var(--color-primary); transform: scale(1.04); }
+:host-context(.service-card:hover) .service-icon { color: var(--color-surface); background: var(--color-primary); }
+.service-icon-babysitting, .service-icon-driving, .service-icon-masonry { color: var(--color-categoryBlue); background: var(--color-categoryBlueSoft); }
+.service-icon-cooking, .service-icon-tools, .service-icon-renovation { color: var(--color-categoryPurple); background: var(--color-categoryPurpleSoft); }
+.service-icon-laundry { color: var(--color-categoryAmber); background: var(--color-categoryAmberSoft); }
+.service-icon-electrical, .service-icon-carpentry { color: var(--color-categoryRose); background: var(--color-categoryRoseSoft); }
+.service-icon-plumbing { color: var(--color-categoryCyan); background: var(--color-categoryCyanSoft); }
+.service-icon-security, .service-icon-painting, .service-icon-garden { color: var(--color-primary); background: var(--color-accentSoft); }
+.service-icon-animalCare, .service-icon-moving, .service-icon-roofing { color: var(--color-categoryRose); background: var(--color-categoryRoseSoft); }
+.service-icon-elderlyCare, .service-icon-airConditioning, .service-icon-glazing { color: var(--color-categoryCyan); background: var(--color-categoryCyanSoft); }
+.service-icon-solar, .service-icon-pestControl, .service-icon-locksmith { color: var(--color-categoryAmber); background: var(--color-categoryAmberSoft); }
+.service-icon-furnitureAssembly, .service-icon-drywall, .service-icon-architecture { color: var(--color-categoryPurple); background: var(--color-categoryPurpleSoft); }
+.service-icon-cameras, .service-icon-appliances, .service-icon-postConstruction { color: var(--color-categoryBlue); background: var(--color-categoryBlueSoft); }

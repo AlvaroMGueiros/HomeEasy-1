@@ -1,7 +1,7 @@
 <app-navbar [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
 <main class="app-page">
   <div class="page-shell">
-    <header class="page-heading">
+    <header class="page-heading"><span class="pageEmblem"><app-page-icon name="message"></app-page-icon></span>
       <div class="page-heading-copy"><span class="page-kicker">Fale com a gente</span><h1>Como podemos ajudar?</h1><p>Envie sua dúvida. Nossa equipe responde pelo canal informado.</p></div>
     </header>
     <div class="content-grid">
@@ -11,12 +11,12 @@
           <div class="field-group"><label for="contactPhone">Telefone</label><input id="contactPhone" type="tel" placeholder="(00) 00000-0000" [(ngModel)]="mensagem.telefone" name="telefone" required pattern="^[0-9]{9,11}$" #rateInput1="ngModel"><span class="field-error" *ngIf="rateInput1.errors && rateInput1.touched">Informe um telefone válido.</span></div>
           <div class="field-group"><label for="contactEmail">E-mail</label><input id="contactEmail" type="email" placeholder="voce@exemplo.com" [(ngModel)]="mensagem.email" name="email" required email></div>
           <div class="field-group"><label for="contactSubject">Assunto</label><input id="contactSubject" type="text" placeholder="Como podemos ajudar?" [(ngModel)]="mensagem.assunto" name="assunto" required></div>
-          <div class="field-group field-group-full"><label for="contactMessage">Mensagem</label><textarea id="contactMessage" rows="5" placeholder="Conte os detalhes da sua dúvida" [(ngModel)]="mensagem.mensagem" name="mensagem" required></textarea></div>
+          <div class="field-group field-group-full"><label for="contactMessage">Mensagem</label><textarea id="contactMessage" rows="5" placeholder="Conte os detalhes da sua dúvida" [(ngModel)]="mensagem.mensagem" name="mensagem" required minlength="5" maxlength="5000" aria-describedby="contactMessageHelp"></textarea><app-character-count [value]="mensagem.mensagem" [minimum]="5" [maximum]="5000" hintId="contactMessageHelp"></app-character-count></div>
         </div>
         <app-action-feedback [message]="feedbackMessage" [type]="feedbackType"></app-action-feedback>
         <div class="form-actions"><button class="button-primary" type="submit" [disabled]="!contactForm.valid || isSubmitting">{{ isSubmitting ? 'Enviando...' : 'Enviar mensagem' }}</button></div>
       </form>
-      <aside class="surface-card"><span class="icon-badge">HE</span><h2>Contato direto</h2><p>Prefere outro canal? Fale conosco durante o horário comercial.</p><div class="detail-list"><div class="detail-item"><span>E-mail</span><strong>contatohomeeasy@gmail.com</strong></div><div class="detail-item"><span>Telefone</span><strong>3761-xxx</strong></div><div class="detail-item field-group-full"><span>Atendimento</span><strong>Terezinha, Canhotinho e Bom Conselho — PE</strong></div></div></aside>
+      <aside class="surface-card"><span class="icon-badge">HE</span><h2>Contato direto</h2><p>Você também pode falar com a equipe por e-mail.</p><div class="detail-list"><div class="detail-item"><span>E-mail</span><a href="mailto:contatohomeeasy@gmail.com">contatohomeeasy@gmail.com</a></div></div></aside>
     </div>
   </div>
 </main>

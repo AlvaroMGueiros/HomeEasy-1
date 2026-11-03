@@ -5,4 +5,7 @@ export class Chat {
     hora? : string;
     senderId? : string;
     readAt? : string;
+    attachmentMediaId?: string;
+    attachmentName?: string;
+    attachmentUrl?: string;
 }

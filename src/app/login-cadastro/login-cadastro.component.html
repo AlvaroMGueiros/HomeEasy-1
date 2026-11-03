@@ -1,45 +1,46 @@
 <app-navbar [authenticated]="authenticated" [userId]="userId" (logout)="logout()"></app-navbar>
 
 <main class="auth-page">
-  <section class="auth-intro">
-    <span class="page-kicker">Bem-vindo</span>
-    <h1>Sua casa mais simples de cuidar.</h1>
-    <p>Entre para contratar profissionais, conversar e acompanhar seus pedidos.</p>
+  <section class="auth-intro" aria-labelledby="authIntroTitle">
+    <span class="auth-eyebrow">Home Easy</span>
+    <h1 id="authIntroTitle">Contrate ou ofereça<br>serviços residenciais</h1>
+    <p>Conecte-se para encontrar profissionais ou cuidar dos seus próximos trabalhos.</p>
     <div class="auth-benefits">
-      <span><i aria-hidden="true">✓</i> Profissionais avaliados</span>
-      <span><i aria-hidden="true">✓</i> Contato direto</span>
-      <span><i aria-hidden="true">✓</i> Pedidos em um só lugar</span>
+      <div><app-page-icon name="document"></app-page-icon><span><strong>Orçamentos e atendimentos</strong><small>Do orçamento à conclusão do atendimento.</small></span></div>
+      <div><app-page-icon name="message"></app-page-icon><span><strong>Conversas por serviço</strong><small>Os detalhes de cada serviço no mesmo lugar.</small></span></div>
+      <div><app-page-icon name="profile"></app-page-icon><span><strong>Perfil profissional</strong><small>Serviços, portfólio e avaliações de clientes.</small></span></div>
     </div>
+    <a class="auth-explore" routerLink="/feed">Prefere conhecer primeiro? Explore os serviços <app-arrow-icon></app-arrow-icon></a>
   </section>
 
   <section class="login-wrap" aria-labelledby="authTitle">
     <div class="login-html">
-      <h2 id="authTitle">Acesse sua conta</h2>
-      <div class="auth-tabs" role="tablist" aria-label="Escolha entre entrar ou criar conta">
-        <button type="button" role="tab" [attr.aria-selected]="authMode === 'login'" [class.active]="authMode === 'login'" (click)="setAuthMode('login')">Entrar</button>
-        <button type="button" role="tab" [attr.aria-selected]="authMode === 'register'" [class.active]="authMode === 'register'" (click)="setAuthMode('register')">Criar conta</button>
+      <header class="auth-heading"><span class="page-kicker">{{ authMode === 'login' ? 'Acesso à conta' : 'Cadastro' }}</span><h2 id="authTitle">{{ authMode === 'login' ? 'Entre na sua conta' : 'Crie sua conta' }}</h2><p>{{ authMode === 'login' ? 'Acesse seus pedidos, conversas e serviços.' : 'Uma conta para contratar e oferecer serviços.' }}</p></header>
+      <div class="auth-tabs" role="group" aria-label="Escolha entre entrar ou criar conta">
+        <button type="button" [attr.aria-pressed]="authMode === 'login'" [class.active]="authMode === 'login'" (click)="setAuthMode('login')">Entrar</button>
+        <button type="button" [attr.aria-pressed]="authMode === 'register'" [class.active]="authMode === 'register'" (click)="setAuthMode('register')">Criar conta</button>
       </div>
 
-      <form *ngIf="authMode === 'login'" class="form-stack" #loginForm="ngForm" (ngSubmit)="signIn()" role="tabpanel">
+      <form *ngIf="authMode === 'login'" class="form-stack" #loginForm="ngForm" (ngSubmit)="signIn()">
         <div class="field-group">
           <label for="loginEmail">E-mail</label>
-          <input id="loginEmail" type="email" [(ngModel)]="loginUser.email" name="email" required email autocomplete="email" #loginEmail="ngModel">
+          <input id="loginEmail" type="email" [(ngModel)]="loginUser.email" name="email" required email autocomplete="email" placeholder="voce@exemplo.com" #loginEmail="ngModel">
           <span class="field-error" *ngIf="loginEmail.invalid && loginEmail.touched">Informe um e-mail válido.</span>
         </div>
         <div class="field-group">
-          <label for="loginPassword">Senha</label>
-          <input id="loginPassword" type="password" [(ngModel)]="loginUser.senha" name="password" required autocomplete="current-password">
+          <div class="password-label"><label for="loginPassword">Senha</label><a class="recovery-link" routerLink="/recuperar-senha">Esqueceu a senha?</a></div>
+          <input id="loginPassword" type="password" [(ngModel)]="loginUser.senha" name="password" required autocomplete="current-password" placeholder="Sua senha">
         </div>
         <button type="submit" class="button-primary auth-submit" [disabled]="!loginForm.valid || isLoginSubmitting">
           {{ isLoginSubmitting ? 'Entrando...' : 'Entrar' }}
         </button>
-        <a class="recovery-link" routerLink="/recuperar-senha">Esqueci minha senha</a>
+
       </form>
 
-      <form *ngIf="authMode === 'register'" class="form-stack" #registerForm="ngForm" (ngSubmit)="createAccount()" role="tabpanel">
+      <form *ngIf="authMode === 'register'" class="form-stack" #registerForm="ngForm" (ngSubmit)="createAccount()">
         <div class="field-group">
           <label for="registerName">Nome</label>
-          <input id="registerName" type="text" [(ngModel)]="registrationUser.nome" name="registerName" required autocomplete="name">
+          <input id="registerName" type="text" [(ngModel)]="registrationUser.nome" name="registerName" required autocomplete="name" placeholder="Como você gostaria de ser chamado?">
         </div>
         <div class="field-group">
           <label for="registerBirthDate">Data de nascimento</label>
@@ -48,12 +49,12 @@
         </div>
         <div class="field-group">
           <label for="registerEmail">E-mail</label>
-          <input id="registerEmail" type="email" [(ngModel)]="registrationUser.email" name="registerEmail" required email autocomplete="email" #registerEmail="ngModel">
+          <input id="registerEmail" type="email" [(ngModel)]="registrationUser.email" name="registerEmail" required email autocomplete="email" placeholder="voce@exemplo.com" #registerEmail="ngModel">
           <span class="field-error" *ngIf="registerEmail.invalid && registerEmail.touched">Informe um e-mail válido.</span>
         </div>
         <div class="field-group">
           <label for="registerPassword">Senha</label>
-          <input id="registerPassword" type="password" [(ngModel)]="registrationUser.senha" name="registerPassword" required pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$" autocomplete="new-password" aria-describedby="passwordRequirements" #registerPassword="ngModel">
+          <input id="registerPassword" type="password" [(ngModel)]="registrationUser.senha" name="registerPassword" required pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$" autocomplete="new-password" placeholder="Crie uma senha" aria-describedby="passwordRequirements" #registerPassword="ngModel">
           <p id="passwordRequirements" class="field-help">Use 8 ou mais caracteres, com maiúscula, minúscula e número.</p>
           <span class="field-error" *ngIf="registerPassword.invalid && registerPassword.touched">A senha ainda não atende aos requisitos.</span>
         </div>
@@ -62,6 +63,9 @@
         </button>
       </form>
 
+      <div class="auth-divider"><span>ou continue com</span></div>
+      <app-google-auth-button [disabled]="isGoogleSubmitting || isLoginSubmitting || isRegistrationSubmitting || (authMode === 'register' && !isRegistrationBirthDateValid)" (credential)="signInWithGoogle($event)" (failure)="showGoogleError($event)"></app-google-auth-button>
+      <p class="auth-google-hint" *ngIf="authMode === 'register' && !isRegistrationBirthDateValid">Para criar uma conta com o Google, preencha primeiro sua data de nascimento.</p>
       <app-action-feedback [message]="feedbackMessage" [type]="feedbackType"></app-action-feedback>
     </div>
   </section>

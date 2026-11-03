@@ -17,11 +17,16 @@ interface VerificationQueue {
   }>;
 }
 
+export enum VerificationDocumentType { Identity = 'identity', AddressProof = 'address_proof', ProfessionalCertificate = 'professional_certificate' }
+export interface VerificationDocument { id: string; type: VerificationDocumentType; status: string; reviewNotes?: string; createdAt: string; }
+
 @Injectable({ providedIn: 'root' })
 export class ProfessionalVerificationService {
   constructor(private http: HttpClient, private mediaUploadService: MediaUploadService) {}
 
-  async requestVerification(userId: string, document: File) {
+  findOwnDocuments() { return this.http.get<VerificationDocument[]>(`${environment.apiUrl}/verification/documents/me`); }
+
+  async requestVerification(userId: string, document: File, documentType = VerificationDocumentType.Identity) {
     if (!document) {
       throw new Error('Selecione um documento de identidade em PDF, PNG, JPG ou WebP.');
     }
@@ -32,7 +37,7 @@ export class ProfessionalVerificationService {
     await firstValueFrom(
       this.http.post(`${environment.apiUrl}/verification/documents`, {
         mediaId,
-        type: 'identity'
+        type: documentType
       })
     );
   }

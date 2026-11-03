@@ -1,7 +1,9 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { NgModule } from '@angular/core';
+import { LOCALE_ID, NgModule } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localePt from '@angular/common/locales/pt';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app.routing.module';
@@ -24,6 +26,9 @@ import { AvalicaoService } from './Servicos/avaliacao.service';
 import { SharedModule } from './shared/shared.module';
 import { AdminModule } from './admin/admin.module';
 import { ApiAuthInterceptor } from './Servicos/api-auth.interceptor';
+import { HighlightsModule } from './highlights/highlights.module';
+
+registerLocaleData(localePt);
 
 @NgModule({
   declarations: [
@@ -45,9 +50,11 @@ import { ApiAuthInterceptor } from './Servicos/api-auth.interceptor';
     ServicoModule,
     SharedModule,
     AdminModule,
+    HighlightsModule,
     AppRoutingModule
   ],
   providers: [
+    { provide: LOCALE_ID, useValue: 'pt-BR' },
     LoginServiceService,
     ContatoService,
     ServicosService,

@@ -1,6 +1,6 @@
 <app-navbar [authenticated]="authenticated" [userId]="userId" (logout)="logout()"></app-navbar>
-<main class="app-page"><div class="page-shell">
-  <header class="page-heading"><div class="page-heading-copy"><span class="page-kicker">Novos trabalhos</span><h1>Oportunidades perto de você</h1><p>Solicitações compatíveis com seus serviços e sua região.</p></div></header>
+<main class="app-page"><div class="page-shell page-shell-narrow">
+  <header class="page-heading"><span class="pageEmblem"><app-page-icon name="document"></app-page-icon></span><div class="page-heading-copy"><span class="page-kicker">Novos trabalhos</span><h1>Oportunidades perto de você</h1><p>Solicitações compatíveis com seus serviços e sua região.</p></div></header>
   <app-loading-state *ngIf="isLoading" message="Encontrando oportunidades..."></app-loading-state>
   <app-action-feedback [message]="loadError" type="error"></app-action-feedback>
   <section class="entity-grid" *ngIf="!isLoading && requests.length"><article class="entity-card" *ngFor="let request of requests"><div class="entity-card-header"><app-service-icon [serviceName]="request.serviceName"></app-service-icon><span class="opportunity-urgency">{{ getUrgencyLabel(request.urgency) }}</span></div><h2>{{ request.serviceName }}</h2><p>{{ request.description }}</p><div class="opportunity-location"><strong>{{ request.city }}, {{ request.state }}</strong><span>{{ request.proposalCount || 0 }} de {{ request.maximumProposals || 4 }} propostas</span></div><div class="card-actions"><a class="button-primary" [routerLink]="['/oportunidades', request.id]">Analisar oportunidade</a></div></article></section>

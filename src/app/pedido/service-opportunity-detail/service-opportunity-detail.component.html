@@ -1,11 +1,11 @@
 <app-navbar [authenticated]="authenticated" [userId]="userId" (logout)="logout()"></app-navbar>
 <div class="context-nav"><app-back-link route="/oportunidades" label="Voltar às oportunidades"></app-back-link></div>
-<main class="app-page"><div class="page-shell">
+<main class="app-page"><div class="page-shell page-shell-narrow">
   <app-loading-state *ngIf="isLoading" message="Carregando oportunidade..."></app-loading-state>
   <app-action-feedback [message]="loadError" type="error"></app-action-feedback>
   <ng-container *ngIf="!isLoading && !loadError">
-    <header class="page-heading"><div class="page-heading-copy"><span class="page-kicker">Oportunidade em {{ request.city }}</span><h1>{{ request.serviceName }}</h1><p>{{ request.description }}</p></div></header>
-    <div class="content-grid">
+    <header class="page-heading"><span class="pageEmblem"><app-page-icon name="document"></app-page-icon></span><div class="page-heading-copy"><span class="page-kicker">Oportunidade em {{ request.city }}</span><h1>{{ request.serviceName }}</h1><p>{{ request.description }}</p></div></header>
+    <div class="form-stack">
       <aside class="surface-card">
         <span class="page-kicker">Resumo do pedido</span><h2>Informações do atendimento</h2>
         <div class="detail-list opportunity-details">
@@ -22,7 +22,7 @@
         <div class="form-grid">
           <div class="field-group"><label for="proposalPrice">Valor total</label><input id="proposalPrice" name="proposalPrice" type="number" min="1" step="0.01" [(ngModel)]="proposal.price" required></div>
           <div class="field-group"><label for="estimatedDurationHours">Prazo estimado em horas</label><input id="estimatedDurationHours" name="estimatedDurationHours" type="number" min="1" max="720" step="1" [(ngModel)]="proposalDurationHours" required><small class="field-help">Ex.: informe 48 para dois dias.</small></div>
-          <div class="field-group field-group-full"><label for="proposalMessage">O que está incluído?</label><textarea id="proposalMessage" name="proposalMessage" rows="5" minlength="10" maxlength="800" [(ngModel)]="proposal.message" required placeholder="Explique sua experiência, como pretende executar o serviço e o que está incluído no valor"></textarea></div>
+          <div class="field-group field-group-full"><label for="proposalMessage">O que está incluído?</label><textarea id="proposalMessage" name="proposalMessage" rows="5" minlength="10" maxlength="800" [(ngModel)]="proposal.message" required placeholder="Explique sua experiência, como pretende executar o serviço e o que está incluído no valor" aria-describedby="proposalMessageHelp"></textarea><app-character-count [value]="proposal.message" [minimum]="10" [maximum]="800" hintId="proposalMessageHelp"></app-character-count></div>
           <div class="field-group"><label for="travelFee">Taxa de deslocamento</label><input id="travelFee" name="travelFee" type="number" min="0" step="0.01" [(ngModel)]="proposal.travelFee" placeholder="R$ 0"></div>
           <label class="availability-filter"><input type="checkbox" name="materialsIncluded" [(ngModel)]="proposal.materialsIncluded"><span><strong>Materiais incluídos</strong><small>O valor já considera os materiais</small></span></label>
         </div>

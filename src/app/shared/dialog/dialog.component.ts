@@ -33,8 +33,8 @@ export class DialogComponent implements OnChanges, OnDestroy {
   @Input() cancelLabel = 'Voltar';
   @Output() confirm = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
-  @ViewChild('primaryButton') primaryButton: ElementRef;
-  @ViewChild('cancelButton') cancelButton: ElementRef;
+  @ViewChild('primaryButton') primaryButton: ElementRef<HTMLButtonElement>;
+  @ViewChild('cancelButton') cancelButton: ElementRef<HTMLButtonElement>;
 
   private previouslyFocusedElement: HTMLElement;
   private previousBodyOverflow = '';
@@ -70,22 +70,18 @@ export class DialogComponent implements OnChanges, OnDestroy {
       return;
     }
 
-    if (!this.confirmation || !this.cancelButton) {
-      keyboardEvent.preventDefault();
-      this.primaryButton.nativeElement.focus();
-      return;
-    }
-
+    const dialog = this.primaryButton.nativeElement.closest('[role="dialog"]');
+    if (!dialog) return;
+    const focusableElements = Array.from(dialog.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'))
+      .filter(element => element.offsetParent !== null);
+    if (!focusableElements.length) return;
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
     const activeElement = this.document.activeElement;
-    if (keyboardEvent.shiftKey && activeElement === this.cancelButton.nativeElement) {
-      keyboardEvent.preventDefault();
-      this.primaryButton.nativeElement.focus();
-      return;
-    }
-
-    if (!keyboardEvent.shiftKey && activeElement === this.primaryButton.nativeElement) {
-      keyboardEvent.preventDefault();
-      this.cancelButton.nativeElement.focus();
+    if (keyboardEvent.shiftKey && (activeElement === firstElement || !dialog.contains(activeElement))) {
+      keyboardEvent.preventDefault(); lastElement.focus();
+    } else if (!keyboardEvent.shiftKey && (activeElement === lastElement || !dialog.contains(activeElement))) {
+      keyboardEvent.preventDefault(); firstElement.focus();
     }
   }
 

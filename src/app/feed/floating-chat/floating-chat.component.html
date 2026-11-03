@@ -3,7 +3,7 @@
     <header class="chat-panel-header">
       <div><span>Central de contato</span><h2>Mensagens <small *ngIf="contacts.length">{{ contacts.length }}</small></h2></div>
       <button class="icon-button" *ngIf="!docked" type="button" (click)="closeChat()" aria-label="Fechar conversas">×</button>
-      <a class="expand-chat" *ngIf="docked" routerLink="/conversas" aria-label="Ver todas as conversas">↗</a>
+      <a class="expand-chat" *ngIf="docked" routerLink="/conversas" aria-label="Ver todas as conversas"><app-arrow-icon direction="external"></app-arrow-icon></a>
     </header>
 
     <div class="chat-search" *ngIf="!isLoading && contacts.length">
@@ -19,7 +19,7 @@
         <img class="contact-avatar" *ngIf="contact.foto" [src]="contact.foto" [alt]="contact.nome" (error)="hideUnavailableContactPhoto(contact)">
         <span class="contact-avatar contact-initial" *ngIf="!contact.foto" aria-hidden="true">{{ contact.nome ? contact.nome.charAt(0) : 'HE' }}</span>
         <span class="contact-copy"><strong>{{ contact.conversationServiceName }}</strong><small>{{ contact.nome }} · {{ contact.conversationWritable ? 'Ativa' : 'Encerrada' }}</small></span>
-        <span class="contact-arrow" aria-hidden="true">→</span>
+        <span class="contact-arrow" aria-hidden="true"><app-arrow-icon></app-arrow-icon></span>
       </a>
     </div>
 

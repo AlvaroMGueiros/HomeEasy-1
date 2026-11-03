@@ -38,6 +38,12 @@ export class ScheduleService {
     return this.http.get<ProfessionalSchedule>(`${environment.apiUrl}/schedules/me`);
   }
 
+  getPublicSchedule(professionalId: string) { return this.http.get<ProfessionalSchedule>(`${environment.apiUrl}/schedules/${professionalId}`); }
+  saveSchedule(schedule: ProfessionalSchedule) { return this.http.put<ProfessionalSchedule>(`${environment.apiUrl}/schedules/me`, schedule); }
+  findAvailability(professionalId: string, availableAt: string, durationMinutes = 60) {
+    return this.http.get<{ isAvailable: boolean; timeZone: string }>(`${environment.apiUrl}/schedules/${professionalId}/availability`, { params: { availableAt, durationMinutes } });
+  }
+
   replaceWeeklySchedule(weekdays: string[], startTime: string, endTime: string) {
     const periods = weekdays.map(weekday => ({
       weekday: weekdayIndexes[weekday],

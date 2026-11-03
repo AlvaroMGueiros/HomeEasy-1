@@ -5,7 +5,7 @@ import { map, switchMap } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
 import { OrderStatus } from '../Usuarios/pedido';
-import { ServiceProposal, ServiceRequest } from '../shared/models/service-request';
+import { OwnProposal, ServiceProposal, ServiceRequest } from '../shared/models/service-request';
 import { MediaPurpose, MediaUploadService } from './media-upload.service';
 import { CancellationReason } from '../shared/models/cancellation-reason';
 
@@ -45,6 +45,7 @@ interface ApiProposal {
 
 @Injectable({ providedIn: 'root' })
 export class ServiceRequestService {
+  getOwnProposals() { return this.http.get<OwnProposal[]>(`${environment.apiUrl}/marketplace/proposals/me`); }
   constructor(private http: HttpClient, private mediaUploadService: MediaUploadService) {}
 
   async createRequest(request: ServiceRequest, clientId: string) {
@@ -127,7 +128,7 @@ export class ServiceRequestService {
 
   acceptProposal(requestId: string, proposalId: string, clientId: string) {
     return firstValueFrom(
-      this.http.post(
+      this.http.post<{ id: string }>(
         `${environment.apiUrl}/marketplace/requests/${requestId}/proposals/${proposalId}/accept`,
         {}
       )

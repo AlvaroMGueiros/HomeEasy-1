@@ -9,6 +9,7 @@ import { resolveServiceIcon, ServiceIconType } from '../utils/service-icon.utils
   styleUrls: ['./service-icon.component.css']
 })
 export class ServiceIconComponent {
+  @Input() colorful = false;
   iconType: ServiceIconType = 'tools';
 
   @Input()

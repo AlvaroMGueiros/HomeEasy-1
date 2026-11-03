@@ -8,6 +8,7 @@ import { RedefinirSenhaComponent } from './redefinir-senha/redefinir-senha.compo
 import { LoginServiceService } from '../Servicos/login-service.service';
 import { LoginRoutingModule } from './login.routing.module';
 import { SharedModule } from '../shared/shared.module';
+import { GoogleAuthButtonComponent } from './google-auth-button/google-auth-button.component';
 
 @NgModule({
     imports:[
@@ -17,6 +18,7 @@ import { SharedModule } from '../shared/shared.module';
         SharedModule
     ],
     declarations:[
+        GoogleAuthButtonComponent,
         LoginCadastroComponent,
         RecuperarSenhaComponent,
         RedefinirSenhaComponent

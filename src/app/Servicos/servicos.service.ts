@@ -9,6 +9,7 @@ import { Usuario } from '../Usuarios/usuario';
 import { ServiceRequestField } from '../shared/models/service-request-field';
 import { CityGeocodingService } from './city-geocoding.service';
 import { ApiSessionService } from './api-session.service';
+import { UsuarioService } from './usuario.service';
 
 interface ApiService {
   id: string;
@@ -22,6 +23,7 @@ interface ApiService {
 
 interface ApiProfessionalProfile {
   id: string;
+  profilePhotoMediaId?: string;
   name: string;
   bio: string;
   phone?: string;
@@ -31,6 +33,7 @@ interface ApiProfessionalProfile {
   yearsOfExperience: number;
   isAvailable: boolean;
   verificationStatus?: Usuario['verificationStatus'];
+  metrics?: { averageRating?: number; verifiedReviewCount?: number };
   services: ApiService[];
 }
 
@@ -43,7 +46,8 @@ export class ServicosService {
   constructor(
     private http: HttpClient,
     private geocodingService: CityGeocodingService,
-    private sessionService: ApiSessionService
+    private sessionService: ApiSessionService,
+    private usuarioService: UsuarioService
   ) {}
 
   getServicoPorNome(name: string) {
@@ -125,14 +129,23 @@ export class ServicosService {
     const params = new HttpParams().set('serviceId', serviceId).set('limit', '50');
     return this.http.get<ApiProfessionalsResponse>(`${environment.apiUrl}/professionals`, { params }).pipe(
       map(response =>
-        response.professionals.map(profile => ({
-          id: profile.id,
-          nome: profile.name,
-          cidade: profile.city,
-          estado: profile.state,
-          availableForService: profile.isAvailable,
-          verificationStatus: profile.verificationStatus
-        } as Usuario))
+        response.professionals.map(profile => {
+          const selectedService = profile.services.find(service => service.id === serviceId);
+          return {
+            id: profile.id,
+            nome: profile.name,
+            profilePhotoMediaId: profile.profilePhotoMediaId,
+            foto: profile.profilePhotoMediaId ? this.usuarioService.getProfilePhotoUrl(profile.profilePhotoMediaId) : undefined,
+            cidade: profile.city,
+            estado: profile.state,
+            availableForService: profile.isAvailable,
+            serviceBasePrice: selectedService?.basePrice,
+            serviceDescription: selectedService?.description,
+            averageRating: profile.metrics?.averageRating,
+            ratingCount: profile.metrics?.verifiedReviewCount,
+            verificationStatus: profile.verificationStatus
+          } as Usuario;
+        })
       )
     );
   }

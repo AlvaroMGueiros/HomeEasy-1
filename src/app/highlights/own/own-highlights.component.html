@@ -1,0 +1,16 @@
+<app-navbar [authenticated]="true" [userId]="userId" (logout)="logout()"></app-navbar>
+<main class="app-page"><div class="page-shell page-shell-narrow">
+  <header class="page-heading"><span class="pageEmblem"><app-page-icon name="star"></app-page-icon></span><div><span class="page-kicker">Área profissional</span><h1>Minhas publicações</h1></div><a class="button-primary" routerLink="/destaques/publicar">Publicar trabalho</a></header>
+  <app-loading-state *ngIf="isLoading" message="Carregando publicações..."></app-loading-state>
+  <app-action-feedback type="error" [message]="error"></app-action-feedback><button class="button-secondary" *ngIf="error" (click)="load()">Tentar novamente</button>
+  <div class="entity-grid" *ngIf="!isLoading && !error && publications.length">
+    <article class="entity-card" *ngFor="let publication of publications">
+      <div class="entity-card-header"><h2>{{ publication.title }}</h2><span class="order-status-chip" [class.status-success]="publication.status === statuses.Approved" [class.status-pending]="publication.status === statuses.Pending" [class.status-danger]="publication.status === statuses.Rejected">{{ statusLabels[publication.status] }}</span></div>
+      <p *ngIf="publication.serviceName">{{ publication.serviceName }}</p><small class="field-help">{{ publication.createdAt | date:'dd/MM/yyyy' }}</small>
+      <p *ngIf="publication.reviewNotes" class="field-help">{{ publication.reviewNotes }}</p>
+      <div class="card-actions"><button class="button-quiet dangerAction" [disabled]="isSaving" (click)="selectedPublication = publication">Remover publicação</button></div>
+    </article>
+  </div>
+  <section class="empty-state" *ngIf="!isLoading && !error && !publications.length"><div class="empty-state-content"><h2>Nenhuma publicação ainda</h2><p>Seus trabalhos publicados e em análise aparecerão aqui.</p></div></section>
+</div></main>
+<app-dialog [open]="!!selectedPublication" title="Remover publicação?" message="O trabalho deixará de aparecer no feed." [confirmation]="true" [dangerAction]="true" [loading]="isSaving" confirmLabel="Remover publicação" (confirm)="archive()" (cancel)="selectedPublication = null"></app-dialog>

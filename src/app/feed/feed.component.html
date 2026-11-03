@@ -1,99 +1,60 @@
-<app-navbar [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
-
+<app-navbar [hideSearch]="true" [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
 <div class="feed-dashboard" [class.guest-dashboard]="!entrarSair">
   <main class="feed-content">
-    <section class="dashboard-hero">
-      <div class="hero-copy">
-        <span class="hero-eyebrow">Serviços para a sua casa</span>
-        <h1>Resolva sua casa com profissionais <em>de confiança.</em></h1>
-        <p>Encontre especialistas para qualquer serviço que você precisa, compare opções e contrate com tranquilidade.</p>
+    <header class="search-heading"><div><span class="section-overline">Serviços residenciais</span><h1>Encontrar profissionais</h1></div><a routerLink="/destaques" class="button-quiet">Ver trabalhos publicados <app-arrow-icon></app-arrow-icon></a></header>
+    <section class="search-toolbar" aria-label="Buscar profissionais">
+      <form class="feed-search" (ngSubmit)="searchService()" role="search">
+        <app-page-icon name="search"></app-page-icon><label class="sr-only" for="serviceSearch">Buscar serviço ou problema</label>
+        <input id="serviceSearch" name="serviceSearch" type="search" [(ngModel)]="serviceSearch" (ngModelChange)="onSearchChange()" placeholder="Qual serviço você precisa?" autocomplete="off">
+        <button class="button-primary" type="submit">Buscar</button>
+      </form>
+      <label class="location-picker" for="cityFilter"><app-page-icon name="location"></app-page-icon><span class="sr-only">Cidade</span><select id="cityFilter" name="cityFilter" [(ngModel)]="cityFilter" (ngModelChange)="onFilterChange()" [disabled]="isFilterMetadataLoading"><option value="">Todas as cidades</option><option *ngFor="let city of availableCities" [value]="city">{{ city }}</option></select></label>
+      <button class="filter-toggle button-secondary" type="button" (click)="toggleFilterPanel()" [attr.aria-expanded]="isFilterPanelOpen" aria-controls="advancedFilters"><app-page-icon name="settings"></app-page-icon>{{ isFilterPanelOpen ? 'Ocultar filtros' : 'Mais filtros' }}</button>
+    </section>
 
-        <form class="feed-search" #searchForm="ngForm" (ngSubmit)="searchService()" role="search">
-          <span class="search-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5L21 21"></path></svg></span>
-          <label class="sr-only" for="serviceSearch">Buscar serviço ou problema</label>
-          <input id="serviceSearch" name="serviceSearch" type="search" [(ngModel)]="serviceSearch" (ngModelChange)="onSearchChange()" placeholder="O que você precisa? Ex.: limpeza, pintura..." autocomplete="off">
-          <button class="button-primary" type="submit">Buscar serviço</button>
-        </form>
-
-        <div class="popular-searches" *ngIf="popularServices.length">
-          <span>Buscas populares:</span>
-          <button type="button" *ngFor="let service of popularServices" (click)="selectPopularService(service.nome)">{{ service.nome }}</button>
-        </div>
+    <section class="filter-panel" id="advancedFilters" *ngIf="isFilterPanelOpen" aria-labelledby="filterTitle">
+      <header class="filter-header"><h2 id="filterTitle">Refinar resultados</h2><button class="button-quiet" type="button" *ngIf="hasActiveFilters()" (click)="clearFilters()">Limpar filtros</button></header>
+      <div class="filter-grid">
+        <div class="field-group"><label for="categoryFilter">Categoria</label><select id="categoryFilter" name="categoryFilter" [(ngModel)]="categoryFilter" (ngModelChange)="onFilterChange()"><option value="all">Todas</option><option *ngFor="let category of serviceCategories" [value]="category">{{ category }}</option></select></div>
+        <div class="field-group"><label for="minimumPrice">Preço mínimo</label><input id="minimumPrice" name="minimumPrice" type="number" min="0" [(ngModel)]="minimumPrice" (ngModelChange)="onFilterChange()" placeholder="R$ 0"></div>
+        <div class="field-group"><label for="maximumPrice">Preço máximo</label><input id="maximumPrice" name="maximumPrice" type="number" min="0" [(ngModel)]="maximumPrice" (ngModelChange)="onFilterChange()" placeholder="Sem limite"></div>
+        <div class="field-group"><label for="minimumRating">Avaliação mínima</label><select id="minimumRating" name="minimumRating" [(ngModel)]="minimumRating" (ngModelChange)="onFilterChange()"><option [ngValue]="0">Qualquer nota</option><option [ngValue]="3">3 ou mais</option><option [ngValue]="4">4 ou mais</option><option [ngValue]="4.5">4,5 ou mais</option></select></div>
+        <label class="availability-filter"><input type="checkbox" name="availableOnly" [(ngModel)]="availableOnly" (ngModelChange)="onFilterChange()">Somente disponíveis</label>
       </div>
+      <p class="field-error" *ngIf="hasInvalidPriceRange">O preço mínimo deve ser menor ou igual ao preço máximo.</p>
+    </section>
 
-      <div class="hero-visual" aria-label="Home Easy conecta sua casa a profissionais">
-        <span class="hero-shape hero-shape-one"></span><span class="hero-shape hero-shape-two"></span>
-        <div class="hero-logo"><img src="assets/home-easy-logo-v2.png" alt="Home Easy"></div>
-        <div class="trust-card trust-card-top"><span class="trust-icon">✓</span><strong>Profissionais</strong><small>Perfis e serviços organizados</small></div>
-        <div class="trust-card trust-card-bottom"><span class="trust-icon">★</span><strong>Avaliações reais</strong><small>Experiências de clientes</small></div>
+    <section class="services-section" aria-labelledby="servicesTitle">
+      <h2 class="sr-only" id="servicesTitle">Categorias de serviços</h2>
+      <app-loading-state *ngIf="isCatalogLoading" message="Carregando serviços..."></app-loading-state>
+      <app-action-feedback *ngIf="hasCatalogLoadError" type="error" message="Não foi possível carregar os serviços."></app-action-feedback>
+      <button *ngIf="hasCatalogLoadError" class="button-secondary" (click)="loadServiceCategories()">Tentar novamente</button>
+      <div class="category-grid" id="serviceCategories" [class.expanded]="servicesExpanded" *ngIf="!hasCatalogLoadError && !isCatalogLoading">
+        <button class="category-all" [attr.aria-pressed]="!serviceSearch && categoryFilter === 'all'" [class.selected]="!serviceSearch && categoryFilter === 'all'" type="button" (click)="clearServiceSelection()"><app-page-icon name="briefcase"></app-page-icon><span>Todos</span></button>
+        <button class="category-card" *ngFor="let service of visibleServices" [class.selected]="serviceSearch === service.nome" [attr.aria-pressed]="serviceSearch === service.nome" type="button" (click)="selectService(service.nome)"><app-service-icon [serviceName]="service.nome"></app-service-icon><strong>{{ service.nome }}</strong></button>
+        <button class="exploreServices" *ngIf="services.length > initialServiceCount" type="button" (click)="toggleServices()" aria-controls="serviceCategories" [attr.aria-expanded]="servicesExpanded"><app-page-icon name="plus" *ngIf="!servicesExpanded"></app-page-icon><app-arrow-icon direction="left" *ngIf="servicesExpanded"></app-arrow-icon><span>{{ servicesExpanded ? 'Mostrar menos serviços' : 'Explorar todos os serviços' }}</span></button>
       </div>
     </section>
 
-    <section class="dashboard-section services-section" aria-labelledby="servicesTitle">
-      <header class="section-heading">
-        <div><span class="section-overline">Encontre o serviço certo</span><h2 id="servicesTitle">Categorias de serviços</h2></div>
-        <button class="filter-toggle" type="button" (click)="toggleFilterPanel()" [attr.aria-expanded]="isFilterPanelOpen" aria-controls="advancedFilters">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"></path></svg>{{ isFilterPanelOpen ? 'Ocultar filtros' : 'Mais filtros' }}
-        </button>
-      </header>
+    <div class="mobile-views" role="group" aria-label="Visualização dos resultados"><button type="button" [class.selected]="mobileView === 'list'" [attr.aria-pressed]="mobileView === 'list'" (click)="mobileView = 'list'"><app-page-icon name="briefcase"></app-page-icon>Lista</button><button type="button" [class.selected]="mobileView === 'map'" [attr.aria-pressed]="mobileView === 'map'" (click)="mobileView = 'map'"><app-page-icon name="location"></app-page-icon>Mapa</button></div>
 
-      <section class="filter-panel" id="advancedFilters" aria-labelledby="filterTitle" *ngIf="isFilterPanelOpen">
-        <header class="filter-header"><div><span class="section-overline">Refine sua busca</span><h3 id="filterTitle">Filtros</h3></div><button class="button-quiet" type="button" *ngIf="hasActiveFilters()" (click)="clearFilters()">Limpar filtros</button></header>
-        <div class="filter-grid">
-          <div class="field-group"><label for="categoryFilter">Categoria</label><select id="categoryFilter" name="categoryFilter" [(ngModel)]="categoryFilter" (ngModelChange)="onFilterChange()"><option value="all">Todas</option><option value="domestic">Domésticos</option><option value="renovation">Reformas e reparos</option></select></div>
-          <div class="field-group"><label for="cityFilter">Cidade</label><select id="cityFilter" name="cityFilter" [(ngModel)]="cityFilter" (ngModelChange)="onFilterChange()" [disabled]="isFilterMetadataLoading"><option value="">Todas as cidades</option><option *ngFor="let city of availableCities" [value]="city">{{ city }}</option></select></div>
-          <div class="field-group"><label for="minimumPrice">Preço mínimo</label><input id="minimumPrice" name="minimumPrice" type="number" min="0" step="1" [(ngModel)]="minimumPrice" (ngModelChange)="onFilterChange()" placeholder="R$ 0"></div>
-          <div class="field-group"><label for="maximumPrice">Preço máximo</label><input id="maximumPrice" name="maximumPrice" type="number" min="0" step="1" [(ngModel)]="maximumPrice" (ngModelChange)="onFilterChange()" placeholder="Sem limite"></div>
-          <div class="field-group"><label for="minimumRating">Avaliação mínima</label><select id="minimumRating" name="minimumRating" [(ngModel)]="minimumRating" (ngModelChange)="onFilterChange()"><option [ngValue]="0">Qualquer nota</option><option [ngValue]="3">3 ou mais</option><option [ngValue]="4">4 ou mais</option><option [ngValue]="4.5">4,5 ou mais</option></select></div>
-          <label class="availability-filter"><input type="checkbox" name="availableOnly" [(ngModel)]="availableOnly" (ngModelChange)="onFilterChange()"><span><strong>Somente disponíveis</strong><small>Com profissional cadastrado</small></span></label>
+    <div class="discovery-layout" [class.map-view]="mobileView === 'map'">
+      <section class="results-panel" aria-labelledby="professionalsTitle">
+        <header class="results-heading"><h2 id="professionalsTitle" aria-live="polite"><ng-container *ngIf="isFilterMetadataLoading">Buscando profissionais</ng-container><ng-container *ngIf="!isFilterMetadataLoading">{{ matchingProfessionals.length }} {{ matchingProfessionals.length === 1 ? 'profissional encontrado' : 'profissionais encontrados' }}</ng-container></h2><span *ngIf="cityFilter">{{ cityFilter }}</span></header>
+        <app-loading-state *ngIf="isFilterMetadataLoading" message="Buscando profissionais..."></app-loading-state>
+        <app-action-feedback *ngIf="hasMetadataLoadError" type="error" message="Alguns profissionais não puderam ser carregados."></app-action-feedback>
+        <button class="button-secondary" *ngIf="hasMetadataLoadError && !hasCatalogLoadError" (click)="loadServiceCategories()">Tentar novamente</button>
+        <div class="professional-grid" *ngIf="!isFilterMetadataLoading">
+          <article class="professional-card" *ngFor="let professional of matchingProfessionals">
+            <div class="professional-card-header"><img *ngIf="professional.professionalPhoto" [src]="professional.professionalPhoto" [alt]="professional.professionalName" (error)="hideUnavailableProfessionalPhoto(professional)"><span class="professional-initial" *ngIf="!professional.professionalPhoto" aria-hidden="true">{{ getProfessionalInitial(professional.professionalName) }}</span><div><h3>{{ professional.professionalName }}</h3><p>{{ professional.serviceName }}</p><div class="professional-meta"><span class="professional-location"><app-page-icon name="location"></app-page-icon>{{ professional.city || 'Local a combinar' }}</span><span class="professional-rating" *ngIf="professional.ratingCount"><strong>★ {{ professional.averageRating | number:'1.1-1' }}</strong> ({{ professional.ratingCount }})</span><span class="professional-rating" *ngIf="!professional.ratingCount">Sem avaliações</span></div></div></div>
+            <p class="professional-description" *ngIf="professional.description">{{ professional.description }}</p>
+            <div class="professional-footer"><span *ngIf="hasProfessionalPrice(professional.price)"><small>A partir de</small><strong>{{ professional.price | currency:'BRL' }}</strong></span><a class="button-primary" [routerLink]="['/serviço', professional.serviceId, 'usuario', professional.professionalId]">Ver perfil <app-arrow-icon direction="chevron"></app-arrow-icon></a></div>
+          </article>
         </div>
-        <div class="filter-summary" aria-live="polite"><span *ngIf="isFilterMetadataLoading">Carregando informações...</span><span class="filter-error" *ngIf="!isFilterMetadataLoading && hasInvalidPriceRange">O preço mínimo deve ser menor ou igual ao preço máximo.</span><strong *ngIf="!isFilterMetadataLoading && !hasInvalidPriceRange">{{ totalFilteredServices }} serviço(s) encontrado(s)</strong></div>
+        <section class="empty-state" *ngIf="!hasCatalogLoadError && !isFilterMetadataLoading && !matchingProfessionals.length"><div><app-page-icon name="search"></app-page-icon><h3>Nenhum profissional encontrado</h3><p>Tente outro serviço ou amplie a região da busca.</p><button *ngIf="hasActiveFilters()" class="button-secondary" (click)="clearFilters()">Limpar filtros</button></div></section>
       </section>
-
-      <app-loading-state *ngIf="isDomesticLoading || isRenovationLoading" message="Carregando categorias..."></app-loading-state>
-
-      <div class="category-grid" *ngIf="!isDomesticLoading && !isRenovationLoading && filteredServices.length">
-        <a class="category-card" *ngFor="let service of filteredServices" [routerLink]="['/serviço', service.id]">
-          <app-service-icon [serviceName]="service.nome"></app-service-icon>
-          <strong>{{ service.nome }}</strong>
-          <small *ngIf="isFilterMetadataLoading">Ver profissionais</small>
-          <small *ngIf="!isFilterMetadataLoading">{{ getServiceProfessionalCount(service.id) }} profissional(is)</small>
-          <span aria-hidden="true">→</span>
-        </a>
-      </div>
-
-      <div class="empty-state compact-empty" *ngIf="!isDomesticLoading && !isRenovationLoading && !isFilterMetadataLoading && !filteredServices.length">
-        <div class="empty-state-content"><span class="icon-badge">0</span><h2>Nenhum serviço encontrado</h2><p>Tente buscar outro termo ou ampliar os filtros.</p><button class="button-primary" type="button" (click)="clearFilters()">Limpar filtros</button></div>
-      </div>
-    </section>
-
-    <section class="dashboard-section" aria-labelledby="professionalsTitle">
-      <header class="section-heading"><div><span class="section-overline">Escolhas com boa reputação</span><h2 id="professionalsTitle">Profissionais recomendados para você</h2></div></header>
-      <div class="professional-skeleton-grid" *ngIf="isFilterMetadataLoading" aria-label="Carregando profissionais"><span></span><span></span><span></span></div>
-      <div class="professional-grid" *ngIf="!isFilterMetadataLoading && recommendedProfessionals.length">
-        <article class="professional-card" *ngFor="let professional of recommendedProfessionals">
-          <div class="professional-card-header">
-            <img *ngIf="professional.professionalPhoto" [src]="professional.professionalPhoto" [alt]="professional.professionalName" (error)="hideUnavailableProfessionalPhoto(professional)">
-            <span class="professional-initial" *ngIf="!professional.professionalPhoto" aria-hidden="true">{{ getProfessionalInitial(professional.professionalName) }}</span>
-            <div><h3>{{ professional.professionalName }}</h3><p>{{ professional.serviceName }}</p></div>
-          </div>
-          <div class="professional-rating" *ngIf="professional.ratingCount"><strong>★ {{ professional.averageRating | number:'1.1-1' }}</strong><span>({{ professional.ratingCount }} avaliações)</span></div>
-          <div class="professional-rating" *ngIf="!professional.ratingCount"><span>Novo profissional</span></div>
-          <div class="professional-footer"><span *ngIf="hasProfessionalPrice(professional.price)"><small>A partir de</small><strong>{{ professional.price | currency:'BRL':'symbol':'1.0-0' }}</strong></span><span *ngIf="!hasProfessionalPrice(professional.price)"><small>{{ professional.city || 'Atendimento a combinar' }}</small></span><a [routerLink]="['/serviço', professional.serviceId, 'usuario', professional.professionalId]">Ver perfil</a></div>
-        </article>
-      </div>
-      <div class="empty-state compact-empty" *ngIf="!isFilterMetadataLoading && !recommendedProfessionals.length"><div class="empty-state-content"><h2>Profissionais em breve</h2><p>Ainda não há profissionais com dados suficientes para recomendação.</p></div></div>
-    </section>
-
-    <app-regional-service-map [regions]="serviceRegions" [isLoading]="isFilterMetadataLoading" (citySelected)="selectCityFromMap($event)"></app-regional-service-map>
-
-    <section class="trust-strip" aria-label="Por que usar o Home Easy">
-      <article><span>✓</span><div><h3>Profissionais cadastrados</h3><p>Compare perfis antes de escolher.</p></div></article>
-      <article><span>★</span><div><h3>Avaliações reais</h3><p>Veja opiniões de outros clientes.</p></div></article>
-      <article><span>⌂</span><div><h3>Serviços na sua região</h3><p>Encontre ajuda perto de você.</p></div></article>
-      <article><span>?</span><div><h3>Suporte rápido</h3><p>Converse diretamente pela plataforma.</p></div></article>
-    </section>
+      <aside class="map-panel" aria-label="Profissionais por região"><app-regional-service-map *ngIf="!hasCatalogLoadError" [embedded]="true" [regions]="serviceRegions" [isLoading]="isFilterMetadataLoading" (regionSelected)="openRegion($event)"></app-regional-service-map></aside>
+    </div>
   </main>
-
-  <app-floating-chat [authenticated]="entrarSair" [userId]="userId" [docked]="entrarSair"></app-floating-chat>
+  <app-floating-chat [authenticated]="entrarSair" [userId]="userId" [docked]="false"></app-floating-chat>
 </div>

@@ -11,6 +11,7 @@ export class LoginServiceService {
   login(user: Usuario) {
     return firstValueFrom(this.sessionService.login(user.email || '', user.senha || ''));
   }
+  loginWithGoogle(idToken: string, birthDate?: string) { return firstValueFrom(this.sessionService.loginWithGoogle(idToken, birthDate)); }
 
   register(user: Usuario) {
     return firstValueFrom(

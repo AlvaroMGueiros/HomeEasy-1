@@ -1,9 +1,8 @@
 import { Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
+import * as L from 'leaflet';
 
 import { CityGeocodingService } from '../../Servicos/city-geocoding.service';
 import { ServiceRegion } from '../../shared/models/service-region';
-
-declare const L: any;
 
 @Component({
   standalone: false,
@@ -14,19 +13,22 @@ declare const L: any;
 export class RegionalServiceMapComponent implements OnChanges, OnDestroy {
   @Input() regions = new Array<ServiceRegion>();
   @Input() isLoading = false;
-  @Output() citySelected = new EventEmitter<string>();
+  @Input() embedded = false;
+  @Output() regionSelected = new EventEmitter<ServiceRegion>();
   @ViewChild('mapContainer') mapContainer: ElementRef;
 
   isOpen = false;
   isLocatingCities = false;
   mapFeedback = '';
-  private map: any;
-  private markerLayer: any;
+  private map: L.Map;
+  private markerLayer: L.LayerGroup;
   private renderVersion = 0;
+  private resizeObserver: ResizeObserver;
 
   constructor(private cityGeocodingService: CityGeocodingService) { }
 
   ngOnChanges(changes: SimpleChanges) {
+    if (this.embedded) this.isOpen = true;
     if (!this.isOpen) {
       return;
     }
@@ -56,12 +58,12 @@ export class RegionalServiceMapComponent implements OnChanges, OnDestroy {
     this.scheduleMapInitialization();
   }
 
-  selectCity(city: string) {
-    this.citySelected.emit(city);
+  selectRegion(region: ServiceRegion) {
+    this.regionSelected.emit(region);
   }
 
   private initializeMap() {
-    if (!this.mapContainer || this.map) {
+    if (!this.isOpen || this.isLoading || !this.regions.length || !this.mapContainer || this.map) {
       return;
     }
 
@@ -75,6 +77,8 @@ export class RegionalServiceMapComponent implements OnChanges, OnDestroy {
     }).addTo(this.map);
 
     this.markerLayer = L.layerGroup().addTo(this.map);
+    this.resizeObserver = new ResizeObserver(() => this.map?.invalidateSize());
+    this.resizeObserver.observe(this.mapContainer.nativeElement);
     this.map.invalidateSize();
     this.renderRegions();
   }
@@ -89,7 +93,7 @@ export class RegionalServiceMapComponent implements OnChanges, OnDestroy {
     }
 
     const currentRenderVersion = ++this.renderVersion;
-    const locatedCoordinates = new Array<any>();
+    const locatedCoordinates: L.LatLngTuple[] = [];
     let unavailableCityCount = 0;
 
     this.markerLayer.clearLayers();
@@ -104,14 +108,14 @@ export class RegionalServiceMapComponent implements OnChanges, OnDestroy {
           return;
         }
 
-        const markerCoordinates = [coordinates.latitude, coordinates.longitude];
+        const markerCoordinates: L.LatLngTuple = [coordinates.latitude, coordinates.longitude];
         const markerIcon = L.divIcon({
           className: 'regional-map-marker',
           html: `<span>${region.professionalCount}</span>`,
           iconSize: [46, 46],
           iconAnchor: [23, 23]
         });
-        const markerTitle = `${region.city}: ${region.professionalCount} profissionais`;
+        const markerTitle = `${region.city}, ${region.state}: ${region.professionalCount} profissionais`;
         const marker = L.marker(markerCoordinates, {
           icon: markerIcon,
           keyboard: true,
@@ -119,7 +123,7 @@ export class RegionalServiceMapComponent implements OnChanges, OnDestroy {
           alt: markerTitle
         });
 
-        marker.on('click', () => this.selectCity(region.city));
+        marker.on('click', () => this.selectRegion(region));
         marker.addTo(this.markerLayer);
         locatedCoordinates.push(markerCoordinates);
       } catch (error) {
@@ -144,7 +148,7 @@ export class RegionalServiceMapComponent implements OnChanges, OnDestroy {
     }
   }
 
-  private updateMapViewport(locatedCoordinates: any[]) {
+  private updateMapViewport(locatedCoordinates: L.LatLngTuple[]) {
     if (!locatedCoordinates.length) {
       this.map.setView([-14.235, -51.9253], 4);
       return;
@@ -162,6 +166,7 @@ export class RegionalServiceMapComponent implements OnChanges, OnDestroy {
   }
 
   private destroyMap() {
+    this.resizeObserver?.disconnect();
     this.renderVersion++;
     this.isLocatingCities = false;
 
