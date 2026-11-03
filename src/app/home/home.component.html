@@ -2,40 +2,46 @@
 <main class="home-page">
   <section class="hero" aria-labelledby="homeTitle">
     <div class="hero-copy">
-      <span class="eyebrow">Serviços para sua casa</span>
-      <h1 id="homeTitle">Encontre profissionais<br>para sua casa</h1>
-      <p>Encontre profissionais na sua região, compare propostas e acompanhe o serviço do primeiro contato à conclusão.</p>
-      <div class="hero-actions">
-        <a class="button-primary" routerLink="/feed">Encontrar profissionais <app-arrow-icon></app-arrow-icon></a>
-        <a class="hero-secondary" routerLink="/profissional">Quero oferecer serviços <app-arrow-icon direction="external"></app-arrow-icon></a>
-      </div>
-      <div class="hero-proof"><span><app-page-icon name="location"></app-page-icon>Busca por região</span><span><app-page-icon name="star"></app-page-icon>Avaliações de clientes</span><span><app-page-icon name="message"></app-page-icon>Conversa pelo app</span></div>
+      <h1 id="homeTitle">Eletricista, diarista, encanador: encontre quem resolve na sua cidade</h1>
+      <p>Compare profissionais, peça orçamento e converse pela Home Easy. Acompanhe o serviço do primeiro contato à conclusão.</p>
+      <form class="homeSearch" (ngSubmit)="search()" role="search">
+        <label class="serviceField"><app-page-icon name="search"></app-page-icon><span class="sr-only">Serviço</span><input name="serviceSearch" [(ngModel)]="serviceSearch" type="search" maxlength="100" placeholder="Qual serviço você precisa?"></label>
+        <label class="cityField"><app-page-icon name="location"></app-page-icon><span class="sr-only">Cidade</span><input name="citySearch" [(ngModel)]="citySearch" maxlength="100" placeholder="Sua cidade"></label>
+        <button class="button-primary" type="submit">Buscar</button>
+      </form>
+      <div class="popularSearches"><span>Explore:</span><a *ngFor="let service of popularServices" routerLink="/feed" [queryParams]="{q: service, city: citySearch.trim() || undefined}">{{ service }}</a></div>
+      <div class="hero-proof"><span><app-page-icon name="location"></app-page-icon>Busca por região</span><span><app-page-icon name="star"></app-page-icon>Avaliações de clientes</span><span><app-page-icon name="message"></app-page-icon>Chat na plataforma</span></div>
     </div>
-    <div class="service-explorer">
-      <header><span class="explorer-icon"><app-page-icon name="search"></app-page-icon></span><div><span class="eyebrow">Por onde começar</span><h2>O que você precisa resolver?</h2></div></header>
-      <div class="explorer-services">
-        <a routerLink="/feed" [queryParams]="{ q: 'Limpeza' }"><app-service-icon serviceName="Limpeza" [colorful]="true"></app-service-icon><span><strong>Limpeza</strong><small>Mais cuidado com cada ambiente</small></span><app-arrow-icon direction="chevron"></app-arrow-icon></a>
-        <a routerLink="/feed" [queryParams]="{ q: 'Eletricista' }"><app-service-icon serviceName="Eletricista" [colorful]="true"></app-service-icon><span><strong>Elétrica</strong><small>Instalações e pequenos reparos</small></span><app-arrow-icon direction="chevron"></app-arrow-icon></a>
-        <a routerLink="/feed" [queryParams]="{ q: 'Encanador' }"><app-service-icon serviceName="Encanador" [colorful]="true"></app-service-icon><span><strong>Hidráulica</strong><small>Vazamentos e manutenção</small></span><app-arrow-icon direction="chevron"></app-arrow-icon></a>
-        <a routerLink="/feed" [queryParams]="{ q: 'Marceneiro' }"><app-service-icon serviceName="Marceneiro" [colorful]="true"></app-service-icon><span><strong>Marcenaria</strong><small>Montagem, ajustes e móveis</small></span><app-arrow-icon direction="chevron"></app-arrow-icon></a>
-      </div>
-      <a class="explorer-footer" routerLink="/feed">Explorar todos os serviços <app-arrow-icon></app-arrow-icon></a>
+    <aside class="professionalPreview" aria-label="Conheça profissionais da plataforma">
+      <app-loading-state *ngIf="isLoadingProfessionals" message="Carregando profissionais..."></app-loading-state>
+      <a class="previewCard" *ngFor="let professional of professionals" [routerLink]="['/profissionais', professional.id]">
+        <img *ngIf="professional.profilePhotoMediaId" [src]="mediaUrl(professional.profilePhotoMediaId)" [alt]="professional.name">
+        <span class="previewAvatar" *ngIf="!professional.profilePhotoMediaId" aria-hidden="true">{{ professional.name.charAt(0) }}</span>
+        <div><strong>{{ professional.name }}</strong><small>{{ professional.services[0]?.name }} · {{ professional.city }}</small><small *ngIf="professional.metrics?.verifiedReviewCount">★ {{ professional.metrics.averageRating | number:'1.1-1' }} · {{ professional.metrics.verifiedReviewCount }} avaliações</small></div>
+        <app-arrow-icon direction="chevron"></app-arrow-icon>
+      </a>
+      <div *ngIf="!isLoadingProfessionals && !professionals.length"><h2>Encontre seu próximo profissional</h2><p>{{ professionalsError ? 'Os perfis não puderam ser carregados agora. Continue pela busca.' : 'Explore os serviços e confira quem atende na sua região.' }}</p><a routerLink="/feed" class="button-secondary">Explorar profissionais <app-arrow-icon></app-arrow-icon></a></div>
+    </aside>
+  </section>
+  <section class="homeCategories" aria-labelledby="categoriesTitle">
+    <div class="section-heading"><h2 id="categoriesTitle">Do que você precisa hoje?</h2><p>Escolha o serviço e veja quem atende na sua região.</p></div>
+    <div class="homeCategoryGrid">
+      <a *ngFor="let category of categories" routerLink="/feed" [queryParams]="{ q: category.search, city: citySearch.trim() || undefined }"><app-service-icon [serviceName]="category.search" [colorful]="true"></app-service-icon><h3>{{ category.name }}</h3><p>{{ category.description }}</p></a>
+      <a class="allServices" routerLink="/feed"><app-page-icon name="plus"></app-page-icon><h3>Ver todos os serviços</h3><p>Dedetização, pintura e mais</p></a>
     </div>
   </section>
-
   <section class="how-it-works" aria-labelledby="stepsTitle">
-    <div class="section-heading"><div><span class="eyebrow">Do pedido ao serviço concluído</span><h2 id="stepsTitle">Como contratar um serviço</h2></div><p>Você escolhe o profissional e acompanha os próximos passos pela Home Easy.</p></div>
+    <div class="section-heading"><h2 id="stepsTitle">Como contratar</h2><p>Você escolhe o profissional e acompanha cada etapa pela Home Easy.</p></div>
     <ol class="steps-grid">
-      <li><div class="step-top"><span class="step-icon"><app-page-icon name="document"></app-page-icon></span><span class="step-number">01</span></div><h3>Conte o que precisa</h3><p>Escolha o serviço, informe o local e descreva os detalhes do seu pedido.</p></li>
-      <li><div class="step-top"><span class="step-icon"><app-page-icon name="message"></app-page-icon></span><span class="step-number">02</span></div><h3>Compare e combine</h3><p>Conheça os perfis, confira as propostas e alinhe o atendimento com o profissional.</p></li>
-      <li><div class="step-top"><span class="step-icon"><app-page-icon name="check"></app-page-icon></span><span class="step-number">03</span></div><h3>Acompanhe e avalie</h3><p>Mantenha a conversa e os detalhes organizados. Ao final, compartilhe sua experiência.</p></li>
+      <li><span class="step-number">1</span><h3>Descreva o que precisa</h3><p>Informe o serviço e o local. Se quiser, anexe fotos para explicar o pedido.</p></li>
+      <li><span class="step-number">2</span><h3>Compare propostas</h3><p>Confira perfis, preços e condições. Converse antes de decidir.</p></li>
+      <li><span class="step-number">3</span><h3>Contrate e avalie</h3><p>Acompanhe o atendimento até a conclusão e compartilhe sua experiência.</p></li>
     </ol>
   </section>
-
-  <section class="professional-callout" aria-labelledby="professionalTitle"><span class="callout-icon"><app-page-icon name="briefcase"></app-page-icon></span><div><span class="eyebrow">Para profissionais</span><h2 id="professionalTitle">Ofereça serviços na sua região</h2><p>Apresente seus serviços, publique seu portfólio e encontre oportunidades na sua região.</p></div><a class="button-secondary" routerLink="/profissional">Conhecer a área profissional <app-arrow-icon></app-arrow-icon></a></section>
-
-  <footer class="home-footer">
-    <div class="footer-main"><div><a class="home-brand" routerLink="/home"><span class="brand-logo-frame" aria-hidden="true"><img class="brand-logo" src="assets/home-easy-logo-v2.png" alt=""></span><strong>home easy</strong></a><p>Serviços residenciais, orçamentos e atendimentos.</p></div><nav aria-label="Links do rodapé"><a routerLink="/feed">Encontrar serviços</a><a routerLink="/profissional">Para profissionais</a><a routerLink="/contato">Falar com a equipe</a></nav></div>
-    <div class="footer-bottom"><span>© 2026 Home Easy</span><a routerLink="/login">Acessar minha conta <app-arrow-icon direction="external"></app-arrow-icon></a></div>
-  </footer>
+  <section class="recentWorks" aria-labelledby="worksTitle" *ngIf="portfolioProfessionals.length">
+    <div class="section-heading"><h2 id="worksTitle">Trabalhos no portfólio</h2><a routerLink="/destaques">Explorar Destaques <app-arrow-icon></app-arrow-icon></a></div>
+    <div class="workGrid"><a *ngFor="let professional of portfolioProfessionals" [routerLink]="['/profissionais', professional.id]"><img [src]="mediaUrl(professional.portfolioPhotos[0].mediaId)" [alt]="professional.portfolioPhotos[0].caption || 'Trabalho de ' + professional.name" loading="lazy"><div><h3>{{ professional.portfolioPhotos[0].caption || professional.services[0]?.name }}</h3><p>{{ professional.name }} · {{ professional.city }}</p></div></a></div>
+  </section>
+  <section class="professional-callout" aria-labelledby="professionalTitle"><div><h2 id="professionalTitle">Você é profissional? Receba pedidos de clientes perto de você.</h2><p>Crie seu perfil, apresente seus serviços e publique seu portfólio.</p></div><a class="button-secondary" routerLink="/profissional">Quero oferecer serviços <app-arrow-icon></app-arrow-icon></a></section>
+  <footer class="home-footer"><div class="footer-main"><a class="home-brand" routerLink="/home"><span class="brand-logo-frame" aria-hidden="true"><img class="brand-logo" src="assets/home-easy-logo-v2.png" alt=""></span><strong>home easy</strong></a><p>Serviços residenciais na sua região</p><nav aria-label="Links do rodapé"><a routerLink="/feed">Serviços</a><a routerLink="/contato">Suporte</a><a routerLink="/login">Entrar</a></nav></div><div class="footer-bottom">© 2026 Home Easy</div></footer>
 </main>
