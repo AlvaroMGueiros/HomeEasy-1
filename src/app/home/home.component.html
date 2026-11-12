@@ -3,12 +3,12 @@
   <section class="heroBand" aria-labelledby="homeTitle">
     <div class="hero">
       <div class="hero-copy">
-        <h1 id="homeTitle">O que você precisa resolver hoje?</h1>
-        <p>A HomeEasy conecta você ao profissional certo da sua região, com conversa direta, orçamento e avaliações de quem já contratou.</p>
+        <h1 id="homeTitle">Encontre quem resolve na sua casa</h1>
+        <p>Eletricistas, diaristas, encanadores e outros profissionais da sua cidade. Veja portfólio e avaliações, peça orçamento e combine tudo pelo chat.</p>
       </div>
 
       <aside class="heroPanel" aria-label="Profissionais da plataforma">
-        <header class="panelHead"><span class="os-tag">{{ professionals.length || isLoadingProfessionals ? 'Disponíveis agora' : 'Exemplo de pedido' }}</span><a routerLink="/feed">Ver todos</a></header>
+        <header class="panelHead"><span class="os-tag">{{ professionals.length || isLoadingProfessionals ? 'Atendendo agora' : 'Exemplo de pedido' }}</span><a routerLink="/feed">Ver todos</a></header>
         <app-loading-state *ngIf="isLoadingProfessionals" message="Carregando profissionais"></app-loading-state>
         <a class="proRow" *ngFor="let professional of professionals.slice(0, 3)" [routerLink]="['/profissionais', professional.id]">
           <img *ngIf="professional.profilePhotoMediaId" [src]="mediaUrl(professional.profilePhotoMediaId)" [alt]="professional.name">
@@ -27,12 +27,12 @@
     <div class="searchWrap">
       <form class="homeSearch" (ngSubmit)="search()" role="search">
         <label class="cityField">
-          <span class="fieldLabel">Onde</span>
+          <span class="fieldLabel">Cidade</span>
           <span class="fieldControl"><app-page-icon name="location"></app-page-icon><input name="citySearch" [(ngModel)]="citySearch" maxlength="100" placeholder="Sua cidade"></span>
         </label>
         <label class="serviceField">
-          <span class="fieldLabel">O que você precisa</span>
-          <input name="serviceSearch" [(ngModel)]="serviceSearch" type="search" maxlength="100" placeholder="Ex.: instalação de chuveiro">
+          <span class="fieldLabel">Serviço</span>
+          <input name="serviceSearch" [(ngModel)]="serviceSearch" type="search" maxlength="100" placeholder="Eletricista, diarista, encanador…">
         </label>
         <button class="searchButton" type="submit" aria-label="Buscar profissionais">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7"></circle><path d="m16 16 5 5"></path></svg>
@@ -45,7 +45,7 @@
   </section>
 
   <section class="featured" aria-labelledby="featuredTitle" *ngIf="professionals.length">
-    <div class="section-heading"><h2 id="featuredTitle">Profissionais em destaque</h2><a class="sectionLink" routerLink="/feed">Todos os profissionais <app-arrow-icon></app-arrow-icon></a></div>
+    <div class="section-heading"><h2 id="featuredTitle">Quem está atendendo</h2><a class="sectionLink" routerLink="/feed">Ver profissionais <app-arrow-icon></app-arrow-icon></a></div>
     <div class="featuredGrid">
       <a class="featuredCard" *ngFor="let professional of professionals" [routerLink]="['/profissionais', professional.id]">
         <div class="featuredMedia">
@@ -62,7 +62,7 @@
   </section>
 
   <section class="explore" aria-labelledby="exploreTitle">
-    <div class="section-heading"><h2 id="exploreTitle">Explorar</h2><a class="sectionLink" routerLink="/feed">Todas as categorias <app-arrow-icon></app-arrow-icon></a></div>
+    <div class="section-heading"><h2 id="exploreTitle">Por tipo de serviço</h2><a class="sectionLink" routerLink="/feed">Ver catálogo <app-arrow-icon></app-arrow-icon></a></div>
     <div class="exploreGrid">
       <a class="exploreTile" *ngFor="let group of exploreGroups" routerLink="/feed" [queryParams]="{ q: group.search, city: citySearch.trim() || undefined }">
         <span class="exploreCopy"><h3>{{ group.name }}</h3><small>{{ group.description }}</small></span>
@@ -72,7 +72,7 @@
   </section>
 
   <section class="specialties" aria-labelledby="specialtiesTitle">
-    <div class="section-heading"><h2 id="specialtiesTitle">Especialidades</h2></div>
+    <div class="section-heading"><h2 id="specialtiesTitle">Os mais pedidos</h2></div>
     <div class="specialtyRow">
       <a *ngFor="let category of categories; let i = index" class="specialty" routerLink="/feed" [queryParams]="{ q: category.search, city: citySearch.trim() || undefined }">
         <span class="specialtyCircle" [attr.data-tone]="i % 5"><app-service-icon [serviceName]="category.search"></app-service-icon></span>
@@ -84,15 +84,15 @@
   <section class="howBand" aria-labelledby="stepsTitle">
     <div class="how-it-works">
       <div class="howIntro">
-        <h2 id="stepsTitle">Do pedido à conclusão,<br>tudo pela HomeEasy.</h2>
-        <p>Você escolhe o profissional, conversa antes de fechar<br>e acompanha cada etapa do atendimento.</p>
+        <h2 id="stepsTitle">Como funciona,<br>em quatro passos</h2>
+        <p>Do primeiro pedido à avaliação final,<br>tudo acontece no mesmo lugar.</p>
       </div>
       <ol class="steps-grid">
         <li class="stepCard">
           <span class="stepNumber">1</span><h3>Descreva o pedido</h3><p>Diga o que precisa e onde. Fotos ajudam o profissional a entender.</p>
           <div class="mock mockRequest" aria-hidden="true">
             <strong>Instalação de chuveiro</strong><small>Banheiro social · Garanhuns</small>
-            <span class="mockPhotos"><i></i><i></i><i></i></span>
+            <span class="mockPhotos"><img src="assets/home/pedido-chuveiro.svg" alt=""><img src="assets/home/pedido-fiacao.svg" alt=""><img src="assets/home/pedido-registro.svg" alt=""></span>
             <span class="mockButton">Pedir orçamento</span>
           </div>
         </li>
@@ -147,7 +147,7 @@
   </section>
 
   <section class="faq" aria-labelledby="faqTitle">
-    <h2 id="faqTitle">Ficou com dúvida?</h2>
+    <h2 id="faqTitle">Perguntas frequentes</h2>
     <div class="faqList">
       <details *ngFor="let item of faq"><summary>{{ item.question }}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></summary><p>{{ item.answer }}</p></details>
     </div>

@@ -117,3 +117,7 @@
 .location-picker app-select-menu app-page-icon { width: 16px; height: 16px; color: var(--color-text); }
 .sortPicker svg { width: 18px; height: 18px; flex: 0 0 18px; }
 .sortPicker ::ng-deep .selectList { right: 0; left: auto; }
+
+/* Sem título visível: o link fica à direita, alinhado ao breadcrumb */
+.search-heading { justify-content: flex-end; margin-top: -32px; margin-bottom: 16px; min-height: 20px; }
+@media (max-width: 640px) { .search-heading { margin-top: 0; justify-content: flex-start; } }

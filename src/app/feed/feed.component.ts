@@ -253,7 +253,7 @@ export class FeedComponent implements OnInit, OnDestroy {
   get resultsTitle() {
     const term = this.serviceSearch?.trim() || (this.categoryFilter !== 'all' ? this.categoryFilter : '');
     const place = this.cityFilter ? ` em ${this.cityFilter}` : '';
-    return term ? `Resultados para “${term}”${place}` : `Profissionais${place || ' na HomeEasy'}`;
+    return term ? `${term}${place}` : `Encontrar profissionais${place}`;
   }
 
   setMinimumRating(value: number) {

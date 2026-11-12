@@ -48,7 +48,7 @@ h2 { font-weight: 800; letter-spacing: -.035em; }
 .searchButton:active { transform: scale(.96); }
 .searchButton svg { width: 22px; height: 22px; }
 .popularSearches { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 14px 16px 8px; }
-.popularSearches::before { content: 'Mais buscados'; margin-right: 4px; color: var(--color-textMuted); font-size: .8125rem; font-weight: 500; }
+.popularSearches::before { content: 'Buscas comuns'; margin-right: 4px; color: var(--color-textMuted); font-size: .8125rem; font-weight: 500; }
 .popularSearches a { padding: 6px 14px; border: 1px solid var(--color-border); border-radius: 999px; color: var(--ink); font-size: .875rem; transition: border-color 160ms ease, color 160ms ease; }
 .popularSearches a:hover { color: var(--color-primary); border-color: var(--color-primary); }
 
@@ -106,7 +106,7 @@ h2 { font-weight: 800; letter-spacing: -.035em; }
 .mock strong { font-size: .875rem; font-weight: 700; }
 .mock small { color: var(--color-textMuted); font-size: .75rem; }
 .mockPhotos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.mockPhotos i { aspect-ratio: 1; border-radius: 8px; background: linear-gradient(135deg, var(--color-primarySoft), color-mix(in srgb, var(--color-accent) 25%, var(--color-primarySoft))); }
+.mockPhotos img { display: block; width: 100%; aspect-ratio: 1; border-radius: 8px; object-fit: cover; box-shadow: inset 0 0 0 1px rgba(16, 45, 45, .06); }
 .mockButton { margin-top: 4px; padding: 8px; border-radius: 10px; color: #fff; background: var(--color-primary); font-weight: 700; text-align: center; }
 .mockOffer { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--color-border); }
 .mockOffer:last-child { border-bottom: 0; }

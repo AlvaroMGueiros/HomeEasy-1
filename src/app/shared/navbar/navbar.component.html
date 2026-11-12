@@ -17,7 +17,7 @@
   <nav id="mainNavigation" class="navbar-links" [class.menu-open]="menuOpen" aria-label="Navegação principal" *ngIf="!authenticated">
     <a routerLink="/feed" routerLinkActive="active" (click)="closeMenu()">Serviços</a>
     <a routerLink="/pedido-info" routerLinkActive="active" (click)="closeMenu()">Como funciona</a>
-    <a routerLink="/profissional" routerLinkActive="active" (click)="closeMenu()">Seja um profissional</a>
+    <a routerLink="/profissional" routerLinkActive="active" (click)="closeMenu()">Para profissionais</a>
     <span class="navbar-auth">
       <a class="navbar-login" href="/login" (click)="openAuth($event, 'login')">Entrar</a>
       <a class="navbar-action" href="/login?mode=register" (click)="openAuth($event, 'register')">Criar conta</a>
@@ -79,7 +79,7 @@
     <button class="topbar-account" type="button" (click)="toggleProfileMenu($event)" [attr.aria-expanded]="profileMenuOpen" aria-controls="profileMenu" aria-label="Abrir opções da conta">
       <img *ngIf="user && user.foto" [src]="user.foto" [alt]="user.nome" (error)="hideUnavailableUserPhoto()">
       <span class="account-initial" *ngIf="!user || !user.foto" aria-hidden="true">{{ userInitial }}</span>
-      <span class="account-copy"><strong>Olá, {{ userFirstName }}</strong><small>Ver opções</small></span>
+      <span class="account-copy"><strong>{{ greeting }}, {{ userFirstName }}</strong><small>Ver opções</small></span>
       <svg class="account-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 10l5 5 5-5"></path></svg>
     </button>
 
@@ -100,7 +100,7 @@
     <img src="assets/brand/homeeasy-symbol.svg" alt="" width="28" height="28">
     <span><strong>HomeEasy</strong><small>Serviços para sua casa</small></span>
   </a>
-  <p class="sidebar-greeting">Olá{{ user?.nome ? ', ' + userFirstName : '' }}!</p>
+  <p class="sidebar-greeting">{{ greeting }}<ng-container *ngIf="user?.nome">, {{ userFirstName }}</ng-container></p>
   <nav class="sidebar-navigation" aria-label="Menu principal">
     <span class="sidebar-section">Menu</span>
     <a *ngFor="let link of visibleMainLinks" [routerLink]="link.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeSidebar()"><app-page-icon [name]="link.icon"></app-page-icon><span>{{ link.label }}</span></a>
