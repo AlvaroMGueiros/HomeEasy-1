@@ -1,0 +1,103 @@
+<app-navbar [authenticated]="true" [userId]="userId" (logout)="logout()"></app-navbar>
+
+<main class="overview" [attr.aria-busy]="isLoading">
+  <header class="overview-head">
+    <div>
+      <h1>{{ monthLabel }}</h1>
+    </div>
+    <div class="head-actions">
+      <a class="button-secondary" routerLink="/agenda">Agenda</a>
+    </div>
+  </header>
+
+  <div class="grid" [class.is-loading]="isLoading">
+
+    <section class="panel services" aria-labelledby="servicesTitle">
+      <header class="card-head"><h2 id="servicesTitle">Seus atendimentos</h2><a routerLink="/meus-servicos">Ver atendimentos</a></header>
+      <div class="figure-row">
+        <p class="figure"><strong>{{ activeCount }}</strong><span>em aberto de {{ ordersTotal }} {{ ordersTotal === 1 ? 'atendimento' : 'atendimentos' }}</span></p>
+        <p class="figure-side"><strong>{{ revenue | currency:'BRL' }}</strong><span>faturado em {{ completedCount }} {{ completedCount === 1 ? 'serviço concluído' : 'serviços concluídos' }}</span></p>
+      </div>
+      <div class="stack" role="img" [attr.aria-label]="'Atendimentos por status: ' + segmentTotal + ' no total'">
+        <ng-container *ngFor="let segment of segments"><span *ngIf="segment.count" [class]="'seg seg-' + segment.key" [style.flex-grow]="segment.count"></span></ng-container>
+        <span class="seg seg-empty" *ngIf="!segmentTotal"></span>
+      </div>
+      <dl class="legend">
+        <div *ngFor="let segment of segments"><dt><i [class]="'dot seg-' + segment.key"></i>{{ segment.label }}</dt><dd>{{ segment.count }}</dd></div>
+      </dl>
+    </section>
+
+    <section class="panel agenda" aria-labelledby="agendaTitle">
+      <header class="card-head"><h2 id="agendaTitle">Próximos atendimentos</h2><span class="muted">{{ upcoming.length }} {{ upcoming.length === 1 ? 'confirmado' : 'confirmados' }}</span></header>
+      <div class="days" role="group" aria-label="Filtrar por dia">
+        <button type="button" *ngFor="let day of agendaDays" [class.active]="selectedDay === day.key" [attr.aria-pressed]="selectedDay === day.key" (click)="selectDay(day.key)">
+          <strong>{{ day.day }}</strong><small>{{ day.weekday }}</small><span class="day-count">{{ day.count || '' }}</span>
+        </button>
+      </div>
+      <ul class="rows">
+        <li *ngFor="let order of filteredUpcoming">
+          <a [routerLink]="['/atendimentos', order.id]">
+            <span class="row-copy"><strong>{{ order.request?.service?.name || 'Serviço' }}</strong><small>{{ order.scheduledAt ? (order.scheduledAt | date:"EEE, dd/MM 'às' HH:mm") : 'Data a combinar' }}</small></span>
+            <span class="row-value">{{ +order.agreedPrice | currency:'BRL' }}</span>
+          </a>
+        </li>
+      </ul>
+      <p class="empty" *ngIf="!isLoading && !filteredUpcoming.length">Nenhum atendimento {{ selectedDay ? 'neste dia' : 'agendado' }}</p>
+    </section>
+
+    <section class="panel requests" aria-labelledby="requestsTitle">
+      <header class="card-head"><h2 id="requestsTitle">Orçamentos pedidos</h2><a routerLink="/solicitacoes">Ver todos</a></header>
+      <p class="figure"><strong>{{ requestsOpen }}</strong><span>{{ requestsOpen === 1 ? 'pedido aberto' : 'pedidos abertos' }}<ng-container *ngIf="requestsClosed">, {{ requestsClosed }} {{ requestsClosed === 1 ? 'encerrado' : 'encerrados' }}</ng-container></span></p>
+      <div class="split" *ngIf="requestsOpen">
+        <div class="split-labels"><span>Com propostas <strong>{{ requestsWithProposals }}</strong></span><span>Aguardando <strong>{{ requestsWaiting }}</strong></span></div>
+        <div class="split-bar"><span [style.width.%]="requestsShare"></span></div>
+      </div>
+      <ul class="rows compact">
+        <li *ngFor="let request of openRequests">
+          <a [routerLink]="['/solicitacoes', request.id]">
+            <span class="row-copy"><strong>{{ request.serviceName || 'Serviço' }}</strong><small>{{ request.createdAt | date:'dd/MM' }}<ng-container *ngIf="request.city">, {{ request.city }}</ng-container></small></span>
+            <span class="os-tag" [class.muted-tag]="!request.proposalCount">{{ requestStatusLabel(request) }}</span>
+          </a>
+        </li>
+      </ul>
+      <p class="empty" *ngIf="!isLoading && !openRequests.length">Você ainda não pediu orçamentos</p>
+    </section>
+
+    <section class="panel saved" aria-labelledby="savedTitle">
+      <header class="card-head"><h2 id="savedTitle">Profissionais salvos</h2><a routerLink="/favoritos">Ver lista</a></header>
+      <p class="figure"><strong>{{ favorites.length }}</strong><span>na sua lista</span></p>
+      <ul class="rows compact">
+        <li *ngFor="let favorite of favorites.slice(0, 5)">
+          <a [routerLink]="['/profissionais', favorite.professional.id]">
+            <span class="avatar" aria-hidden="true">{{ initials(favorite.professional.name) }}</span>
+            <span class="row-copy"><strong>{{ favorite.professional.name }}</strong><small>{{ favorite.professional.services[0]?.name || 'Serviços gerais' }}<ng-container *ngIf="favorite.professional.city">, {{ favorite.professional.city }}</ng-container></small></span>
+            <span class="rating" *ngIf="favorite.professional.metrics?.averageRating">★ {{ favorite.professional.metrics.averageRating | number:'1.1-1' }}</span>
+          </a>
+        </li>
+      </ul>
+      <p class="empty" *ngIf="!isLoading && !favorites.length">Salve profissionais para contratar de novo depois</p>
+    </section>
+
+    <section class="panel pro" aria-labelledby="proTitle">
+      <header class="card-head"><h2 id="proTitle">Propostas enviadas</h2><a routerLink="/oportunidades">Oportunidades</a></header>
+      <p class="figure"><strong>{{ proposals.length }}</strong><span>{{ proposals.length === 1 ? 'proposta' : 'propostas' }}</span></p>
+      <div class="meter-label"><span>Aceitas entre as respondidas</span><strong>{{ conversionRate === null ? '—' : conversionRate + '%' }}</strong></div>
+      <div class="meter"><span [style.width.%]="conversionRate || 0"></span></div>
+      <dl class="numbers">
+        <div><dt>Aguardando cliente</dt><dd>{{ proposalsPending }}</dd></div>
+        <div><dt>Aceitas</dt><dd>{{ proposalsAccepted }}</dd></div>
+        <div><dt>Não escolhidas</dt><dd>{{ proposalsLost }}</dd></div>
+      </dl>
+    </section>
+
+    <section class="panel quick" aria-labelledby="quickTitle">
+      <div>
+        <h2 id="quickTitle">Precisa de algo em casa</h2>
+        <p>Escolha um serviço e veja profissionais avaliados perto de você</p>
+      </div>
+      <div class="chips">
+        <button class="category-card" type="button" *ngFor="let service of quickServices" (click)="searchService(service)"><app-service-icon [serviceName]="service"></app-service-icon>{{ service }}</button>
+      </div>
+    </section>
+  </div>
+</main>

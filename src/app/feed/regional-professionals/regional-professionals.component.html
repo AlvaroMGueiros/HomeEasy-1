@@ -1,7 +1,7 @@
 <app-navbar [authenticated]="!!userId" [userId]="userId" (logout)="logout()"></app-navbar>
-<main class="app-page"><div class="page-shell page-shell-narrow">
+<main class="app-page"><div class="page-shell">
   <app-back-link route="/feed" label="Voltar aos serviços"></app-back-link>
-  <header class="page-heading"><span class="pageEmblem"><app-page-icon name="location"></app-page-icon></span><div><span class="page-kicker">Profissionais na região</span><h1>Profissionais em {{ city || 'sua região' }}</h1><p *ngIf="state">{{ city }}, {{ state }}</p></div></header>
+  <header class="page-heading"><span class="pageEmblem"><app-page-icon name="location"></app-page-icon></span><div><h1>Profissionais em {{ city || 'sua região' }}</h1><p *ngIf="state">{{ city }}, {{ state }}</p></div></header>
   <app-action-feedback type="error" [message]="error"></app-action-feedback>
   <button class="button-secondary" *ngIf="error" [disabled]="isLoading" (click)="load()">Tentar novamente</button>
   <app-loading-state *ngIf="isLoading && !professionals.length" message="Buscando profissionais nesta cidade..."></app-loading-state>
@@ -14,7 +14,7 @@
       </a>
       <div class="professionalServices"><ng-container *ngFor="let service of professional.services"><span *ngIf="service.isActive">{{ service.name }}</span></ng-container></div>
       <p class="professionalBio" *ngIf="professional.bio">{{ professional.bio }}</p>
-      <div class="professionalFooter"><span class="professionalRating" *ngIf="professional.metrics?.verifiedReviewCount"><span aria-hidden="true">★</span> {{ professional.metrics.averageRating | number:'1.1-1' }} <small>({{ professional.metrics.verifiedReviewCount }} avaliações)</small></span><span class="field-help" *ngIf="!professional.metrics?.verifiedReviewCount">Ainda sem avaliações</span><a class="button-secondary" [routerLink]="['/profissionais', professional.id]">Ver perfil <app-arrow-icon></app-arrow-icon></a></div>
+      <div class="professionalFooter"><span class="professionalRating" *ngIf="professional.metrics?.verifiedReviewCount"><span aria-hidden="true">★</span> {{ professional.metrics.averageRating | number:'1.1-1' }} <small>({{ professional.metrics.verifiedReviewCount }} avaliações)</small></span><span class="field-help" *ngIf="!professional.metrics?.verifiedReviewCount">Ainda sem avaliações</span><a class="button-secondary" [routerLink]="['/profissionais', professional.id]">Ver perfil</a></div>
     </article>
   </section>
   <section class="empty-state" *ngIf="!isLoading && !error && !professionals.length"><div class="empty-state-content"><h2>Nenhum profissional disponível</h2><p>Não encontramos profissionais disponíveis nesta cidade no momento.</p><a class="button-secondary" routerLink="/feed">Explorar outras regiões</a></div></section>

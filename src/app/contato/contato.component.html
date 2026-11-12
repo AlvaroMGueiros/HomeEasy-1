@@ -2,7 +2,7 @@
 <main class="app-page">
   <div class="page-shell">
     <header class="page-heading"><span class="pageEmblem"><app-page-icon name="message"></app-page-icon></span>
-      <div class="page-heading-copy"><span class="page-kicker">Fale com a gente</span><h1>Como podemos ajudar?</h1><p>Envie sua dúvida. Nossa equipe responde pelo canal informado.</p></div>
+      <div class="page-heading-copy"><h1>Como podemos ajudar?</h1><p>Envie sua dúvida. Nossa equipe responde pelo canal informado.</p></div>
     </header>
     <div class="content-grid">
       <form class="surface-card form-stack" #contactForm="ngForm" (ngSubmit)="sendMessage(contactForm)">
@@ -20,3 +20,4 @@
     </div>
   </div>
 </main>
+<app-site-footer></app-site-footer>

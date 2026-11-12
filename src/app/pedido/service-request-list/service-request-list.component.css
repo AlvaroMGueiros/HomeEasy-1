@@ -1,4 +1,4 @@
 :host { display: block; min-height: 100vh; background: var(--color-background); }
-.request-card-meta { display: flex; align-items: baseline; gap: 6px; margin: 4px 0 20px; color: var(--color-textMuted); }
+.request-card-meta { display: flex; align-items: baseline; gap: 8px; margin: 4px 0 20px; color: var(--color-textMuted); }
 .request-card-meta strong { color: var(--color-primary); font-size: 1.35rem; }
 .request-card-meta span { font-size: 0.82rem; }

@@ -1,7 +1,7 @@
 <app-navbar [authenticated]="true" [userId]="userId" (logout)="logout()"></app-navbar>
 <main class="app-page"><div class="page-shell page-shell-narrow">
   <app-back-link route="/destaques/minhas" label="Minhas publicações"></app-back-link>
-  <header class="page-heading"><span class="pageEmblem"><app-page-icon name="star"></app-page-icon></span><div><span class="page-kicker">Área profissional</span><h1>Publicar trabalho</h1></div></header>
+  <header class="page-heading"><span class="pageEmblem"><app-page-icon name="star"></app-page-icon></span><div><h1>Publicar trabalho</h1></div></header>
   <app-loading-state *ngIf="isLoading" message="Carregando portfólio..."></app-loading-state>
   <app-action-feedback type="error" [message]="error"></app-action-feedback>
   <a class="button-secondary" *ngIf="!isLoading && !profile" routerLink="/serprofissional">Criar perfil profissional</a>
@@ -18,7 +18,7 @@
         </label>
       </div>
       <p class="field-help" *ngIf="!profile.portfolioPhotos?.length">Adicione fotos ao portfólio antes de publicar.</p>
-      <a class="portfolioLink" [routerLink]="['/usuario', userId]">Gerenciar fotos do portfólio <app-arrow-icon></app-arrow-icon></a>
+      <a class="portfolioLink" [routerLink]="['/usuario', userId]">Gerenciar fotos do portfólio</a>
     </fieldset>
     <label class="checkboxRow consentRow"><input name="consent" type="checkbox" [(ngModel)]="consent" required [disabled]="isSaving"><span>Tenho autorização para publicar estas fotos e elas não expõem dados privados dos clientes.</span></label>
     <div class="form-actions publicationActions"><button class="button-primary" [disabled]="!canPublish || publicationForm.invalid">{{ isSaving ? 'Enviando...' : 'Enviar para aprovação' }}</button><a class="button-quiet" routerLink="/destaques/minhas">Cancelar</a></div>

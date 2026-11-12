@@ -1,0 +1,19 @@
+<div class="selectMenu" [class.open]="open" [class.field]="variant === 'field'" [class.disabled]="disabled">
+  <button class="selectTrigger" type="button" role="combobox" [disabled]="disabled"
+    [attr.aria-label]="ariaLabel || null" aria-haspopup="listbox" [attr.aria-expanded]="open" [attr.aria-controls]="listId"
+    [attr.aria-activedescendant]="open && activeIndex >= 0 ? listId + '-' + activeIndex : null"
+    (click)="toggle()" (keydown)="onKeydown($event)">
+    <ng-content></ng-content>
+    <span class="selectValue">{{ selectedLabel }}</span>
+    <svg class="selectChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+  </button>
+
+  <ul class="selectList" *ngIf="open" [id]="listId" role="listbox" [attr.aria-label]="ariaLabel || null">
+    <li *ngFor="let option of options; let i = index" [id]="listId + '-' + i" role="option"
+      [attr.aria-selected]="option.value === value" [class.active]="i === activeIndex" [class.selected]="option.value === value"
+      (mouseenter)="activeIndex = i" (mousedown)="$event.preventDefault()" (click)="choose(option)">
+      <span>{{ option.label }}</span>
+      <svg *ngIf="option.value === value" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>
+    </li>
+  </ul>
+</div>

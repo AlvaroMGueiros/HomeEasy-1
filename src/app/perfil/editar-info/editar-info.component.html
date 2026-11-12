@@ -4,7 +4,6 @@
   <div class="page-shell">
     <header class="page-heading"><span class="pageEmblem"><app-page-icon name="profile"></app-page-icon></span>
       <div class="page-heading-copy">
-        <span class="page-kicker">Configurações</span>
         <h1>Editar perfil</h1>
         <p>Mantenha seus dados atualizados para uma experiência mais segura.</p>
       </div>
@@ -13,7 +12,6 @@
     <div class="profile-edit-layout">
       <form class="surface-card form-stack" #profileForm="ngForm" (ngSubmit)="editarInfo()">
         <div>
-          <span class="page-kicker">Dados pessoais</span>
           <h2>Informações básicas</h2>
         </div>
 
@@ -82,7 +80,6 @@
 
       <aside class="surface-card form-stack profile-photo-card" aria-labelledby="profilePhotoTitle">
         <div>
-          <span class="page-kicker">Imagem</span>
           <h2 id="profilePhotoTitle">Foto de perfil</h2>
         </div>
         <div class="profile-photo-preview">
@@ -96,7 +93,6 @@
 
       <form class="surface-card form-stack profile-social-card" #socialForm="ngForm" (ngSubmit)="editarInfo()">
         <div>
-          <span class="page-kicker">Presença digital</span>
           <h2>Redes sociais</h2>
           <p>Links opcionais para clientes conhecerem melhor seu trabalho.</p>
         </div>

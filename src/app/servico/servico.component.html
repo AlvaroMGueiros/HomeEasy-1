@@ -1,7 +1,7 @@
 <app-navbar [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
 <main class="app-page">
   <div class="page-shell">
-    <header class="page-heading"><span class="pageEmblem"><app-page-icon name="briefcase"></app-page-icon></span><div class="page-heading-copy"><span class="page-kicker">Painel profissional</span><h1>Meus serviços</h1><p>Gerencie as ofertas publicadas no seu perfil.</p></div><a class="button-primary" routerLink="/serprofissional">Adicionar serviço</a></header>
+    <header class="page-heading"><span class="pageEmblem"><app-page-icon name="briefcase"></app-page-icon></span><div class="page-heading-copy"><h1>Meus serviços</h1><p>Gerencie as ofertas publicadas no seu perfil.</p></div><a class="button-primary" routerLink="/serprofissional">Adicionar serviço</a></header>
 
     <app-action-feedback [message]="feedbackMessage" [type]="feedbackType"></app-action-feedback>
 
@@ -12,7 +12,7 @@
         <p>{{ service.available === false ? 'Serviço pausado para novas oportunidades.' : 'Serviço ativo no seu perfil profissional.' }}</p>
 
         <div class="card-actions" *ngIf="!servicePendingDeletion || servicePendingDeletion.id !== service.id">
-          <a class="button-primary" [routerLink]="['/serviços', userId, 'detalhe', service.id]">Ver detalhes</a>
+          <a class="button-secondary" [routerLink]="['/serviços', userId, 'detalhe', service.id]">Ver detalhes</a>
           <a class="button-secondary" [routerLink]="['/serviço', service.id, 'usuario', userId, 'avaliações']">Avaliações</a>
           <button class="button-secondary" type="button" [disabled]="!!serviceAvailabilityInProgressId" (click)="toggleServiceAvailability(service)">{{ service.available === false ? 'Ativar' : 'Pausar' }}</button>
           <button class="button-danger" type="button" (click)="requestServiceDeletion(service)">Excluir</button>

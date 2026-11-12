@@ -1,16 +1,16 @@
 :host { display: block; min-height: 100vh; background: var(--color-background); }
 .request-proposals { margin-top: 28px; }
 .request-proposals > header { margin-bottom: 16px; }
-.request-proposals h2 { margin: 6px 0 0; }
+.request-proposals h2 { margin: 8px 0 0; }
 .proposal-comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; }
 .proposal-comparison article { display: flex; min-width: 0; flex-direction: column; padding: 24px 0; border: 0; border-top: 1px solid var(--color-border); border-radius: 0; background: transparent; }
 .proposal-professional { display: flex; align-items: center; gap: 12px; }
 .proposal-professional h3 { margin: 0; }
 .proposal-professional small { color: var(--color-textMuted); }
 .professional-name { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.verified-label { padding: 4px 8px; border-radius: 999px; color: var(--color-primary); background: var(--color-primarySoft); font-size: 0.68rem; font-weight: 800; }
-.professional-initial { display: grid; width: 42px; height: 42px; flex: 0 0 auto; place-items: center; border-radius: 50%; color: var(--color-surface); background: var(--color-primary); font-weight: 800; }
-.proposal-price { margin-top: 22px; color: var(--color-primary); font-size: 1.6rem; }
+.verified-label { padding: 4px 8px; border-radius: 999px; color: var(--color-primary); background: var(--color-primarySoft); font-size: 0.68rem; font-weight: 600; }
+.professional-initial { display: grid; width: 42px; height: 42px; flex: 0 0 auto; place-items: center; border-radius: 50%; color: var(--color-surface); background: var(--color-primary); font-weight: 600; }
+.proposal-price { margin-top: 24px; color: var(--color-primary); font-size: 1.6rem; }
 .proposal-comparison p { color: var(--color-textMuted); }
 .proposal-comparison ul { margin: 0 0 20px; padding-left: 20px; color: var(--color-textMuted); font-size: 0.85rem; }
 .proposal-comparison .button-primary, .proposal-result { margin-top: auto; }

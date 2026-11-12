@@ -16,7 +16,7 @@ export class LoginGuard implements CanActivate {
       take(1),
       map(user => {
         if (user) {
-          void this.router.navigate(['/feed']);
+          void this.router.navigate(['/inicio']);
         }
 
         return !user;

@@ -27,9 +27,9 @@
   border-radius: 15px;
   color: var(--color-primary);
   background: var(--color-primarySoft);
-  font-family: 'Manrope', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 1.25rem;
-  font-weight: 800;
+  font-weight: 600;
   place-items: center;
 }
 
@@ -38,7 +38,7 @@
 .dialog-icon-warning { color: var(--color-warning); background: var(--color-warningSoft); }
 .dialog-copy h2 { margin: 0 0 8px; font-size: 1.45rem; }
 .dialog-copy p { margin: 0; }
-.dialog-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 12px; }
 
 @media (max-width: 560px) {
   .dialog-backdrop { align-items: end; padding: 12px; }

@@ -6,6 +6,7 @@ import { Usuario } from './../Usuarios/usuario';
 import { LoginServiceService } from '../Servicos/login-service.service';
 import { FeedbackType } from '../shared/action-feedback/action-feedback.component';
 import { resolveAuthErrorMessage } from '../shared/utils/auth-error.utils';
+import { UserIntent, UserIntentService } from '../Servicos/user-intent.service';
 import {
   formatBrazilianBirthDate,
   isAdultBirthDate,
@@ -30,23 +31,29 @@ export class LoginCadastroComponent implements OnInit {
   isRegistrationSubmitting = false;
   authenticated = false;
   userId: string;
-  returnUrl = '/feed';
+  returnUrl = '/inicio';
   registrationBirthDateInput = '';
   isRegistrationBirthDateValid = false;
   isGoogleSubmitting = false;
   async signInWithGoogle(idToken: string) {
     if (this.isGoogleSubmitting || this.isLoginSubmitting || this.isRegistrationSubmitting) return;
     this.isGoogleSubmitting = true; this.feedbackMessage = '';
-    try { await this.loginService.loginWithGoogle(idToken, this.registrationUser.birthDate || undefined); await this.router.navigateByUrl(this.returnUrl); }
+    try {
+      const user = await this.loginService.loginWithGoogle(idToken, this.registrationUser.birthDate || undefined);
+      await this.router.navigateByUrl(this.userIntent.afterGoogleLogin(user?.createdAt, this.returnUrl));
+    }
     catch (failure) { this.feedbackType = 'error'; this.feedbackMessage = resolveAuthErrorMessage(failure, 'login'); }
     finally { this.isGoogleSubmitting = false; }
   }
   showGoogleError(message: string) { this.feedbackType = 'error'; this.feedbackMessage = message; }
 
+  roleModalOpen = false;
+
   constructor(
     private loginService: LoginServiceService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private userIntent: UserIntentService
   ) { }
 
   ngOnInit() {
@@ -54,6 +61,12 @@ export class LoginCadastroComponent implements OnInit {
     if (requestedReturnUrl && requestedReturnUrl.startsWith('/')) {
       this.returnUrl = requestedReturnUrl;
     }
+    if (this.route.snapshot.queryParams['mode'] === 'register') {
+      this.authMode = 'register';
+    }
+
+    // Quem chega ao login sem ter dito se quer prestar ou contratar serviços escolhe primeiro.
+    this.roleModalOpen = !this.userIntent.hasChosen;
 
     const currentUser = getCurrentUser();
 
@@ -62,6 +75,14 @@ export class LoginCadastroComponent implements OnInit {
       this.userId = currentUser.uid;
     }
   }
+
+  chooseRole(intent: UserIntent) {
+    this.roleModalOpen = false;
+    this.userIntent.chooseAndGo(intent);
+  }
+
+  /** Fechou sem escolher: continua no login, sem guardar nada. */
+  dismissRoleModal() { this.roleModalOpen = false; }
 
   setAuthMode(authMode: AuthMode) {
     this.authMode = authMode;
@@ -104,7 +125,8 @@ export class LoginCadastroComponent implements OnInit {
 
     try {
       await this.loginService.register(this.registrationUser);
-      this.router.navigateByUrl(this.returnUrl);
+      // Conta nova de prestador: vai direto cadastrar o primeiro serviço.
+      this.router.navigateByUrl(this.userIntent.afterRegister(this.returnUrl));
     } catch (error) {
       this.feedbackType = 'error';
       this.feedbackMessage = resolveAuthErrorMessage(error, 'register');

@@ -27,6 +27,7 @@ import { SharedModule } from './shared/shared.module';
 import { AdminModule } from './admin/admin.module';
 import { ApiAuthInterceptor } from './Servicos/api-auth.interceptor';
 import { HighlightsModule } from './highlights/highlights.module';
+import { PainelModule } from './painel/painel.module';
 
 registerLocaleData(localePt);
 
@@ -51,6 +52,7 @@ registerLocaleData(localePt);
     SharedModule,
     AdminModule,
     HighlightsModule,
+    PainelModule,
     AppRoutingModule
   ],
   providers: [

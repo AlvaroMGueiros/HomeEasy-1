@@ -2,7 +2,7 @@
 
 <main class="auth-page">
   <section class="auth-intro" aria-labelledby="authIntroTitle">
-    <span class="auth-eyebrow">Home Easy</span>
+    <span class="auth-eyebrow">HomeEasy</span>
     <h1 id="authIntroTitle">Contrate ou ofereça<br>serviços residenciais</h1>
     <p>Conecte-se para encontrar profissionais ou cuidar dos seus próximos trabalhos.</p>
     <div class="auth-benefits">
@@ -10,12 +10,12 @@
       <div><app-page-icon name="message"></app-page-icon><span><strong>Conversas por serviço</strong><small>Os detalhes de cada serviço no mesmo lugar.</small></span></div>
       <div><app-page-icon name="profile"></app-page-icon><span><strong>Perfil profissional</strong><small>Serviços, portfólio e avaliações de clientes.</small></span></div>
     </div>
-    <a class="auth-explore" routerLink="/feed">Prefere conhecer primeiro? Explore os serviços <app-arrow-icon></app-arrow-icon></a>
+    <a class="auth-explore" routerLink="/feed">Prefere conhecer primeiro? Explore os serviços</a>
   </section>
 
   <section class="login-wrap" aria-labelledby="authTitle">
     <div class="login-html">
-      <header class="auth-heading"><span class="page-kicker">{{ authMode === 'login' ? 'Acesso à conta' : 'Cadastro' }}</span><h2 id="authTitle">{{ authMode === 'login' ? 'Entre na sua conta' : 'Crie sua conta' }}</h2><p>{{ authMode === 'login' ? 'Acesse seus pedidos, conversas e serviços.' : 'Uma conta para contratar e oferecer serviços.' }}</p></header>
+      <header class="auth-heading"><h2 id="authTitle">{{ authMode === 'login' ? 'Entre na sua conta' : 'Crie sua conta' }}</h2><p>{{ authMode === 'login' ? 'Acesse seus pedidos, conversas e serviços.' : 'Uma conta para contratar e oferecer serviços.' }}</p></header>
       <div class="auth-tabs" role="group" aria-label="Escolha entre entrar ou criar conta">
         <button type="button" [attr.aria-pressed]="authMode === 'login'" [class.active]="authMode === 'login'" (click)="setAuthMode('login')">Entrar</button>
         <button type="button" [attr.aria-pressed]="authMode === 'register'" [class.active]="authMode === 'register'" (click)="setAuthMode('register')">Criar conta</button>
@@ -70,3 +70,5 @@
     </div>
   </section>
 </main>
+
+<app-role-choice-modal *ngIf="roleModalOpen" (choose)="chooseRole($event)" (dismiss)="dismissRoleModal()"></app-role-choice-modal>

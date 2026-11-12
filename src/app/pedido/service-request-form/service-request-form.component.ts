@@ -18,6 +18,7 @@ import { normalizeBrazilStateCode } from '../../shared/utils/brazil-state.utils'
 import { createCompressedImageAttachment } from '../../shared/utils/image-attachment.utils';
 import { resolveHttpErrorMessage } from '../../shared/utils/http-error.utils';
 import { NotificationService } from '../../shared/notification/notification.service';
+import { getBrasiliaToday, getFutureScheduleInstant } from '../../shared/utils/availability-calendar.utils';
 
 @Component({
   standalone: false,
@@ -50,7 +51,7 @@ export class ServiceRequestFormComponent implements OnInit, OnDestroy {
     { value: ServiceUrgency.ThisWeek, label: 'Ainda esta semana' },
     { value: ServiceUrgency.Urgent, label: 'Urgente' }
   ];
-  readonly today = new Date().toJSON().split('T')[0];
+  readonly today = getBrasiliaToday();
   private routeSubscription: Subscription;
   private serviceSubscription: Subscription;
   private userSubscription: Subscription;
@@ -86,6 +87,12 @@ export class ServiceRequestFormComponent implements OnInit, OnDestroy {
         return;
       }
       this.request.preferredProfessionalId = this.professionalId || undefined;
+      const preferredDate = this.activeRoute.snapshot.queryParamMap.get('preferredDate') || '';
+      const preferredTime = this.activeRoute.snapshot.queryParamMap.get('preferredTime') || '';
+      if (getFutureScheduleInstant(preferredDate, preferredTime)) {
+        this.request.preferredDate = preferredDate;
+        this.request.preferredTime = preferredTime;
+      }
       this.loadService();
       this.loadDirectedProfessional();
     });

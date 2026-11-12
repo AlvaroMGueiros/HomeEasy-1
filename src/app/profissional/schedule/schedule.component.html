@@ -2,7 +2,7 @@
 <main class="app-page"><div class="page-shell scheduleShell">
   <header class="page-heading scheduleHero">
     <span class="pageEmblem"><app-page-icon name="calendar"></app-page-icon></span>
-    <div class="page-heading-copy"><span class="page-kicker">Área profissional</span><h1>Minha agenda</h1><p>Seus horários de trabalho e dias de descanso.</p></div>
+    <div class="page-heading-copy"><h1>Minha agenda</h1><p>Seus horários de trabalho e dias de descanso.</p></div>
   </header>
   <app-loading-state *ngIf="isLoading" message="Carregando agenda..."></app-loading-state>
   <app-action-feedback type="error" [message]="error"></app-action-feedback>

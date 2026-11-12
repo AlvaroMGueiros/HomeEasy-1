@@ -1,8 +1,8 @@
 <app-navbar [authenticated]="true" [userId]="userId" (logout)="logout()"></app-navbar>
 <main class="app-page"><div class="page-shell">
   <header class="page-heading"><span class="pageEmblem"><app-page-icon name="chart"></app-page-icon></span>
-    <div><span class="page-kicker">Área profissional</span><h1>Painel profissional</h1><p>Seus orçamentos e próximos atendimentos.</p></div>
-    <div class="form-actions"><a class="button-primary" routerLink="/oportunidades">Ver oportunidades <span aria-hidden="true"><app-arrow-icon direction="external"></app-arrow-icon></span></a><a class="button-secondary" routerLink="/agenda">Minha agenda</a></div>
+    <div><h1>Painel profissional</h1><p>Seus orçamentos e próximos atendimentos.</p></div>
+    <div class="form-actions"><a class="button-primary" routerLink="/oportunidades">Ver oportunidades</a><a class="button-secondary" routerLink="/agenda">Minha agenda</a></div>
   </header>
   <app-loading-state *ngIf="isLoading" message="Carregando resultados..."></app-loading-state>
   <app-action-feedback type="error" [message]="error"></app-action-feedback>
@@ -15,22 +15,22 @@
       <div><span>Serviços concluídos</span><strong>{{ metrics.grossRevenue | currency:'BRL' }}</strong><small>Valor bruto acumulado</small></div>
     </section>
     <section class="dashboardList" aria-labelledby="upcomingTitle">
-      <header class="listHeading"><h2 id="upcomingTitle">Próximos atendimentos</h2><a routerLink="/meus-servicos">Ver atendimentos <span aria-hidden="true"><app-arrow-icon></app-arrow-icon></span></a></header>
+      <header class="listHeading"><h2 id="upcomingTitle">Próximos atendimentos</h2><a routerLink="/meus-servicos">Ver atendimentos</a></header>
       <article class="workRow" *ngFor="let order of metrics.upcomingOrders">
         <span class="workIcon"><app-service-icon [serviceName]="order.request.service?.name"></app-service-icon></span>
         <div class="workCopy"><h3>{{ order.request.service?.name }}</h3><p>{{ order.scheduledAt ? (order.scheduledAt | date:'dd/MM/yyyy, HH:mm') : 'Data a combinar' }}</p></div>
         <strong class="workValue">{{ order.agreedPrice | currency:'BRL' }}</strong>
-        <a class="button-secondary" [routerLink]="['/atendimentos', order.id]">Ver atendimento <span aria-hidden="true"><app-arrow-icon></app-arrow-icon></span></a>
+        <a class="button-secondary" [routerLink]="['/atendimentos', order.id]">Ver atendimento</a>
       </article>
       <p class="listEmpty" *ngIf="!metrics.upcomingOrders.length">Nenhum atendimento agendado.</p>
     </section>
     <section class="dashboardList" aria-labelledby="proposalsTitle">
-      <header class="listHeading"><h2 id="proposalsTitle">Orçamentos enviados</h2><a routerLink="/oportunidades">Ver oportunidades <span aria-hidden="true"><app-arrow-icon></app-arrow-icon></span></a></header>
+      <header class="listHeading"><h2 id="proposalsTitle">Orçamentos enviados</h2><a routerLink="/oportunidades">Ver oportunidades</a></header>
       <article class="workRow" *ngFor="let proposal of proposals">
         <span class="workIcon"><app-service-icon [serviceName]="proposal.request?.service?.name"></app-service-icon></span>
         <div class="workCopy"><h3>{{ proposal.request?.service?.name }}</h3><p>{{ proposal.price | currency:'BRL' }}</p></div>
         <span class="order-status-chip status-banner" [class.status-success]="proposal.status === proposalStatuses.Accepted">{{ statusLabels[proposal.status] }}</span>
-        <a class="button-secondary" [routerLink]="['/oportunidades', proposal.requestId]">Ver pedido <span aria-hidden="true"><app-arrow-icon></app-arrow-icon></span></a>
+        <a class="button-secondary" [routerLink]="['/oportunidades', proposal.requestId]">Ver pedido</a>
       </article>
       <p class="listEmpty" *ngIf="!proposals.length">Você ainda não enviou orçamentos.</p>
     </section>

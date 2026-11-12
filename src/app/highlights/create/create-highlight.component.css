@@ -1,7 +1,7 @@
 .publicationForm { gap: 28px; }
 .portfolioSelection { min-width: 0; margin: 0; padding: 24px 0 0; border: 0; border-top: 1px solid var(--color-border); }
 .portfolioSelection legend { float: none; width: auto; margin: 0 0 12px; color: var(--color-text); font-size: 1rem; font-weight: 700; }
-.selectionSummary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 20px; margin-bottom: 18px; font-size: .82rem; }
+.selectionSummary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; margin-bottom: 20px; font-size: .82rem; }
 .selectionSummary p { margin: 0; }
 .selectionSummary > span { color: var(--color-primary); font-weight: 600; }
 .photoPicker { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 16px; }
@@ -11,9 +11,9 @@
 .photoOption.unavailable:not(.selected) { opacity: .55; cursor: not-allowed; }
 .photoOption input { position: absolute; top: 12px; right: 12px; z-index: 1; margin: 0; }
 .photoPicker img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 5px; }
-.photoOption > span { padding: 10px 8px 6px; color: var(--color-text); font-size: .76rem; font-weight: 500; overflow-wrap: anywhere; }
-.portfolioLink { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; font-size: .82rem; font-weight: 600; }
-.consentRow { padding: 18px 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); }
+.photoOption > span { padding: 12px 8px 8px; color: var(--color-text); font-size: .76rem; font-weight: 500; overflow-wrap: anywhere; }
+.portfolioLink { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; font-size: .82rem; font-weight: 600; }
+.consentRow { padding: 20px 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); }
 .publicationActions { padding-top: 0; }
 .requiredMark { color: var(--color-danger); }
 @media (max-width: 560px) { .photoPicker { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } }

@@ -1,0 +1,16 @@
+<div class="availabilityCalendar">
+  <header class="calendarHeading"><div><h2><app-page-icon name="calendar"></app-page-icon>Disponibilidade</h2><p>Escolha um horário para pedir orçamento. A seleção não reserva o atendimento.</p></div></header>
+  <ng-container *ngIf="profile.isAvailable; else arrangeSchedule">
+    <p *ngIf="!hasSchedule">O profissional ainda não definiu horários na agenda. Combine a data no pedido de orçamento.</p>
+    <div class="weekHeading"><strong>{{ monthLabel }}</strong><div><button class="button-secondary" type="button" aria-label="Semana anterior" [disabled]="weekOffset === 0" (click)="changeWeek(-1)"><app-arrow-icon direction="left"></app-arrow-icon></button><button class="button-secondary" type="button" aria-label="Próxima semana" [disabled]="weekOffset === 84" (click)="changeWeek(1)"><app-arrow-icon></app-arrow-icon></button></div></div>
+    <div class="calendarDays" role="group" aria-label="Escolha o dia"><button *ngFor="let day of days" type="button" [attr.aria-pressed]="selectedDate === day.date" [attr.aria-label]="day.date" (click)="selectDay(day.date)"><span>{{ day.weekday }}</span><strong>{{ day.number }}</strong></button></div>
+    <h3 class="selectedDay">{{ selectedDateLabel }} <span>· horário de Brasília</span></h3>
+    <app-loading-state *ngIf="isLoading" message="Consultando horários..."></app-loading-state>
+    <app-action-feedback type="error" [message]="error"></app-action-feedback>
+    <button *ngIf="error" class="button-quiet" type="button" (click)="selectDay(selectedDate)">Consultar novamente</button>
+    <ng-container *ngIf="!isLoading"><div class="timeGroup" *ngFor="let group of timeGroups"><ng-container *ngIf="slotsForGroup(group.start, group.end) as groupSlots"><ng-container *ngIf="groupSlots.length"><span>{{ group.label }}</span><div><button *ngFor="let slot of groupSlots" type="button" [disabled]="!slot.isAvailable" [attr.aria-pressed]="selectedTime === slot.time" [attr.aria-label]="slot.time + (slot.isAvailable ? ', disponível para até uma hora' : ', indisponível')" (click)="selectedTime = slot.time">{{ slot.time }}</button></div></ng-container></ng-container></div><p *ngIf="!slots.length && !error" role="status">Nenhum horário configurado para este dia. Escolha outra data ou combine no pedido de orçamento.</p></ng-container>
+    <div class="calendarAction" *ngIf="canRequest && services.length"><div><strong>{{ selectedTime ? selectedDateLabel + ' às ' + selectedTime : 'Selecione um horário' }}</strong><small>Consulta de até uma hora. Duração e condições serão combinadas na proposta.</small></div><label *ngIf="services.length > 1">Serviço<select [(ngModel)]="serviceId"><option *ngFor="let service of services" [value]="service.id">{{ service.name }}</option></select></label><a *ngIf="selectedTime && !isLoading" class="button-primary" [routerLink]="['/solicitar', serviceId, 'profissional', profile.id]" [queryParams]="requestParams">Pedir orçamento neste horário</a></div>
+  </ng-container>
+  <ng-template #arrangeSchedule><p>Este profissional não está recebendo novos pedidos.</p></ng-template>
+  <a *ngIf="canRequest && profile.isAvailable && services.length" class="otherSchedule" [routerLink]="['/solicitar', serviceId, 'profissional', profile.id]">Combinar outro horário no orçamento</a>
+</div>

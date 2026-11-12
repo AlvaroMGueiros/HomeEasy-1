@@ -7,6 +7,9 @@ import { filter } from 'rxjs/operators';
 import { NotificationService } from '../../Servicos/notification.service';
 import { UsuarioService } from '../../Servicos/usuario.service';
 import { UserRole, Usuario } from '../../Usuarios/usuario';
+import { PageIconName } from '../page-icon/page-icon.component';
+import { ProviderStatusService } from '../../Servicos/provider-status.service';
+import { UserIntent, UserIntentService } from '../../Servicos/user-intent.service';
 
 interface OrderNotification {
   id?: string;
@@ -18,11 +21,14 @@ interface OrderNotification {
 
 interface NavigationGroup {
   id: string;
+  headerIcon?: PageIconName;
   label: string;
   icon: string;
   adminOnly?: boolean;
-  links: { label: string; route: string }[];
+  links: NavigationLink[];
 }
+
+interface NavigationLink { label: string; route: string; icon: PageIconName; }
 
 @Component({
   standalone: false,
@@ -34,6 +40,7 @@ export class NavbarComponent implements AfterViewChecked, OnChanges, OnDestroy {
   @Input() authenticated = false;
   @Input() userId: string;
   @Input() hideSearch = false;
+  @Input() pageTitle = '';
   @Output() logout = new EventEmitter<void>();
 
   menuOpen = false;
@@ -48,13 +55,24 @@ export class NavbarComponent implements AfterViewChecked, OnChanges, OnDestroy {
   searchQuery = '';
   private navigationSubscription: Subscription;
   navigationGroups: NavigationGroup[] = [];
+  readonly mainLinks: NavigationLink[] = [
+    { label: 'Visão geral', route: '/inicio', icon: 'grid' },
+    { label: 'Encontrar profissionais', route: '/feed', icon: 'search' },
+    { label: 'Destaques', route: '/destaques', icon: 'star' },
+    { label: 'Mensagens', route: '/conversas', icon: 'message' }
+  ];
   private orderSubscription: Subscription;
   private userSubscription: Subscription;
   private focusSidebarPending = false;
+  private providerSubscription: Subscription;
+  isProvider = false;
+  roleModalOpen = false;
 
   constructor(
     private notificationService: NotificationService,
     private usuarioService: UsuarioService,
+    private providerStatus: ProviderStatusService,
+    private userIntent: UserIntentService,
     private router: Router,
     @Inject(DOCUMENT) private document: Document
   ) {
@@ -73,6 +91,7 @@ export class NavbarComponent implements AfterViewChecked, OnChanges, OnDestroy {
     if ((changes.userId || changes.authenticated) && this.authenticated && this.userId) {
       this.loadUser();
       this.loadReceivedOrders();
+      this.loadProviderStatus();
     }
 
     if (!this.authenticated) {
@@ -86,6 +105,7 @@ export class NavbarComponent implements AfterViewChecked, OnChanges, OnDestroy {
 
   ngOnDestroy() {
     this.navigationSubscription?.unsubscribe();
+    this.providerSubscription?.unsubscribe();
     this.clearOrderSubscription();
     this.clearUserSubscription();
     this.document.body.classList.remove('authenticated-layout', 'navigation-open');
@@ -93,6 +113,22 @@ export class NavbarComponent implements AfterViewChecked, OnChanges, OnDestroy {
 
   toggleMenu(){
     this.menuOpen = !this.menuOpen;
+  }
+
+  /** Antes de entrar ou criar conta, pergunta se a pessoa quer prestar ou contratar serviços. */
+  openAuth(event: Event, mode: 'login' | 'register') {
+    event.preventDefault();
+    this.closeMenu();
+    if (!this.userIntent.hasChosen) {
+      this.roleModalOpen = true;
+      return;
+    }
+    this.userIntent.goToLogin(mode);
+  }
+
+  chooseRole(intent: UserIntent) {
+    this.roleModalOpen = false;
+    this.userIntent.chooseAndGo(intent);
   }
 
   closeMenu(){
@@ -184,31 +220,35 @@ export class NavbarComponent implements AfterViewChecked, OnChanges, OnDestroy {
 
   private buildNavigation() {
     this.navigationGroups = [
-      { id: 'hiring', label: 'Contratações', icon: 'M4 4h16v16H4zM8 9h8M8 14h5', links: [
-        { label: 'Meus serviços', route: '/meus-servicos' },
-        { label: 'Orçamentos pedidos', route: '/solicitacoes' },
-        { label: 'Profissionais salvos', route: '/favoritos' }
+      { id: 'hiring', headerIcon: 'briefcase', label: 'Contratações', icon: 'M4 4h16v16H4zM8 9h8M8 14h5', links: [
+        { label: 'Meus serviços', route: '/meus-servicos', icon: 'briefcase' },
+        { label: 'Orçamentos pedidos', route: '/solicitacoes', icon: 'document' },
+        { label: 'Profissionais salvos', route: '/favoritos', icon: 'heart' }
       ] },
-      { id: 'professional', label: 'Área profissional', icon: 'M4 7h16v13H4zM9 7V4h6v3M4 12h16', links: [
-        { label: 'Visão geral', route: '/painel-profissional' },
-        { label: 'Oportunidades', route: '/oportunidades' },
-        { label: 'Pedidos recebidos', route: '/usuario/' + this.userId + '/pedidos-recebidos' },
-        { label: 'Agenda', route: '/agenda' },
-        { label: 'Minhas publicações', route: '/destaques/minhas' },
-        { label: 'Documentos e verificação', route: '/verificacao' }
+      { id: 'professional', headerIcon: 'chart', label: 'Profissional', icon: 'M4 7h16v13H4zM9 7V4h6v3M4 12h16', links: [
+        { label: 'Painel profissional', route: '/painel-profissional', icon: 'chart' },
+        { label: 'Oportunidades', route: '/oportunidades', icon: 'location' },
+        { label: 'Pedidos recebidos', route: '/usuario/' + this.userId + '/pedidos-recebidos', icon: 'bell' },
+        { label: 'Agenda', route: '/agenda', icon: 'calendar' },
+        { label: 'Minhas publicações', route: '/destaques/minhas', icon: 'star' },
+        { label: 'Verificação', route: '/verificacao', icon: 'shield' }
       ] },
-      { id: 'account', label: 'Minha conta', icon: 'M4 21a8 8 0 0 1 16 0M16 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0', links: [
-        { label: 'Meu perfil', route: '/usuario/' + this.userId },
-        { label: 'Editar dados', route: '/editar' },
-        { label: 'Notificações', route: '/notificacoes' },
-        { label: 'Preferências', route: '/preferencias-notificacoes' }
+      { id: 'account', headerIcon: 'profile', label: 'Conta', icon: 'M4 21a8 8 0 0 1 16 0M16 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0', links: [
+        { label: 'Meu perfil', route: '/usuario/' + this.userId, icon: 'profile' },
+        { label: 'Editar dados', route: '/editar', icon: 'edit' },
+        { label: 'Notificações', route: '/notificacoes', icon: 'bell' },
+        { label: 'Preferências', route: '/preferencias-notificacoes', icon: 'settings' }
       ] },
-      { id: 'administration', label: 'Administração', icon: 'M12 3l8 4v5c0 5-4 8-8 9-4-1-8-4-8-9V7zM9 12l2 2 4-4', adminOnly: true, links: [
-        { label: 'Denúncias e suporte', route: '/admin/casos' },
-        { label: 'Publicações', route: '/admin/publicacoes' },
-        { label: 'Verificação de documentos', route: '/admin/verificacoes' }
+      { id: 'administration', headerIcon: 'shield', label: 'Administração', icon: 'M12 3l8 4v5c0 5-4 8-8 9-4-1-8-4-8-9V7zM9 12l2 2 4-4', adminOnly: true, links: [
+        { label: 'Denúncias e suporte', route: '/admin/casos', icon: 'shield' },
+        { label: 'Publicações', route: '/admin/publicacoes', icon: 'document' },
+        { label: 'Verificação de documentos', route: '/admin/verificacoes', icon: 'check' }
       ] }
     ];
+    if (!this.isProvider) {
+      const professional = this.navigationGroups.find(group => group.id === 'professional');
+      professional.links = [{ label: 'Oferecer meus serviços', route: '/serprofissional', icon: 'briefcase' }];
+    }
     this.accountLinks = this.navigationGroups.find(group => group.id === 'account').links;
   }
 
@@ -258,7 +298,21 @@ export class NavbarComponent implements AfterViewChecked, OnChanges, OnDestroy {
     this.closeSidebar(true);
   }
 
+  get visibleMainLinks() { return this.isProvider ? this.mainLinks : this.mainLinks.filter(link => link.route !== '/inicio'); }
+
+  get homeRoute() { return this.isProvider ? '/inicio' : '/feed'; }
+
+  private loadProviderStatus() {
+    this.providerSubscription?.unsubscribe();
+    this.providerSubscription = this.providerStatus.isProvider(this.userId).subscribe(isProvider => {
+      this.isProvider = isProvider;
+      this.buildNavigation();
+    });
+  }
+
   requestLogout(){
+    NavbarComponent.userCache = null;
+    this.providerStatus.invalidate();
     this.closeMenu();
     this.closeNotificationMenu();
     this.closeProfileMenu();
@@ -308,10 +362,18 @@ export class NavbarComponent implements AfterViewChecked, OnChanges, OnDestroy {
     }
   }
 
+  /** O navbar é recriado a cada página; o cache evita que o nome e a foto "pisquem" na troca de tela. */
+  private static userCache: { id: string; user: Usuario } | null = null;
+
   private loadUser() {
     this.clearUserSubscription();
+    const cached = NavbarComponent.userCache;
+    if (cached && cached.id === this.userId) {
+      this.user = cached.user;
+    }
     this.userSubscription = this.usuarioService.getUserWithProfilePhoto(this.userId).subscribe(user => {
       this.user = user;
+      NavbarComponent.userCache = { id: this.userId, user };
     });
   }
 

@@ -66,7 +66,7 @@ export class FeedComponent implements OnInit, OnDestroy {
   visibleServices = new Array<Servico>();
   servicesExpanded = false;
   mobileView: 'list' | 'map' = 'list';
-  readonly initialServiceCount = 6;
+  readonly initialServiceCount = 8;
   matchingProfessionals = new Array<ProfessionalSearchResult>();
   queryParamsSubscription: Subscription;
   entrarSair: boolean;
@@ -222,6 +222,43 @@ export class FeedComponent implements OnInit, OnDestroy {
 
   get totalFilteredServices() {
     return this.filteredServices.length;
+  }
+
+  sortOrder: 'relevance' | 'rating' | 'priceAsc' | 'priceDesc' = 'relevance';
+  readonly ratingOptions = [4.5, 4, 3];
+  mobileFiltersOpen = false;
+  readonly sortOptions = [
+    { value: 'relevance', label: 'Mais relevantes' },
+    { value: 'rating', label: 'Mais bem avaliados' },
+    { value: 'priceAsc', label: 'Menor preço' },
+    { value: 'priceDesc', label: 'Maior preço' }
+  ];
+
+  get cityOptions() {
+    return [{ value: '', label: 'Todas as cidades' }, ...this.availableCities.map(city => ({ value: city, label: city }))];
+  }
+
+  /** Resultados na ordem escolhida pelo usuário; a ordem padrão é a da busca. */
+  get sortedProfessionals() {
+    const list = [...this.matchingProfessionals];
+    const price = (value: number) => (this.hasProfessionalPrice(value) ? Number(value) : Number.POSITIVE_INFINITY);
+    switch (this.sortOrder) {
+      case 'rating': return list.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0) || (b.ratingCount || 0) - (a.ratingCount || 0));
+      case 'priceAsc': return list.sort((a, b) => price(a.price) - price(b.price));
+      case 'priceDesc': return list.sort((a, b) => (this.hasProfessionalPrice(b.price) ? b.price : -1) - (this.hasProfessionalPrice(a.price) ? a.price : -1));
+      default: return list;
+    }
+  }
+
+  get resultsTitle() {
+    const term = this.serviceSearch?.trim() || (this.categoryFilter !== 'all' ? this.categoryFilter : '');
+    const place = this.cityFilter ? ` em ${this.cityFilter}` : '';
+    return term ? `Resultados para “${term}”${place}` : `Profissionais${place || ' na HomeEasy'}`;
+  }
+
+  setMinimumRating(value: number) {
+    this.minimumRating = this.minimumRating === value ? 0 : value;
+    this.onFilterChange();
   }
 
   get hasInvalidPriceRange() {

@@ -1,7 +1,6 @@
 <section class="regional-map surface-card" [class.embedded-map]="embedded" aria-labelledby="regionalMapTitle">
   <header class="regional-map-header">
     <div>
-      <span class="page-kicker" *ngIf="!embedded">Profissionais perto de você</span>
       <h2 id="regionalMapTitle">{{ embedded ? 'Profissionais por cidade' : 'Explore por região' }}</h2>
       <p>{{ embedded ? 'Selecione uma cidade para ver os profissionais da região.' : 'Veja quantos profissionais oferecem os serviços encontrados em cada cidade.' }}</p>
     </div>
@@ -27,7 +26,7 @@
           <span class="region-pin" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-4.4 7-11a7 7 0 1 0-14 0c0 6.6 7 11 7 11Z"></path><circle cx="12" cy="10" r="2"></circle></svg>
           </span>
-          <span class="region-copy"><strong>{{ region.city }}</strong><small>{{ region.state || 'Brasil' }} · {{ region.serviceCount }} serviço(s)</small></span>
+          <span class="region-copy"><strong>{{ region.city }}</strong><small>{{ region.state || 'Brasil' }}, {{ region.serviceCount }} serviço(s)</small></span>
           <span class="region-count"><strong>{{ region.professionalCount }}</strong><small *ngIf="region.professionalCount === 1">profissional</small><small *ngIf="region.professionalCount !== 1">profissionais</small></span>
         </button>
       </div>

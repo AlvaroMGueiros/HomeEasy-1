@@ -1,6 +1,6 @@
 :host { display: inline-flex; }
-:host-context(.category-card) .service-icon { width: 24px; height: 24px; flex-basis: 24px; border-radius: 0; color: inherit; background: transparent; }
-:host-context(.category-card) .service-icon svg { width: 24px; height: 24px; }
+:host-context(.category-card) .service-icon { width: 18px; height: 18px; flex-basis: 18px; border-radius: 0; color: inherit; background: transparent; }
+:host-context(.category-card) .service-icon svg { width: 18px; height: 18px; }
 .service-icon { display: inline-grid; width: 52px; height: 52px; flex: 0 0 52px; place-items: center; border-radius: 15px; color: var(--color-primary); background: var(--color-primarySoft); transition: color var(--durationFast) ease, background-color var(--durationFast) ease; }
 .service-icon svg { width: 27px; height: 27px; }
 :host-context(.service-card:hover) .service-icon { color: var(--color-surface); background: var(--color-primary); }

@@ -163,16 +163,16 @@ export class ServiceRequestService {
     if (!request.preferredDate) {
       return undefined;
     }
-    return new Date(`${request.preferredDate}T${request.preferredTime || '09:00'}:00`).toISOString();
+    return new Date(`${request.preferredDate}T${request.preferredTime || '09:00'}:00-03:00`).toISOString();
   }
 
   private toServiceRequest(request: ApiServiceRequest): ServiceRequest {
-    const preferredAt = request.preferredAt ? new Date(request.preferredAt) : null;
+    const preferredAt = request.preferredAt ? new Date(new Date(request.preferredAt).getTime() - 3 * 3600000) : null;
     return Object.assign({}, request, {
       serviceName: request.service?.name || request.serviceName,
       category: request.service?.category || request.category,
       preferredDate: preferredAt ? preferredAt.toISOString().slice(0, 10) : undefined,
-      preferredTime: preferredAt ? preferredAt.toTimeString().slice(0, 5) : undefined,
+      preferredTime: preferredAt ? preferredAt.toISOString().slice(11, 16) : undefined,
       answers: Object.entries(request.answers || {}).map(([key, value]) => ({ key, label: key, value })),
       attachments: (request.attachments || []).map(attachment => ({
         mediaId: attachment.mediaId,

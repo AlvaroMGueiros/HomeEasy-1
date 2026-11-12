@@ -7,6 +7,7 @@ import { LoginServiceService } from '../../Servicos/login-service.service';
 import { UsuarioService } from '../../Servicos/usuario.service';
 import { ServicoPedidoService } from './../../Servicos/servico-pedido.service';
 import { ServicosService } from '../../Servicos/servicos.service';
+import { ProviderStatusService } from '../../Servicos/provider-status.service';
 import { Usuario } from './../../Usuarios/usuario';
 import { Servico } from './../../Usuarios/servico';
 import { ServicoPedido } from './../../Usuarios/serico-pedido';
@@ -42,7 +43,8 @@ export class AddprofissioanlComponent implements OnInit {
     public usuarioService : UsuarioService,
     public servicoPedido : ServicoPedidoService,
     public router : Router,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private providerStatus: ProviderStatusService
   ) { }
 
   ngOnInit() {
@@ -83,7 +85,8 @@ export class AddprofissioanlComponent implements OnInit {
     try {
       await this.servicoPedido.addServicoPedido(this.usuario, this.servicoSelecionado, this.servePedido);
       this.notificationService.showSuccess('Serviço cadastrado', 'Sua especialidade já está disponível para novos clientes.');
-      this.router.navigate(['/feed']);
+      this.providerStatus.invalidate();
+      this.router.navigate(['/inicio']);
     } catch (error) {
       this.notificationService.showError(
         'Não foi possível cadastrar',

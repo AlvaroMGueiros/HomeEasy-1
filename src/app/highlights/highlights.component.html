@@ -1,55 +1,108 @@
 <app-navbar [authenticated]="true" [userId]="userId" (logout)="logout()"></app-navbar>
-<main class="app-page"><div class="page-shell">
-  <header class="page-heading"><span class="pageEmblem"><app-page-icon name="star"></app-page-icon></span><div><h1>Destaques</h1><p>Trabalhos e profissionais da sua região.</p></div><a class="button-quiet" routerLink="/destaques/minhas">Minhas publicações <span aria-hidden="true"><app-arrow-icon></app-arrow-icon></span></a></header>
-  <div class="highlightsLayout">
-    <section class="timeline" aria-label="Publicações">
-      <div class="publicationComposer"><span class="composerIcon" aria-hidden="true">+</span><div><strong>Seu trabalho merece ser visto</strong><span>Compartilhe um projeto do seu portfólio.</span></div><a class="button-primary" routerLink="/destaques/publicar">Publicar trabalho</a></div>
-      <div class="timelineHeading"><span>{{ filters.city || 'Sua região' }}<span *ngIf="filters.state">, {{ filters.state }}</span></span><span>Publicações recentes</span></div>
+<main class="app-page feedPage">
+  <h1 class="sr-only">Destaques</h1>
+  <div class="feedLayout">
+
+    <!-- Left: who I am and my shortcuts -->
+    <aside class="feedLeft" aria-label="Seu perfil">
+      <section class="profileCard">
+        <div class="profileCover" aria-hidden="true"></div>
+        <a class="profileAvatar" [routerLink]="['/usuario', userId]">
+          <img *ngIf="me?.foto" [src]="me.foto" [alt]="me.nome">
+          <span *ngIf="!me?.foto" aria-hidden="true">{{ myInitial }}</span>
+        </a>
+        <a class="profileName" [routerLink]="['/usuario', userId]">{{ me?.nome || 'Seu perfil' }}</a>
+        <p class="profileMeta" *ngIf="me?.cidade">{{ me.cidade }}<ng-container *ngIf="me?.estado">, {{ me.estado }}</ng-container></p>
+        <nav class="profileLinks" aria-label="Atalhos">
+          <a routerLink="/destaques/minhas">Minhas publicações</a>
+          <a routerLink="/favoritos">Profissionais salvos</a>
+        </nav>
+      </section>
+    </aside>
+
+    <!-- Center: the feed -->
+    <section class="feedCenter" aria-label="Publicações">
+      <div class="composer">
+        <span class="composerAvatar" aria-hidden="true"><img *ngIf="me?.foto" [src]="me.foto" alt=""><span *ngIf="!me?.foto">{{ myInitial }}</span></span>
+        <a class="composerInput" routerLink="/destaques/publicar">Compartilhe um trabalho</a>
+        <a class="composerPhoto" routerLink="/destaques/publicar" aria-label="Publicar com fotos" title="Publicar com fotos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="10" r="1.8"></circle><path d="m21 16-5-5-8 8"></path></svg></a>
+      </div>
+
+      <!-- Filters on small screens -->
+      <details class="mobileFilters">
+        <summary>Filtrar por cidade e serviço<span>{{ filters.city }}<ng-container *ngIf="filters.state">, {{ filters.state }}</ng-container></span></summary>
+        <ng-container *ngTemplateOutlet="filterForm"></ng-container>
+      </details>
+
       <app-action-feedback type="error" [message]="error"></app-action-feedback><app-action-feedback type="info" [message]="feedback"></app-action-feedback>
       <button class="button-secondary" *ngIf="error" (click)="load()">Tentar novamente</button>
-      <app-loading-state *ngIf="isLoading" message="Carregando publicações..."></app-loading-state>
-      <div class="publications">
-        <article class="publication" *ngFor="let publication of publications">
-          <header class="publicationHeader">
-            <a class="author" [routerLink]="['/profissionais', publication.professional.id]">
-              <img *ngIf="publication.professional.profilePhotoMediaId" [src]="mediaUrl(publication.professional.profilePhotoMediaId)" [alt]="publication.professional.name">
-              <span class="authorInitial" *ngIf="!publication.professional.profilePhotoMediaId" aria-hidden="true">{{ publication.professional.name.charAt(0) }}</span>
-              <div><strong>{{ publication.professional.name }}</strong><small>{{ publication.serviceName }} · {{ publication.professional.city }}, {{ publication.professional.state }}</small><small>{{ publication.createdAt | date:'dd/MM/yyyy' }}<span *ngIf="publication.isSponsored"> · Patrocinado</span></small></div>
-            </a>
-            <a class="profileLink" [routerLink]="['/profissionais', publication.professional.id]">Ver perfil <span aria-hidden="true"><app-arrow-icon direction="external"></app-arrow-icon></span></a>
-          </header>
-          <div class="publicationCopy"><h2>{{ publication.title }}</h2><p>{{ publication.description }}</p></div>
-          <div class="publicationPhotos" *ngIf="publication.mediaIds.length" tabindex="0" aria-label="Fotos do trabalho">
-            <img *ngFor="let mediaId of publication.mediaIds; let photoIndex = index" [src]="mediaUrl(mediaId)" [alt]="publication.title + ' (foto ' + (photoIndex + 1) + ')'" loading="lazy">
-          </div>
-          <div class="publicationBody">
-            <div class="publicationReputation" *ngIf="publication.professional.metrics?.verifiedReviewCount">
-              <a [routerLink]="['/profissionais', publication.professional.id]"><span class="ratingStar" aria-hidden="true">★</span> {{ publication.professional.metrics.averageRating | number:'1.1-1' }} de 5 <span>· {{ publication.professional.metrics.verifiedReviewCount }} avaliações</span></a>
-              <small *ngIf="publication.mediaIds.length > 1">Deslize para ver {{ publication.mediaIds.length }} fotos</small>
-            </div>
-            <blockquote *ngIf="publication.latestReview"><strong>{{ publication.latestReview.clientName }} <span>· {{ publication.latestReview.rating }} de 5</span></strong><p>{{ publication.latestReview.comment }}</p><small>{{ publication.latestReview.createdAt | date:'dd/MM/yyyy' }}</small></blockquote>
-            <div class="publicationActions">
-              <button class="button-quiet" *ngIf="publication.professional.id !== userId" [disabled]="!favoriteReady || !!savingFavoriteId" (click)="toggleFavorite(publication.professional.id)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"></path></svg>{{ favoriteIds.has(publication.professional.id) ? 'Salvo' : 'Salvar profissional' }}</button>
-              <button class="button-quiet" (click)="share(publication)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="5" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8 11 7-4M8 13l7 4"></path></svg>Compartilhar</button>
-              <a class="button-primary" *ngIf="publication.professional.id !== userId" [routerLink]="['/solicitar', publication.serviceId, 'profissional', publication.professional.id]">Solicitar orçamento</a>
-            </div>
-            <app-user-safety-actions *ngIf="publication.professional.id !== userId" [targetUserId]="publication.professional.id" [highlightId]="publication.id"></app-user-safety-actions>
-          </div>
-        </article>
-      </div>
-      <div class="empty-state" *ngIf="!isLoading && !error && !publications.length"><div><h2>Nenhuma publicação por aqui</h2><p>Tente outra região ou serviço.</p></div></div>
-      <button class="button-secondary" *ngIf="hasMore" [disabled]="isLoading" (click)="load(true)">Carregar mais</button>
+      <app-loading-state *ngIf="isLoading && !publications.length" message="Carregando publicações"></app-loading-state>
+
+      <article class="post" *ngFor="let publication of publications">
+        <header class="postHeader">
+          <a class="postAuthor" [routerLink]="['/profissionais', publication.professional.id]">
+            <img *ngIf="publication.professional.profilePhotoMediaId" [src]="mediaUrl(publication.professional.profilePhotoMediaId)" alt="">
+            <span class="postInitial" *ngIf="!publication.professional.profilePhotoMediaId" aria-hidden="true">{{ publication.professional.name.charAt(0) }}</span>
+            <span class="postAuthorCopy">
+              <strong>{{ publication.professional.name }}</strong>
+              <small>{{ publication.serviceName }} em {{ publication.professional.city }}<ng-container *ngIf="publication.professional.metrics?.verifiedReviewCount">, ★ {{ publication.professional.metrics.averageRating | number:'1.1-1' }}</ng-container></small>
+              <small><time [attr.datetime]="publication.createdAt">{{ publication.createdAt | date:"d 'de' MMM" }}</time><ng-container *ngIf="publication.isSponsored">, patrocinado</ng-container></small>
+            </span>
+          </a>
+        </header>
+
+        <div class="postText">
+          <h2>{{ publication.title }}</h2>
+          <p [class.clamped]="!expandedIds.has(publication.id)">{{ publication.description }}</p>
+          <button type="button" class="moreLink" *ngIf="publication.description?.length > 220" (click)="toggleExpanded(publication.id)">{{ expandedIds.has(publication.id) ? 'ver menos' : 'ver mais' }}</button>
+        </div>
+
+        <div class="postMedia" *ngIf="publication.mediaIds.length" tabindex="0" [attr.aria-label]="publication.mediaIds.length > 1 ? 'Fotos do trabalho, deslize para ver ' + publication.mediaIds.length : 'Foto do trabalho'">
+          <img *ngFor="let mediaId of publication.mediaIds; let photoIndex = index" [src]="mediaUrl(mediaId)" [alt]="publication.title + ' (foto ' + (photoIndex + 1) + ')'" loading="lazy">
+          <span class="photoCount" *ngIf="publication.mediaIds.length > 1" aria-hidden="true">{{ publication.mediaIds.length }} fotos</span>
+        </div>
+
+        <div class="postReview" *ngIf="publication.latestReview">
+          <span class="reviewStars" [attr.aria-label]="publication.latestReview.rating + ' de 5'">★ {{ publication.latestReview.rating }}</span>
+          <p><strong>{{ publication.latestReview.clientName }}</strong> {{ publication.latestReview.comment }}</p>
+        </div>
+
+        <footer class="postActions">
+          <button type="button" *ngIf="publication.professional.id !== userId" [disabled]="!favoriteReady || !!savingFavoriteId" (click)="toggleFavorite(publication.professional.id)" [attr.aria-pressed]="favoriteIds.has(publication.professional.id)">
+            <svg viewBox="0 0 24 24" [attr.fill]="favoriteIds.has(publication.professional.id) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"></path></svg><span>{{ favoriteIds.has(publication.professional.id) ? 'Salvo' : 'Salvar' }}</span>
+          </button>
+          <button type="button" (click)="share(publication)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="5" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8 11 7-4M8 13l7 4"></path></svg><span>Compartilhar</span>
+          </button>
+          <a *ngIf="publication.professional.id !== userId" [routerLink]="['/solicitar', publication.serviceId, 'profissional', publication.professional.id]">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M21 14a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path></svg><span>Pedir orçamento</span>
+          </a>
+          <a *ngIf="publication.professional.id === userId" routerLink="/destaques/minhas">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg><span>Gerenciar</span>
+          </a>
+        </footer>
+        <app-user-safety-actions class="postSafety" *ngIf="publication.professional.id !== userId" [targetUserId]="publication.professional.id" [highlightId]="publication.id"></app-user-safety-actions>
+      </article>
+
+      <div class="feedEmpty" *ngIf="!isLoading && !error && !publications.length"><h2>Nenhuma publicação por aqui</h2><p>Tente outra cidade ou outro serviço</p></div>
+      <div class="loadMore" *ngIf="hasMore"><button class="button-secondary" [disabled]="isLoading" (click)="load(true)">{{ isLoading ? 'Carregando' : 'Carregar mais' }}</button></div>
     </section>
-    <aside class="feedFilters" aria-label="Filtros de publicações">
-      <details [open]="filtersExpanded"><summary>Explorar trabalhos</summary>
-        <form class="filterForm" (ngSubmit)="load()">
-          <label>Buscar<input name="highlightSearch" [(ngModel)]="filters.search" type="search" placeholder="Serviço ou profissional"></label>
-          <div class="locationFields"><label>Cidade<input name="highlightCity" [(ngModel)]="filters.city" maxlength="100"></label><label>Estado<input name="highlightState" [(ngModel)]="filters.state" maxlength="2" placeholder="PE"></label></div>
-          <label>Serviço<select name="highlightService" [(ngModel)]="filters.serviceId"><option value="">Todos os serviços</option><option *ngFor="let service of services" [value]="service.id">{{ service.nome }}</option></select></label>
-          <button class="button-secondary" [disabled]="isLoading">Filtrar</button>
-        </form>
-      </details>
-      <div class="feedSidebarLinks"><a routerLink="/destaques/minhas">Gerenciar minhas publicações <span aria-hidden="true"><app-arrow-icon></app-arrow-icon></span></a><a routerLink="/favoritos">Profissionais salvos <span aria-hidden="true"><app-arrow-icon></app-arrow-icon></span></a><a routerLink="/contato">Ajuda e suporte <span aria-hidden="true"><app-arrow-icon direction="external"></app-arrow-icon></span></a></div>
+
+    <!-- Right: explore -->
+    <aside class="feedRight" aria-label="Filtrar publicações">
+      <section class="sideCard">
+        <h2>Explorar trabalhos</h2>
+        <ng-container *ngTemplateOutlet="filterForm"></ng-container>
+      </section>
     </aside>
   </div>
-</div></main>
+</main>
+
+<ng-template #filterForm>
+  <form class="filterForm" (ngSubmit)="load()">
+    <label>Buscar<input name="highlightSearch" [(ngModel)]="filters.search" type="search" placeholder="Serviço ou profissional"></label>
+    <div class="locationFields"><label>Cidade<input name="highlightCity" [(ngModel)]="filters.city" maxlength="100"></label><label>UF<input name="highlightState" [(ngModel)]="filters.state" maxlength="2"></label></div>
+    <label>Serviço<select name="highlightService" [(ngModel)]="filters.serviceId"><option value="">Todos os serviços</option><option *ngFor="let service of services" [value]="service.id">{{ service.nome }}</option></select></label>
+    <button class="button-secondary" [disabled]="isLoading">Aplicar filtros</button>
+  </form>
+</ng-template>

@@ -123,12 +123,12 @@ export class RegionalServiceMapComponent implements OnChanges, OnDestroy {
       const coordinates: L.LatLngTuple = [location.latitude, location.longitude];
       const popup = document.createElement('div');
       const notice = document.createElement('p');
-      notice.textContent = 'Localização aproximada · não é o endereço de atendimento';
+      notice.textContent = 'Localização aproximada, não é o endereço de atendimento';
       popup.appendChild(notice);
       for (const professional of professionals) {
         const link = document.createElement('a');
         link.href = `/profissionais/${encodeURIComponent(professional.professionalId)}`;
-        link.textContent = `${professional.professionalName} · ${professional.serviceName}`;
+        link.textContent = `${professional.professionalName}, ${professional.serviceName}`;
         link.style.display = 'block';
         popup.appendChild(link);
       }

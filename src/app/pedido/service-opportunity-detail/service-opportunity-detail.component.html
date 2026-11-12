@@ -6,8 +6,7 @@
   <ng-container *ngIf="!isLoading && !loadError">
     <header class="page-heading"><span class="pageEmblem"><app-page-icon name="document"></app-page-icon></span><div class="page-heading-copy"><span class="page-kicker">Oportunidade em {{ request.city }}</span><h1>{{ request.serviceName }}</h1><p>{{ request.description }}</p></div></header>
     <div class="form-stack">
-      <aside class="surface-card">
-        <span class="page-kicker">Resumo do pedido</span><h2>Informações do atendimento</h2>
+      <aside class="surface-card"><h2>Informações do atendimento</h2>
         <div class="detail-list opportunity-details">
           <div class="detail-item"><span>Local</span><strong>{{ request.city }}, {{ request.state }}</strong></div>
           <div class="detail-item"><span>Data</span><strong>{{ request.preferredDate ? (request.preferredDate | date:'dd/MM/yyyy':'UTC') : 'A combinar' }}</strong></div>
@@ -18,7 +17,7 @@
         <app-request-attachment-gallery [attachments]="request.attachments || []"></app-request-attachment-gallery>
       </aside>
       <form class="surface-card form-stack" #proposalForm="ngForm" (ngSubmit)="submitProposal()" *ngIf="!hasSubmittedProposal">
-        <div><span class="page-kicker">Sua proposta</span><h2>Apresente uma oferta clara</h2></div>
+        <div><h2>Apresente uma oferta clara</h2></div>
         <div class="form-grid">
           <div class="field-group"><label for="proposalPrice">Valor total</label><input id="proposalPrice" name="proposalPrice" type="number" min="1" step="0.01" [(ngModel)]="proposal.price" required></div>
           <div class="field-group"><label for="estimatedDurationHours">Prazo estimado em horas</label><input id="estimatedDurationHours" name="estimatedDurationHours" type="number" min="1" max="720" step="1" [(ngModel)]="proposalDurationHours" required><small class="field-help">Ex.: informe 48 para dois dias.</small></div>
@@ -31,7 +30,7 @@
         <button class="button-primary" type="submit" [disabled]="!proposalForm.valid || isSubmitting">{{ isSubmitting ? 'Enviando...' : 'Enviar proposta' }}</button>
       </form>
       <section class="surface-card form-stack" *ngIf="hasSubmittedProposal">
-        <span class="page-kicker">Proposta registrada</span><h2>Agora é só aguardar o cliente.</h2><p>Sua proposta já foi enviada e não pode ser enviada novamente.</p>
+        <span class="page-kicker">Proposta registrada</span><h2>Agora é só aguardar o cliente</h2><p>Sua proposta já foi enviada e não pode ser enviada novamente.</p>
         <app-action-feedback [message]="feedbackMessage" [type]="feedbackType"></app-action-feedback>
         <a class="button-primary" routerLink="/oportunidades">Ver outras oportunidades</a>
       </section>

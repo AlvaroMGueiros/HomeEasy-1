@@ -18,7 +18,7 @@
       <a class="contact-row" *ngFor="let contact of filteredContacts; trackBy: trackByContactId" [routerLink]="['/chat', contact.conversationId]" (click)="closeChat()">
         <img class="contact-avatar" *ngIf="contact.foto" [src]="contact.foto" [alt]="contact.nome" (error)="hideUnavailableContactPhoto(contact)">
         <span class="contact-avatar contact-initial" *ngIf="!contact.foto" aria-hidden="true">{{ contact.nome ? contact.nome.charAt(0) : 'HE' }}</span>
-        <span class="contact-copy"><strong>{{ contact.conversationServiceName }}</strong><small>{{ contact.nome }} · {{ contact.conversationWritable ? 'Ativa' : 'Encerrada' }}</small></span>
+        <span class="contact-copy"><strong>{{ contact.conversationServiceName }}</strong><small>{{ contact.nome }}, {{ contact.conversationWritable ? 'Ativa' : 'Encerrada' }}</small></span>
         <span class="contact-arrow" aria-hidden="true"><app-arrow-icon></app-arrow-icon></span>
       </a>
     </div>

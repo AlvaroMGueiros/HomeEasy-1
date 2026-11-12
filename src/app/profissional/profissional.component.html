@@ -2,8 +2,7 @@
 
 <main class="professional-page">
   <section class="professional-copy">
-    <span class="page-kicker">Para profissionais</span>
-    <h1>Seu trabalho mais perto de quem precisa.</h1>
+    <h1>Seu trabalho mais perto de quem precisa</h1>
     <p>Crie seu perfil, apresente seus serviços e receba pedidos de clientes da sua região.</p>
     <div class="form-actions">
       <a *ngIf="!entrarSair" routerLink="/login" class="button-primary">Criar minha conta</a>
@@ -16,7 +15,7 @@
     <div class="professional-dashboard">
       <header class="dashboard-header">
         <div class="dashboard-brand">
-          <span class="dashboard-logo"><img src="assets/home-easy-logo-v2.png" alt=""></span>
+          <span class="dashboard-logo"><img src="assets/brand/homeeasy-symbol.svg" alt=""></span>
           <div><small>Exemplo ilustrativo</small><strong>Seu painel</strong></div>
         </div>
         <span class="profile-status"><i></i> Perfil ativo</span>
@@ -50,18 +49,6 @@
         <div><span>Sua avaliação</span><strong>4,9 <small>★</small></strong></div>
       </div>
     </div>
-
-    <div class="pro-highlight pro-highlight-top">
-      <span class="highlight-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m5 12 4 4L19 6"></path></svg>
-      </span>
-      <div><strong>Perfil pronto</strong><small>para receber clientes</small></div>
-    </div>
-    <div class="pro-highlight pro-highlight-bottom">
-      <span class="highlight-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg>
-      </span>
-      <div><strong>Novo pedido</strong><small>na sua região</small></div>
-    </div>
   </section>
 </main>
+<app-site-footer></app-site-footer>

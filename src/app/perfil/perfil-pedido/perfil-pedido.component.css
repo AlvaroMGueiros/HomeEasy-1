@@ -19,10 +19,10 @@ blockquote { margin: 16px 0 0; padding-left: 16px; border-left: 3px solid var(--
 .profileNavigation { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0; border-bottom: 1px solid var(--color-border); }
 .profileNavigation a { flex: 0 0 auto; padding: 12px 16px; border-radius: 8px; color: var(--color-textMuted); font-size: .9rem; font-weight: 500; }
 .profileNavigation a:hover, .profileNavigation a:focus-visible { color: var(--color-primary); background: var(--color-primarySoft); }
-.section-card[id] { scroll-margin-top: 96px; }
+.section-card[id], #profileAvailability { scroll-margin-top: 96px; }
 .portfolioGrid { margin-top: 20px; }
-figcaption { padding-top: 10px; font-size: .9rem; }
-.profileHeader h1 { margin-bottom: 6px; }
+figcaption { padding-top: 12px; font-size: .9rem; }
+.profileHeader h1 { margin-bottom: 8px; }
 .profile-layout { grid-template-columns: minmax(260px, .8fr) minmax(0, 1.35fr); gap: 24px; align-items: start; }
 .profile-layout .serviceRow { padding: 16px 0; }
 .profile-layout .serviceRow:first-of-type { padding-top: 0; }

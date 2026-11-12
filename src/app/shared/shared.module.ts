@@ -8,6 +8,10 @@ import { FormsModule } from '@angular/forms';
 import { ProfessionalPresentationComponent } from './professional-presentation/professional-presentation.component';
 import { CommunityRulesGateComponent } from './community-rules-gate/community-rules-gate.component';
 import { UserSafetyActionsComponent } from './user-safety-actions/user-safety-actions.component';
+import { AvailabilityCalendarComponent } from './availability-calendar/availability-calendar.component';
+import { SiteFooterComponent } from './site-footer/site-footer.component';
+import { RoleChoiceModalComponent } from './role-choice-modal/role-choice-modal.component';
+import { SelectMenuComponent } from './select-menu/select-menu.component';
 
 import { NavbarComponent } from './navbar/navbar.component';
 import { ServiceIconComponent } from './service-icon/service-icon.component';
@@ -23,7 +27,7 @@ import { RequestAttachmentGalleryComponent } from './request-attachment-gallery/
     FormsModule,
     RouterModule
   ],
-  declarations: [PageIconComponent, CharacterCountComponent, ArrowIconComponent, NavbarComponent, ServiceIconComponent, ActionFeedbackComponent, LoadingStateComponent, BackLinkComponent, DialogComponent, RequestAttachmentGalleryComponent, ProfessionalPresentationComponent, CommunityRulesGateComponent, UserSafetyActionsComponent],
-  exports: [PageIconComponent, CharacterCountComponent, ArrowIconComponent, NavbarComponent, ServiceIconComponent, ActionFeedbackComponent, LoadingStateComponent, BackLinkComponent, DialogComponent, RequestAttachmentGalleryComponent, ProfessionalPresentationComponent, CommunityRulesGateComponent, UserSafetyActionsComponent]
+  declarations: [PageIconComponent, CharacterCountComponent, ArrowIconComponent, NavbarComponent, ServiceIconComponent, ActionFeedbackComponent, LoadingStateComponent, BackLinkComponent, DialogComponent, RequestAttachmentGalleryComponent, ProfessionalPresentationComponent, CommunityRulesGateComponent, UserSafetyActionsComponent, AvailabilityCalendarComponent, SiteFooterComponent, RoleChoiceModalComponent, SelectMenuComponent],
+  exports: [PageIconComponent, CharacterCountComponent, ArrowIconComponent, NavbarComponent, ServiceIconComponent, ActionFeedbackComponent, LoadingStateComponent, BackLinkComponent, DialogComponent, RequestAttachmentGalleryComponent, ProfessionalPresentationComponent, CommunityRulesGateComponent, UserSafetyActionsComponent, AvailabilityCalendarComponent, SiteFooterComponent, RoleChoiceModalComponent, SelectMenuComponent]
 })
 export class SharedModule {}

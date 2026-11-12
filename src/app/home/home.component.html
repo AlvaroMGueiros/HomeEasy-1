@@ -1,47 +1,156 @@
 <app-navbar [authenticated]="authenticated" [userId]="userId" (logout)="logout()"></app-navbar>
 <main class="home-page">
-  <section class="hero" aria-labelledby="homeTitle">
-    <div class="hero-copy">
-      <h1 id="homeTitle">Eletricista, diarista, encanador: encontre quem resolve na sua cidade</h1>
-      <p>Compare profissionais, peça orçamento e converse pela Home Easy. Acompanhe o serviço do primeiro contato à conclusão.</p>
+  <section class="heroBand" aria-labelledby="homeTitle">
+    <div class="hero">
+      <div class="hero-copy">
+        <h1 id="homeTitle">O que você precisa resolver hoje?</h1>
+        <p>A HomeEasy conecta você ao profissional certo da sua região, com conversa direta, orçamento e avaliações de quem já contratou.</p>
+      </div>
+
+      <aside class="heroPanel" aria-label="Profissionais da plataforma">
+        <header class="panelHead"><span class="os-tag">{{ professionals.length || isLoadingProfessionals ? 'Disponíveis agora' : 'Exemplo de pedido' }}</span><a routerLink="/feed">Ver todos</a></header>
+        <app-loading-state *ngIf="isLoadingProfessionals" message="Carregando profissionais"></app-loading-state>
+        <a class="proRow" *ngFor="let professional of professionals.slice(0, 3)" [routerLink]="['/profissionais', professional.id]">
+          <img *ngIf="professional.profilePhotoMediaId" [src]="mediaUrl(professional.profilePhotoMediaId)" [alt]="professional.name">
+          <span class="proAvatar" *ngIf="!professional.profilePhotoMediaId" aria-hidden="true">{{ professional.name.charAt(0) }}</span>
+          <span class="proCopy"><strong>{{ professional.name }}</strong><small>{{ professional.services[0]?.name }}<ng-container *ngIf="professional.city">, {{ professional.city }}</ng-container></small></span>
+          <span class="proRating" *ngIf="professional.metrics?.verifiedReviewCount">★ {{ professional.metrics.averageRating | number:'1.1-1' }}<small>{{ professional.metrics.verifiedReviewCount }} avaliações</small></span>
+        </a>
+        <div class="orderExample" *ngIf="!isLoadingProfessionals && !professionals.length">
+          <strong>Troca de disjuntor e instalação de 2 tomadas</strong>
+          <dl><div><dt>Serviço</dt><dd>Elétrica</dd></div><div><dt>Quando</dt><dd>Sábado, 9h</dd></div><div><dt>Propostas</dt><dd>3 recebidas</dd></div></dl>
+          <p>{{ professionalsError ? 'Os perfis não puderam ser carregados agora. Continue pela busca.' : 'Descreva o serviço e receba propostas de quem atende na sua região.' }}</p>
+        </div>
+      </aside>
+    </div>
+
+    <div class="searchWrap">
       <form class="homeSearch" (ngSubmit)="search()" role="search">
-        <label class="serviceField"><app-page-icon name="search"></app-page-icon><span class="sr-only">Serviço</span><input name="serviceSearch" [(ngModel)]="serviceSearch" type="search" maxlength="100" placeholder="Qual serviço você precisa?"></label>
-        <label class="cityField"><app-page-icon name="location"></app-page-icon><span class="sr-only">Cidade</span><input name="citySearch" [(ngModel)]="citySearch" maxlength="100" placeholder="Sua cidade"></label>
-        <button class="button-primary" type="submit">Buscar</button>
+        <label class="cityField">
+          <span class="fieldLabel">Onde</span>
+          <span class="fieldControl"><app-page-icon name="location"></app-page-icon><input name="citySearch" [(ngModel)]="citySearch" maxlength="100" placeholder="Sua cidade"></span>
+        </label>
+        <label class="serviceField">
+          <span class="fieldLabel">O que você precisa</span>
+          <input name="serviceSearch" [(ngModel)]="serviceSearch" type="search" maxlength="100" placeholder="Ex.: instalação de chuveiro">
+        </label>
+        <button class="searchButton" type="submit" aria-label="Buscar profissionais">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7"></circle><path d="m16 16 5 5"></path></svg>
+        </button>
       </form>
-      <div class="popularSearches"><span>Explore:</span><a *ngFor="let service of popularServices" routerLink="/feed" [queryParams]="{q: service, city: citySearch.trim() || undefined}">{{ service }}</a></div>
-      <div class="hero-proof"><span><app-page-icon name="location"></app-page-icon>Busca por região</span><span><app-page-icon name="star"></app-page-icon>Avaliações de clientes</span><span><app-page-icon name="message"></app-page-icon>Chat na plataforma</span></div>
+      <div class="popularSearches" aria-label="Mais buscados">
+        <a *ngFor="let service of popularServices" routerLink="/feed" [queryParams]="{q: service, city: citySearch.trim() || undefined}">{{ service }}</a>
+      </div>
     </div>
-    <aside class="professionalPreview" aria-label="Conheça profissionais da plataforma">
-      <app-loading-state *ngIf="isLoadingProfessionals" message="Carregando profissionais..."></app-loading-state>
-      <a class="previewCard" *ngFor="let professional of professionals" [routerLink]="['/profissionais', professional.id]">
-        <img *ngIf="professional.profilePhotoMediaId" [src]="mediaUrl(professional.profilePhotoMediaId)" [alt]="professional.name">
-        <span class="previewAvatar" *ngIf="!professional.profilePhotoMediaId" aria-hidden="true">{{ professional.name.charAt(0) }}</span>
-        <div><strong>{{ professional.name }}</strong><small>{{ professional.services[0]?.name }} · {{ professional.city }}</small><small *ngIf="professional.metrics?.verifiedReviewCount">★ {{ professional.metrics.averageRating | number:'1.1-1' }} · {{ professional.metrics.verifiedReviewCount }} avaliações</small></div>
-        <app-arrow-icon direction="chevron"></app-arrow-icon>
+  </section>
+
+  <section class="featured" aria-labelledby="featuredTitle" *ngIf="professionals.length">
+    <div class="section-heading"><h2 id="featuredTitle">Profissionais em destaque</h2><a class="sectionLink" routerLink="/feed">Todos os profissionais <app-arrow-icon></app-arrow-icon></a></div>
+    <div class="featuredGrid">
+      <a class="featuredCard" *ngFor="let professional of professionals" [routerLink]="['/profissionais', professional.id]">
+        <div class="featuredMedia">
+          <img *ngIf="coverPhoto(professional) as photo" [src]="mediaUrl(photo)" [alt]="'Trabalho de ' + professional.name" loading="lazy">
+          <span class="featuredInitial" *ngIf="!coverPhoto(professional)" aria-hidden="true">{{ professional.name.charAt(0) }}</span>
+          <span class="featuredRating" *ngIf="professional.metrics?.verifiedReviewCount">★ {{ professional.metrics.averageRating | number:'1.1-1' }}</span>
+        </div>
+        <div class="featuredBody">
+          <h3>{{ professional.services[0]?.name || 'Serviços gerais' }}</h3>
+          <p>{{ professional.name }}<ng-container *ngIf="professional.city"> · {{ professional.city }}</ng-container></p>
+        </div>
       </a>
-      <div *ngIf="!isLoadingProfessionals && !professionals.length"><h2>Encontre seu próximo profissional</h2><p>{{ professionalsError ? 'Os perfis não puderam ser carregados agora. Continue pela busca.' : 'Explore os serviços e confira quem atende na sua região.' }}</p><a routerLink="/feed" class="button-secondary">Explorar profissionais <app-arrow-icon></app-arrow-icon></a></div>
-    </aside>
-  </section>
-  <section class="homeCategories" aria-labelledby="categoriesTitle">
-    <div class="section-heading"><h2 id="categoriesTitle">Do que você precisa hoje?</h2><p>Escolha o serviço e veja quem atende na sua região.</p></div>
-    <div class="homeCategoryGrid">
-      <a *ngFor="let category of categories" routerLink="/feed" [queryParams]="{ q: category.search, city: citySearch.trim() || undefined }"><app-service-icon [serviceName]="category.search" [colorful]="true"></app-service-icon><h3>{{ category.name }}</h3><p>{{ category.description }}</p></a>
-      <a class="allServices" routerLink="/feed"><app-page-icon name="plus"></app-page-icon><h3>Ver todos os serviços</h3><p>Dedetização, pintura e mais</p></a>
     </div>
   </section>
-  <section class="how-it-works" aria-labelledby="stepsTitle">
-    <div class="section-heading"><h2 id="stepsTitle">Como contratar</h2><p>Você escolhe o profissional e acompanha cada etapa pela Home Easy.</p></div>
-    <ol class="steps-grid">
-      <li><span class="step-number">1</span><h3>Descreva o que precisa</h3><p>Informe o serviço e o local. Se quiser, anexe fotos para explicar o pedido.</p></li>
-      <li><span class="step-number">2</span><h3>Compare propostas</h3><p>Confira perfis, preços e condições. Converse antes de decidir.</p></li>
-      <li><span class="step-number">3</span><h3>Contrate e avalie</h3><p>Acompanhe o atendimento até a conclusão e compartilhe sua experiência.</p></li>
-    </ol>
+
+  <section class="explore" aria-labelledby="exploreTitle">
+    <div class="section-heading"><h2 id="exploreTitle">Explorar</h2><a class="sectionLink" routerLink="/feed">Todas as categorias <app-arrow-icon></app-arrow-icon></a></div>
+    <div class="exploreGrid">
+      <a class="exploreTile" *ngFor="let group of exploreGroups" routerLink="/feed" [queryParams]="{ q: group.search, city: citySearch.trim() || undefined }">
+        <span class="exploreCopy"><h3>{{ group.name }}</h3><small>{{ group.description }}</small></span>
+        <app-service-icon [serviceName]="group.search"></app-service-icon>
+      </a>
+    </div>
   </section>
+
+  <section class="specialties" aria-labelledby="specialtiesTitle">
+    <div class="section-heading"><h2 id="specialtiesTitle">Especialidades</h2></div>
+    <div class="specialtyRow">
+      <a *ngFor="let category of categories; let i = index" class="specialty" routerLink="/feed" [queryParams]="{ q: category.search, city: citySearch.trim() || undefined }">
+        <span class="specialtyCircle" [attr.data-tone]="i % 5"><app-service-icon [serviceName]="category.search"></app-service-icon></span>
+        <strong>{{ category.name }}</strong>
+      </a>
+    </div>
+  </section>
+
+  <section class="howBand" aria-labelledby="stepsTitle">
+    <div class="how-it-works">
+      <div class="howIntro">
+        <h2 id="stepsTitle">Do pedido à conclusão,<br>tudo pela HomeEasy.</h2>
+        <p>Você escolhe o profissional, conversa antes de fechar<br>e acompanha cada etapa do atendimento.</p>
+      </div>
+      <ol class="steps-grid">
+        <li class="stepCard">
+          <span class="stepNumber">1</span><h3>Descreva o pedido</h3><p>Diga o que precisa e onde. Fotos ajudam o profissional a entender.</p>
+          <div class="mock mockRequest" aria-hidden="true">
+            <strong>Instalação de chuveiro</strong><small>Banheiro social · Garanhuns</small>
+            <span class="mockPhotos"><i></i><i></i><i></i></span>
+            <span class="mockButton">Pedir orçamento</span>
+          </div>
+        </li>
+        <li class="stepCard">
+          <span class="stepNumber">2</span><h3>Compare propostas</h3><p>Veja perfis, portfólio e avaliações de quem já contratou.</p>
+          <div class="mock mockOffers" aria-hidden="true">
+            <span class="mockOffer"><i>M</i><span><strong>Marcos</strong><small>★ 4.9 · 32 avaliações</small></span><b>R$ 120</b></span>
+            <span class="mockOffer"><i>J</i><span><strong>Juliana</strong><small>★ 4.8 · 18 avaliações</small></span><b>R$ 140</b></span>
+            <span class="mockOffer"><i>R</i><span><strong>Rafael</strong><small>★ 4.7 · 9 avaliações</small></span><b>R$ 110</b></span>
+          </div>
+        </li>
+        <li class="stepCard">
+          <span class="stepNumber">3</span><h3>Converse e combine</h3><p>Tire dúvidas pelo chat e combine dia e horário.</p>
+          <div class="mock mockChat" aria-hidden="true">
+            <span class="bubble">Consigo ir sábado de manhã. Pode ser às 9h?</span>
+            <span class="bubble mine">Perfeito, te espero às 9h!</span>
+            <span class="mockStatus"><b></b>Atendimento agendado · Sáb, 9h</span>
+          </div>
+        </li>
+        <li class="stepCard">
+          <span class="stepNumber">4</span><h3>Avalie o serviço</h3><p>Conclua o atendimento e ajude a comunidade com sua avaliação.</p>
+          <div class="mock mockReview" aria-hidden="true">
+            <span class="mockStatus done"><b></b>Concluído</span>
+            <span class="stars">★★★★★</span>
+            <strong>Obrigado pela avaliação!</strong><small>Ela aparece no perfil do profissional.</small>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="benefitsBand" aria-labelledby="benefitsTitle">
+    <h2 id="benefitsTitle" class="sr-only">Por que usar a HomeEasy</h2>
+    <div class="bento">
+      <article class="bentoCard tone-muted"><h3>Profissionais<br>verificados</h3><p>Profissionais enviam documentos para verificação, e o selo aparece no perfil.</p></article>
+      <div class="bentoPhoto"><img *ngIf="bentoPhotos[0]" [src]="mediaUrl(bentoPhotos[0])" alt="Trabalho publicado por um profissional da HomeEasy" loading="lazy"><app-service-icon *ngIf="!bentoPhotos[0]" serviceName="Eletricista"></app-service-icon></div>
+      <article class="bentoCard tone-soft"><h3>Converse antes<br>de contratar</h3><p>Chat dentro da plataforma, com o histórico de cada serviço no mesmo lugar.</p></article>
+      <div class="bentoPhoto"><img *ngIf="bentoPhotos[1]" [src]="mediaUrl(bentoPhotos[1])" alt="Trabalho publicado por um profissional da HomeEasy" loading="lazy"><app-service-icon *ngIf="!bentoPhotos[1]" serviceName="Encanador"></app-service-icon></div>
+      <article class="bentoCard tone-white"><h3>Avaliações de<br>quem contratou</h3><p>Avaliações verificadas de clientes ficam no perfil de cada profissional.</p></article>
+      <div class="bentoPhoto"><img *ngIf="bentoPhotos[2]" [src]="mediaUrl(bentoPhotos[2])" alt="Trabalho publicado por um profissional da HomeEasy" loading="lazy"><app-service-icon *ngIf="!bentoPhotos[2]" serviceName="Diarista"></app-service-icon></div>
+    </div>
+  </section>
+
   <section class="recentWorks" aria-labelledby="worksTitle" *ngIf="portfolioProfessionals.length">
-    <div class="section-heading"><h2 id="worksTitle">Trabalhos no portfólio</h2><a routerLink="/destaques">Explorar Destaques <app-arrow-icon></app-arrow-icon></a></div>
-    <div class="workGrid"><a *ngFor="let professional of portfolioProfessionals" [routerLink]="['/profissionais', professional.id]"><img [src]="mediaUrl(professional.portfolioPhotos[0].mediaId)" [alt]="professional.portfolioPhotos[0].caption || 'Trabalho de ' + professional.name" loading="lazy"><div><h3>{{ professional.portfolioPhotos[0].caption || professional.services[0]?.name }}</h3><p>{{ professional.name }} · {{ professional.city }}</p></div></a></div>
+    <div class="section-heading"><h2 id="worksTitle">Trabalhos no portfólio</h2><a class="sectionLink" routerLink="/destaques">Explorar Destaques <app-arrow-icon></app-arrow-icon></a></div>
+    <div class="workGrid"><a *ngFor="let professional of portfolioProfessionals.slice(0, 3)" [routerLink]="['/profissionais', professional.id]"><img [src]="mediaUrl(professional.portfolioPhotos[0].mediaId)" [alt]="professional.portfolioPhotos[0].caption || 'Trabalho de ' + professional.name" loading="lazy"><div><h3>{{ professional.portfolioPhotos[0].caption || professional.services[0]?.name }}</h3><p>{{ professional.name }}, {{ professional.city }}</p></div></a></div>
   </section>
-  <section class="professional-callout" aria-labelledby="professionalTitle"><div><h2 id="professionalTitle">Você é profissional? Receba pedidos de clientes perto de você.</h2><p>Crie seu perfil, apresente seus serviços e publique seu portfólio.</p></div><a class="button-secondary" routerLink="/profissional">Quero oferecer serviços <app-arrow-icon></app-arrow-icon></a></section>
-  <footer class="home-footer"><div class="footer-main"><a class="home-brand" routerLink="/home"><span class="brand-logo-frame" aria-hidden="true"><img class="brand-logo" src="assets/home-easy-logo-v2.png" alt=""></span><strong>home easy</strong></a><p>Serviços residenciais na sua região</p><nav aria-label="Links do rodapé"><a routerLink="/feed">Serviços</a><a routerLink="/contato">Suporte</a><a routerLink="/login">Entrar</a></nav></div><div class="footer-bottom">© 2026 Home Easy</div></footer>
+
+  <section class="professional-callout" aria-labelledby="professionalTitle">
+    <div><h2 id="professionalTitle">Você é profissional? Receba pedidos de clientes perto de você.</h2><p>Crie seu perfil, cadastre seus serviços e mostre seu portfólio para quem procura na sua região.</p></div>
+    <button class="calloutButton" type="button" (click)="startAsProvider()">Cadastrar meu serviço</button>
+  </section>
+
+  <section class="faq" aria-labelledby="faqTitle">
+    <h2 id="faqTitle">Ficou com dúvida?</h2>
+    <div class="faqList">
+      <details *ngFor="let item of faq"><summary>{{ item.question }}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></summary><p>{{ item.answer }}</p></details>
+    </div>
+  </section>
 </main>
+<app-site-footer></app-site-footer>

@@ -16,7 +16,7 @@
         <img class="profile-avatar" *ngIf="usuario.foto" [src]="usuario.foto" [alt]="usuario.nome">
         <span class="profile-avatar icon-badge" *ngIf="!usuario.foto">{{ usuario.nome ? usuario.nome.charAt(0) : 'HE' }}</span>
         <h2>{{ usuario.nome }}</h2>
-        <p>{{ servicosArray.length ? 'Profissional Home Easy' : 'Conta Home Easy' }}</p>
+        <p>{{ servicosArray.length ? 'Profissional HomeEasy' : 'Conta HomeEasy' }}</p>
         <div class="profile-meta">
           <span *ngIf="isOwnProfile && usuario.idade"><strong>Idade:</strong> {{ usuario.idade }}</span>
           <span *ngIf="isOwnProfile && usuario.telefone"><strong>Telefone:</strong> {{ usuario.telefone }}</span>
@@ -27,10 +27,10 @@
       </aside>
 
       <section class="accountLinkList" *ngIf="isOwnProfile">
-        <article class="section-card"><h2>Pedidos feitos</h2><p>Acompanhe os serviços que você contratou.</p><a class="button-primary" [routerLink]="['/usuario', userId, 'pedidos-feitos']">Ver pedidos</a></article>
-        <article class="section-card" *ngIf="servicosArray.length"><h2>Pedidos recebidos</h2><p>Gerencie novas solicitações de clientes.</p><a class="button-primary" [routerLink]="['/usuario', userId, 'pedidos-recebidos']">Ver solicitações</a></article>
-        <article class="section-card"><h2>Conversas</h2><p>Continue seus contatos com clientes e profissionais.</p><a class="button-primary" routerLink="/conversas">Abrir conversas</a></article>
-        <article class="section-card"><h2>Meus serviços</h2><p>Cadastre ou gerencie os serviços que você oferece.</p><div class="form-actions"><a class="button-primary" routerLink="/serprofissional">Adicionar serviço</a><a class="button-secondary" *ngIf="servicosArray.length" [routerLink]="['/serviços', userId]">Gerenciar</a></div></article>
+        <article class="section-card"><h2>Pedidos feitos</h2><p>Acompanhe os serviços que você contratou.</p><a class="button-secondary" [routerLink]="['/usuario', userId, 'pedidos-feitos']">Ver pedidos</a></article>
+        <article class="section-card" *ngIf="servicosArray.length"><h2>Pedidos recebidos</h2><p>Gerencie novas solicitações de clientes.</p><a class="button-secondary" [routerLink]="['/usuario', userId, 'pedidos-recebidos']">Ver solicitações</a></article>
+        <article class="section-card"><h2>Conversas</h2><p>Continue seus contatos com clientes e profissionais.</p><a class="button-secondary" routerLink="/conversas">Abrir conversas</a></article>
+        <article class="section-card"><h2>Meus serviços</h2><p>Cadastre ou gerencie os serviços que você oferece.</p><div class="form-actions"><a class="button-secondary" routerLink="/serprofissional">Adicionar serviço</a><a class="button-secondary" *ngIf="servicosArray.length" [routerLink]="['/serviços', userId]">Gerenciar</a></div></article>
         <article class="section-card" *ngIf="servicosArray.length"><h2>{{ verificationStatusLabel }}</h2><p>Envie um documento de identidade. O arquivo fica privado e somente a moderação pode acessá-lo.</p><label class="field-group" *ngIf="canRequestVerification"><span>Documento (PDF, PNG, JPG ou WebP)</span><input type="file" accept="application/pdf,image/png,image/jpeg,image/webp" (change)="onVerificationDocumentSelection($event)"></label><button class="button-primary" type="button" *ngIf="canRequestVerification" [disabled]="isRequestingVerification || !verificationDocument" (click)="requestVerification()">{{ isRequestingVerification ? 'Enviando...' : 'Solicitar verificação' }}</button></article>
       </section>
 

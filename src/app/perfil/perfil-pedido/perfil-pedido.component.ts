@@ -24,12 +24,7 @@ export class PerfilPedidoComponent implements OnInit, OnDestroy {
   feedback = '';
   isFavorite = false;
   favoriteReady = false;
-  availabilityDate = '';
-  availabilityTime = '';
-  availabilityMessage = '';
-  availabilityLoading = false;
   reviewResponses: Record<string, string> = {};
-  readonly weekdays = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
   readonly verificationLabels = { identity: 'Identidade verificada', address_proof: 'Endereço verificado', professional_certificate: 'Certificado profissional verificado' };
   private routeSubscription: Subscription;
   private loadVersion = 0;
@@ -43,7 +38,7 @@ export class PerfilPedidoComponent implements OnInit, OnDestroy {
     const version = ++this.loadVersion;
     const professionalId = this.route.snapshot.paramMap.get('professionalId') || this.route.snapshot.paramMap.get('idd');
     this.isLoading = true; this.error = ''; this.profile = null; this.reviews = null; this.schedule = null;
-    this.isFavorite = false; this.favoriteReady = false; this.reviewsError = ''; this.scheduleError = ''; this.availabilityMessage = '';
+    this.isFavorite = false; this.favoriteReady = false; this.reviewsError = ''; this.scheduleError = '';
     try {
       const profile = await firstValueFrom(this.profiles.find(professionalId));
       if (version !== this.loadVersion) return;
@@ -75,18 +70,6 @@ export class PerfilPedidoComponent implements OnInit, OnDestroy {
     const url = location.origin + '/profissionais/' + this.profile.id;
     try { if (navigator.share) await navigator.share({ title: this.profile.name, url }); else { await navigator.clipboard.writeText(url); this.feedback = 'Link do perfil copiado.'; } }
     catch (failure) { if (failure instanceof Error && failure.name !== 'AbortError') this.error = 'Não foi possível compartilhar. Copie o endereço desta página.'; }
-  }
-  async consultAvailability() {
-    if (!this.availabilityDate || !this.availabilityTime || this.availabilityLoading) return;
-    const professionalId = this.profile.id;
-    const availableAt = new Date(this.availabilityDate + 'T' + this.availabilityTime + ':00-03:00');
-    if (!Number.isFinite(availableAt.getTime()) || availableAt.getTime() <= Date.now()) { this.error = 'Escolha uma data e um horário futuros.'; return; }
-    this.availabilityLoading = true; this.availabilityMessage = ''; this.error = '';
-    try {
-      const result = await firstValueFrom(this.schedules.findAvailability(professionalId, availableAt.toISOString()));
-      if (this.profile?.id === professionalId) this.availabilityMessage = result.isAvailable ? 'Livre na agenda para até uma hora. Confirme os detalhes na proposta.' : 'Sem horário disponível nesse período.';
-    } catch (failure) { this.error = resolveHttpErrorMessage(failure, 'Não foi possível consultar esse horário.'); }
-    finally { this.availabilityLoading = false; }
   }
   async respondReview(reviewId: string) {
     const response = (this.reviewResponses[reviewId] || '').trim();

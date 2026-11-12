@@ -1,5 +1,5 @@
 .dashboardMetrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 4px 0 32px; padding: 16px 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); }
-.dashboardMetrics > div { position: relative; display: flex; flex-direction: column; gap: 7px; padding: 8px 24px; border-left: 1px solid var(--color-border); background: transparent; }
+.dashboardMetrics > div { position: relative; display: flex; flex-direction: column; gap: 8px; padding: 8px 24px; border-left: 1px solid var(--color-border); background: transparent; }
 .dashboardMetrics > div:first-child { border-left: 0; }
 .dashboardMetrics span { color: var(--color-textMuted); font-size: .8rem; }
 .dashboardMetrics strong { color: var(--color-text); font-size: clamp(1.4rem, 2.2vw, 2rem); font-weight: 600; font-variant-numeric: tabular-nums; }
@@ -8,15 +8,23 @@
 .listHeading { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--color-border); }
 .listHeading h2 { margin: 0; font-size: 1.18rem; }
 .listHeading a { font-size: .8rem; font-weight: 600; }
-.workRow { display: flex; align-items: center; gap: 18px; padding: 20px 0; border-bottom: 1px solid var(--color-border); }
+.workRow { display: flex; align-items: center; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--color-border); }
 .workRow:last-of-type { border-bottom: 0; padding-bottom: 0; }
 .workCopy { min-width: 0; flex: 1; }
-.workCopy h3 { margin: 0 0 5px; font-size: .95rem; }
+.workCopy h3 { margin: 0 0 4px; font-size: .95rem; }
 .workCopy p { margin: 0; font-size: .83rem; }
 .workValue { font-size: .9rem; }
-.workRow .button-secondary { gap: 18px; min-width: 146px; }
+.workRow .button-secondary { gap: 20px; min-width: 146px; }
 .workRow .order-status-chip { margin: 0; align-self: center; font-weight: 600; }
 .listEmpty { padding: 24px 0; font-size: .9rem; }
 @media (max-width: 1100px) { .dashboardMetrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .dashboardMetrics > div:nth-child(3) { border-left: 0; } }
-@media (max-width: 560px) { .dashboardMetrics { gap: 10px; } .dashboardMetrics > div { padding: 16px; } .dashboardList { padding: 18px; } .dashboardMetrics span { font-size: .8rem; } }
+@media (max-width: 560px) { .dashboardMetrics { gap: 12px; } .dashboardMetrics > div { padding: 16px; } .dashboardList { padding: 20px; } .dashboardMetrics span { font-size: .8rem; } }
 @media (max-width: 560px) { .workRow { flex-wrap: wrap; gap: 12px; } .workCopy { flex-basis: calc(100% - 72px); } .workRow > a { margin-left: 64px; } .workValue { margin-left: 64px; } .listHeading { align-items: flex-start; } }
+
+@media (min-width: 1100px) {
+  .page-shell { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 16px; align-items: start; }
+  .page-shell > :not(.dashboardList) { grid-column: 1 / -1; }
+  .dashboardList { margin-top: 0; }
+}
+.dashboardMetrics { margin: 0 0 24px; }
+.dashboardMetrics { border-top: 0; padding-top: 0; }

@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 
-export type PageIconName = 'calendar' | 'briefcase' | 'profile' | 'message' | 'star' | 'shield' | 'document' | 'bell' | 'search' | 'location' | 'heart' | 'settings' | 'plus' | 'trash' | 'check' | 'clock' | 'blocked' | 'chart';
+export type PageIconName = 'calendar' | 'briefcase' | 'profile' | 'message' | 'star' | 'shield' | 'document' | 'bell' | 'search' | 'location' | 'heart' | 'settings' | 'plus' | 'trash' | 'check' | 'clock' | 'blocked' | 'chart' | 'grid' | 'home' | 'edit';
 
 const pageIconPaths: Record<PageIconName, string> = {
     calendar: 'M7 3v4m10-4v4M3 10h18M6 5h12a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3zM7 14h1m4 0h1m4 0h1M7 17h1m4 0h1',
@@ -20,7 +20,10 @@ const pageIconPaths: Record<PageIconName, string> = {
     check: 'm5 12 4 4L19 6',
     clock: 'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0M12 7v5l3 2',
     blocked: 'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0M6 6l12 12',
-    chart: 'M3 3v18h18M7 15l4-5 4 2 6-7'
+    chart: 'M3 3v18h18M7 15l4-5 4 2 6-7',
+    grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+    home: 'M3 11l9-8 9 8M5 10v10h14V10M9 20v-6h6v6',
+    edit: 'M4 20h4L19 9l-4-4L4 16zM14 6l4 4'
   };
 
 @Component({

@@ -1,4 +1,4 @@
 :host { display: block; min-height: 100vh; background: var(--color-background); }
-.opportunity-urgency { padding: 6px 10px; border-radius: 999px; color: var(--color-warning); background: var(--color-warningSoft); font-size: 0.72rem; font-weight: 800; }
+.opportunity-urgency { padding: 8px 12px; border-radius: 999px; color: var(--color-warning); background: var(--color-warningSoft); font-size: 0.72rem; font-weight: 600; }
 .opportunity-location { display: grid; gap: 3px; margin: 0 0 20px; }
 .opportunity-location span { color: var(--color-textMuted); font-size: 0.8rem; }

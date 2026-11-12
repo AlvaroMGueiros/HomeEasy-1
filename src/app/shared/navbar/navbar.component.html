@@ -1,8 +1,14 @@
 <header class="app-navbar" *ngIf="!authenticated">
-  <a class="navbar-brand" [routerLink]="authenticated ? '/feed' : '/home'" (click)="closeMenu()" [attr.aria-label]="authenticated ? 'Home Easy - Feed de serviços' : 'Home Easy - Início'">
-    <span class="brand-logo-frame" aria-hidden="true"><img class="brand-logo" src="assets/home-easy-logo-v2.png" alt=""></span>
-    <span class="brand-name">home easy</span>
+  <a class="navbar-brand" [routerLink]="authenticated ? '/feed' : '/home'" (click)="closeMenu()" [attr.aria-label]="authenticated ? 'HomeEasy - Feed de serviços' : 'HomeEasy - Início'">
+    <span class="brand-logo-frame" aria-hidden="true"><img class="brand-logo" src="assets/brand/homeeasy-symbol.svg" alt=""></span>
+    <span class="brand-name">HomeEasy</span>
   </a>
+
+  <form class="public-search" role="search" (ngSubmit)="searchServices()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7"></circle><path d="m16 16 5 5"></path></svg>
+    <label class="sr-only" for="publicSearch">Qual serviço você procura?</label>
+    <input id="publicSearch" name="publicSearch" type="search" [(ngModel)]="searchQuery" placeholder="Qual serviço você procura?" maxlength="120" autocomplete="off">
+  </form>
 
   <button class="menu-toggle" type="button" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen" aria-controls="mainNavigation" [attr.aria-label]="menuOpen ? 'Fechar menu' : 'Abrir menu'">
     <span></span><span></span><span></span>
@@ -11,36 +17,29 @@
   <nav id="mainNavigation" class="navbar-links" [class.menu-open]="menuOpen" aria-label="Navegação principal" *ngIf="!authenticated">
     <a routerLink="/feed" routerLinkActive="active" (click)="closeMenu()">Serviços</a>
     <a routerLink="/pedido-info" routerLinkActive="active" (click)="closeMenu()">Como funciona</a>
-    <a routerLink="/profissional" routerLinkActive="active" (click)="closeMenu()">Para profissionais</a>
-    <a routerLink="/contato" routerLinkActive="active" (click)="closeMenu()">Suporte</a>
-    <a class="navbar-action" routerLink="/login" (click)="closeMenu()">Entrar</a>
+    <a routerLink="/profissional" routerLinkActive="active" (click)="closeMenu()">Seja um profissional</a>
+    <span class="navbar-auth">
+      <a class="navbar-login" href="/login" (click)="openAuth($event, 'login')">Entrar</a>
+      <a class="navbar-action" href="/login?mode=register" (click)="openAuth($event, 'register')">Criar conta</a>
+    </span>
   </nav>
 
 </header>
 
-<header class="app-navbar account-navbar" [class.discovery-navbar]="hideSearch" *ngIf="authenticated">
-  <a class="navbar-brand account-brand" routerLink="/feed" aria-label="Home Easy - Início"><span class="brand-logo-frame" aria-hidden="true"><img class="brand-logo" src="assets/home-easy-logo-v2.png" alt=""></span><span class="brand-name">home easy</span></a>
-  <nav class="desktop-navigation" aria-label="Navegação principal da conta">
-    <a routerLink="/feed" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Início</a>
-    <a routerLink="/destaques" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Destaques</a>
-    <ng-container *ngFor="let group of navigationGroups">
-      <details class="desktop-menu" *ngIf="group.id !== 'account' && (!group.adminOnly || isAdmin)" [open]="openDesktopGroupId === group.id" [class.active]="isGroupActive(group)">
-        <summary (click)="toggleDesktopGroup($event, group.id)">{{ group.label }}<app-arrow-icon direction="chevron"></app-arrow-icon></summary>
-        <div class="desktop-submenu"><a *ngFor="let link of group.links" [routerLink]="link.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeDesktopNavigation()">{{ link.label }}</a></div>
-      </details>
-    </ng-container>
-    <a routerLink="/contato" routerLinkActive="active">Ajuda</a>
-  </nav>
+<app-role-choice-modal *ngIf="roleModalOpen" (choose)="chooseRole($event)" (dismiss)="roleModalOpen = false"></app-role-choice-modal>
+
+<header class="app-navbar account-navbar" *ngIf="authenticated">
   <button class="authenticated-menu-toggle" type="button" (click)="toggleSidebar($event)" [attr.aria-expanded]="sidebarOpen" aria-controls="accountNavigation" [attr.aria-label]="sidebarOpen ? 'Fechar menu' : 'Abrir menu'">
     <span></span><span></span><span></span>
   </button>
+  <a class="navbar-brand account-brand" [routerLink]="homeRoute" aria-label="HomeEasy - Visão geral"><span class="brand-logo-frame" aria-hidden="true"><img class="brand-logo" src="assets/brand/homeeasy-symbol.svg" alt=""></span><span class="brand-name">HomeEasy</span></a>
 
+  <h1 class="topbar-title" *ngIf="hideSearch && pageTitle">{{ pageTitle }}</h1>
   <form class="topbar-search" *ngIf="!hideSearch" role="search" (ngSubmit)="searchServices()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7"></circle><path d="m16 16 5 5"></path></svg>
     <label class="sr-only" for="navigationSearch">Buscar serviços</label>
-    <input id="navigationSearch" name="navigationSearch" type="search" [(ngModel)]="searchQuery" placeholder="Buscar serviços..." maxlength="120" autocomplete="off">
-    <button type="submit" aria-label="Buscar serviços"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7"></circle><path d="m16 16 5 5"></path></svg></button>
+    <input id="navigationSearch" name="navigationSearch" type="search" [(ngModel)]="searchQuery" placeholder="Buscar serviços" maxlength="120" autocomplete="off">
   </form>
-
   <div class="account-actions">
     <a class="notification-link messages-link" routerLink="/conversas" routerLinkActive="active" aria-label="Mensagens" title="Mensagens"><app-page-icon name="message"></app-page-icon></a>
     <button class="notification-link" type="button" (click)="toggleNotificationMenu($event)" [attr.aria-expanded]="notificationMenuOpen" aria-controls="notificationMenu" [attr.aria-label]="notificationAriaLabel" title="Notificações">
@@ -67,14 +66,15 @@
           </span>
           <span class="notification-order-copy">
             <strong>{{ notification.title }}</strong>
-            <small>{{ notification.date }}<span *ngIf="notification.city"> · {{ notification.city }}</span></small>
+            <small>{{ notification.date }}<span *ngIf="notification.city">, {{ notification.city }}</span></small>
           </span>
-          <span class="notification-order-arrow" aria-hidden="true"><app-arrow-icon></app-arrow-icon></span>
+          <span class="notification-order-arrow" aria-hidden="true"></span>
         </a>
       </div>
 
       <a class="notification-menu-footer" routerLink="/notificacoes" (click)="closeNotificationMenu()">Ver todas</a>
     </section>
+    <a class="button-primary topbar-cta" routerLink="/feed">Pedir orçamento</a>
 
     <button class="topbar-account" type="button" (click)="toggleProfileMenu($event)" [attr.aria-expanded]="profileMenuOpen" aria-controls="profileMenu" aria-label="Abrir opções da conta">
       <img *ngIf="user && user.foto" [src]="user.foto" [alt]="user.nome" (error)="hideUnavailableUserPhoto()">
@@ -96,29 +96,32 @@
 <button class="sidebar-backdrop" type="button" *ngIf="authenticated && sidebarOpen" (click)="closeSidebar(true)" aria-label="Fechar menu"></button>
 
 <aside id="accountNavigation" class="global-sidebar" *ngIf="authenticated" [class.sidebar-open]="sidebarOpen" (transitionend)="focusSidebarAfterTransition($event)" aria-label="Navegação da conta">
-  <a class="navbar-brand sidebar-brand" routerLink="/feed" aria-label="Home Easy - Início" (click)="closeSidebar()">
-    <span class="brand-logo-frame" aria-hidden="true"><img class="brand-logo" src="assets/home-easy-logo-v2.png" alt=""></span>
-    <span class="brand-name">home easy</span>
+  <a class="sidebar-brand" [routerLink]="homeRoute" aria-label="HomeEasy - Visão geral" (click)="closeSidebar()">
+    <img src="assets/brand/homeeasy-symbol.svg" alt="" width="28" height="28">
+    <span><strong>HomeEasy</strong><small>Serviços para sua casa</small></span>
   </a>
+  <p class="sidebar-greeting">Olá{{ user?.nome ? ', ' + userFirstName : '' }}!</p>
   <nav class="sidebar-navigation" aria-label="Menu principal">
-    <a routerLink="/feed" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeSidebar()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h14V10M9 20v-6h6v6"></path></svg><span>Início</span>
-    </a>
-    <a routerLink="/destaques" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeSidebar()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z"></path></svg><span>Destaques</span>
-    </a>
-    <a routerLink="/conversas" routerLinkActive="active" (click)="closeSidebar()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path></svg><span>Mensagens</span>
-    </a>
-    <div class="navigation-divider"></div>
+    <span class="sidebar-section">Menu</span>
+    <a *ngFor="let link of visibleMainLinks" [routerLink]="link.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeSidebar()"><app-page-icon [name]="link.icon"></app-page-icon><span>{{ link.label }}</span></a>
     <ng-container *ngFor="let group of navigationGroups">
-      <details class="navigation-group" *ngIf="!group.adminOnly || isAdmin" [open]="isGroupActive(group)" [class.group-active]="isGroupActive(group)">
-        <summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path [attr.d]="group.icon"></path></svg><span>{{ group.label }}</span><svg class="group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg></summary>
-        <div class="navigation-submenu">
+      <details class="sidebar-group" *ngIf="!group.adminOnly || isAdmin" [open]="isGroupActive(group)">
+        <summary><app-page-icon [name]="group.headerIcon || 'briefcase'"></app-page-icon><span>{{ group.label }}</span><svg class="group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg></summary>
+        <div class="sidebar-group-links">
           <a *ngFor="let link of group.links" [routerLink]="link.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeSidebar()">{{ link.label }}</a>
         </div>
       </details>
     </ng-container>
   </nav>
-  <footer class="sidebar-footer"><a class="sidebarSupport" routerLink="/contato" (click)="closeSidebar()"><app-page-icon name="message"></app-page-icon><span><strong>Precisa de ajuda?</strong><small>Fale com a gente <app-arrow-icon></app-arrow-icon></small></span></a><a routerLink="/serprofissional" (click)="closeSidebar()">Oferecer meus serviços <span aria-hidden="true"><app-arrow-icon direction="external"></app-arrow-icon></span></a></footer>
+  <footer class="sidebar-footer">
+    <a class="sidebar-help" routerLink="/contato" (click)="closeSidebar()"><app-page-icon name="message"></app-page-icon><span>Ajuda e suporte</span></a>
+    <div class="sidebar-user">
+      <a [routerLink]="'/usuario/' + userId" (click)="closeSidebar()">
+        <img *ngIf="user && user.foto" [src]="user.foto" [alt]="user.nome" (error)="hideUnavailableUserPhoto()">
+        <span class="account-initial" *ngIf="!user || !user.foto" aria-hidden="true">{{ userInitial }}</span>
+        <span class="sidebar-user-copy"><strong>{{ user?.nome || userFirstName }}</strong><small>Ver perfil</small></span>
+      </a>
+      <button type="button" (click)="requestLogout()" aria-label="Sair da conta" title="Sair"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3M14 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5"></path></svg></button>
+    </div>
+  </footer>
 </aside>

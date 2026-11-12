@@ -1,58 +1,111 @@
-<app-navbar [hideSearch]="true" [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
+<app-navbar [hideSearch]="true" pageTitle="Encontrar profissionais" [authenticated]="entrarSair" [userId]="userId" (logout)="sair()"></app-navbar>
 <div class="feed-dashboard" [class.guest-dashboard]="!entrarSair">
   <main class="feed-content">
-    <header class="search-heading"><div><span class="section-overline">Serviços residenciais</span><h1>Encontrar profissionais</h1></div><a routerLink="/destaques" class="button-quiet">Ver trabalhos publicados <app-arrow-icon></app-arrow-icon></a></header>
-    <section class="search-toolbar" aria-label="Buscar profissionais">
-      <form class="feed-search" (ngSubmit)="searchService()" role="search">
-        <app-page-icon name="search"></app-page-icon><label class="sr-only" for="serviceSearch">Buscar serviço ou problema</label>
-        <input id="serviceSearch" name="serviceSearch" type="search" [(ngModel)]="serviceSearch" (ngModelChange)="onSearchChange()" placeholder="Qual serviço você precisa?" autocomplete="off">
+    <nav class="breadcrumb" aria-label="Você está em">
+      <a routerLink="/home" aria-label="Início"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5M5.5 10v9.5h13V10"></path></svg></a>
+      <svg class="crumbSep" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+      <span>{{ serviceSearch ? 'Resultados para “' + serviceSearch + '”' : 'Encontrar profissionais' }}</span>
+    </nav>
 
-      <label class="location-picker" for="cityFilter"><app-page-icon name="location"></app-page-icon><span class="sr-only">Cidade</span><select id="cityFilter" name="cityFilter" [(ngModel)]="cityFilter" (ngModelChange)="onFilterChange()" [disabled]="isFilterMetadataLoading"><option value="">Todas as cidades</option><option *ngFor="let city of availableCities" [value]="city">{{ city }}</option></select></label>
-      <button class="filter-toggle button-secondary" type="button" (click)="toggleFilterPanel()" [attr.aria-expanded]="isFilterPanelOpen" aria-controls="advancedFilters"><app-page-icon name="settings"></app-page-icon>{{ isFilterPanelOpen ? 'Ocultar filtros' : 'Filtros' }}</button><button class="button-primary searchSubmit" type="submit">Buscar</button></form>
-    </section>
+    <header class="search-heading">
+      <h1>{{ resultsTitle }}</h1>
+      <a routerLink="/destaques" class="headingLink">Ver trabalhos publicados <app-arrow-icon></app-arrow-icon></a>
+    </header>
 
-    <section class="filter-panel" id="advancedFilters" *ngIf="isFilterPanelOpen" aria-labelledby="filterTitle">
-      <header class="filter-header"><h2 id="filterTitle">Refinar resultados</h2><button class="button-quiet" type="button" *ngIf="hasActiveFilters()" (click)="clearFilters()">Limpar filtros</button></header>
-      <div class="filter-grid">
-        <div class="field-group"><label for="categoryFilter">Categoria</label><select id="categoryFilter" name="categoryFilter" [(ngModel)]="categoryFilter" (ngModelChange)="onFilterChange()"><option value="all">Todas</option><option *ngFor="let category of serviceCategories" [value]="category">{{ category }}</option></select></div>
-        <div class="field-group"><label for="minimumPrice">Preço mínimo</label><input id="minimumPrice" name="minimumPrice" type="number" min="0" [(ngModel)]="minimumPrice" (ngModelChange)="onFilterChange()" placeholder="R$ 0"></div>
-        <div class="field-group"><label for="maximumPrice">Preço máximo</label><input id="maximumPrice" name="maximumPrice" type="number" min="0" [(ngModel)]="maximumPrice" (ngModelChange)="onFilterChange()" placeholder="Sem limite"></div>
-        <div class="field-group"><label for="minimumRating">Avaliação mínima</label><select id="minimumRating" name="minimumRating" [(ngModel)]="minimumRating" (ngModelChange)="onFilterChange()"><option [ngValue]="0">Qualquer nota</option><option [ngValue]="3">3 ou mais</option><option [ngValue]="4">4 ou mais</option><option [ngValue]="4.5">4,5 ou mais</option></select></div>
-        <label class="availability-filter"><input type="checkbox" name="availableOnly" [(ngModel)]="availableOnly" (ngModelChange)="onFilterChange()">Somente disponíveis</label>
+    <form class="feed-search" (ngSubmit)="searchService()" role="search">
+      <div class="location-picker">
+        <app-select-menu ariaLabel="Cidade" [options]="cityOptions" [value]="cityFilter" [disabled]="isFilterMetadataLoading" (valueChange)="cityFilter = $event; onFilterChange()">
+          <app-page-icon name="location"></app-page-icon>
+        </app-select-menu>
       </div>
-      <p class="field-error" *ngIf="hasInvalidPriceRange">O preço mínimo deve ser menor ou igual ao preço máximo.</p>
-    </section>
+      <label class="sr-only" for="serviceSearch">Buscar serviço ou problema</label>
+      <input id="serviceSearch" name="serviceSearch" type="search" [(ngModel)]="serviceSearch" (ngModelChange)="onSearchChange()" placeholder="Qual serviço você precisa?" autocomplete="off">
+      <button class="searchSubmit" type="submit" aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7"></circle><path d="m16 16 5 5"></path></svg></button>
+    </form>
 
     <section class="services-section" aria-labelledby="servicesTitle">
       <h2 class="sr-only" id="servicesTitle">Categorias de serviços</h2>
       <app-loading-state *ngIf="isCatalogLoading" message="Carregando serviços..."></app-loading-state>
       <app-action-feedback *ngIf="hasCatalogLoadError" type="error" message="Não foi possível carregar os serviços."></app-action-feedback>
       <button *ngIf="hasCatalogLoadError" class="button-secondary" (click)="loadServiceCategories()">Tentar novamente</button>
-      <div class="category-grid" id="serviceCategories" [class.expanded]="servicesExpanded" *ngIf="!hasCatalogLoadError && !isCatalogLoading">
-        <button class="category-all" [attr.aria-pressed]="!serviceSearch && categoryFilter === 'all'" [class.selected]="!serviceSearch && categoryFilter === 'all'" type="button" (click)="clearServiceSelection()"><app-page-icon name="briefcase"></app-page-icon><span>Todos</span></button>
-        <button class="category-card" *ngFor="let service of visibleServices" [class.selected]="serviceSearch === service.nome" [attr.aria-pressed]="serviceSearch === service.nome" type="button" (click)="selectService(service.nome)"><app-service-icon [serviceName]="service.nome"></app-service-icon><strong>{{ service.nome }}</strong></button>
-        <button class="exploreServices" *ngIf="services.length > initialServiceCount" type="button" (click)="toggleServices()" aria-controls="serviceCategories" [attr.aria-expanded]="servicesExpanded"><app-page-icon name="plus" *ngIf="!servicesExpanded"></app-page-icon><app-arrow-icon direction="left" *ngIf="servicesExpanded"></app-arrow-icon><span>{{ servicesExpanded ? 'Mostrar menos serviços' : 'Explorar todos os serviços' }}</span></button>
+      <div class="category-chips" id="serviceCategories" [class.expanded]="servicesExpanded" *ngIf="!hasCatalogLoadError && !isCatalogLoading">
+        <button class="chip" [class.selected]="!serviceSearch && categoryFilter === 'all'" [attr.aria-pressed]="!serviceSearch && categoryFilter === 'all'" type="button" (click)="clearServiceSelection()">Todos</button>
+        <button class="chip" *ngFor="let service of visibleServices" [class.selected]="serviceSearch === service.nome" [attr.aria-pressed]="serviceSearch === service.nome" type="button" (click)="selectService(service.nome)">{{ service.nome }}</button>
+        <button class="chip chipMore" *ngIf="services.length > initialServiceCount" type="button" (click)="toggleServices()" aria-controls="serviceCategories" [attr.aria-expanded]="servicesExpanded">{{ servicesExpanded ? 'Mostrar menos' : 'Mais serviços' }}</button>
       </div>
     </section>
 
-    <div class="mobile-views" role="group" aria-label="Visualização dos resultados"><button type="button" [class.selected]="mobileView === 'list'" [attr.aria-pressed]="mobileView === 'list'" (click)="mobileView = 'list'"><app-page-icon name="briefcase"></app-page-icon>Lista</button><button type="button" [class.selected]="mobileView === 'map'" [attr.aria-pressed]="mobileView === 'map'" (click)="mobileView = 'map'"><app-page-icon name="location"></app-page-icon>Mapa</button></div>
+    <div class="results-layout">
+      <button class="mobileFiltersToggle" type="button" (click)="mobileFiltersOpen = !mobileFiltersOpen" [attr.aria-expanded]="mobileFiltersOpen" aria-controls="advancedFilters"><app-page-icon name="settings"></app-page-icon>{{ mobileFiltersOpen ? 'Ocultar filtros' : 'Filtros' }}</button>
 
-    <div class="discovery-layout" [class.map-view]="mobileView === 'map'">
+      <aside class="filter-sidebar" id="advancedFilters" [class.open]="mobileFiltersOpen" aria-labelledby="filterTitle">
+        <header class="filter-header"><h2 id="filterTitle">Filtros</h2><button class="linkButton" type="button" *ngIf="hasActiveFilters()" (click)="clearFilters()">Limpar</button></header>
+
+        <details class="filterGroup" open>
+          <summary>Avaliação<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 15 6-6 6 6"></path></svg></summary>
+          <label class="checkRow" *ngFor="let rating of ratingOptions"><input type="checkbox" [checked]="minimumRating === rating" (change)="setMinimumRating(rating)"><span class="stars" aria-hidden="true">★★★★★</span><span>{{ rating | number:'1.1-1' }}+</span></label>
+        </details>
+
+        <details class="filterGroup" open>
+          <summary>Categoria<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 15 6-6 6 6"></path></svg></summary>
+          <label class="checkRow"><input type="radio" name="categoryFilter" value="all" [(ngModel)]="categoryFilter" (ngModelChange)="onFilterChange()"><span>Todas</span></label>
+          <label class="checkRow" *ngFor="let category of serviceCategories"><input type="radio" name="categoryFilter" [value]="category" [(ngModel)]="categoryFilter" (ngModelChange)="onFilterChange()"><span>{{ category }}</span></label>
+        </details>
+
+        <details class="filterGroup" open>
+          <summary>Preço<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 15 6-6 6 6"></path></svg></summary>
+          <div class="priceRow">
+            <label><span>Mínimo</span><input id="minimumPrice" name="minimumPrice" type="number" min="0" [(ngModel)]="minimumPrice" (ngModelChange)="onFilterChange()" placeholder="R$ 0"></label>
+            <label><span>Máximo</span><input id="maximumPrice" name="maximumPrice" type="number" min="0" [(ngModel)]="maximumPrice" (ngModelChange)="onFilterChange()" placeholder="Sem limite"></label>
+          </div>
+          <p class="field-error" *ngIf="hasInvalidPriceRange">O preço mínimo deve ser menor ou igual ao máximo.</p>
+        </details>
+
+        <details class="filterGroup" open>
+          <summary>Disponibilidade<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 15 6-6 6 6"></path></svg></summary>
+          <label class="checkRow"><input type="checkbox" name="availableOnly" [(ngModel)]="availableOnly" (ngModelChange)="onFilterChange()"><span>Somente disponíveis</span></label>
+        </details>
+      </aside>
+
       <section class="results-panel" aria-labelledby="professionalsTitle">
-        <header class="results-heading"><h2 id="professionalsTitle" aria-live="polite"><ng-container *ngIf="isFilterMetadataLoading">Buscando profissionais</ng-container><ng-container *ngIf="!isFilterMetadataLoading">{{ matchingProfessionals.length }} {{ matchingProfessionals.length === 1 ? 'profissional encontrado' : 'profissionais encontrados' }}</ng-container></h2><span *ngIf="cityFilter">{{ cityFilter }}</span></header>
+        <header class="results-heading">
+          <h2 id="professionalsTitle" aria-live="polite"><ng-container *ngIf="isFilterMetadataLoading">Buscando profissionais…</ng-container><ng-container *ngIf="!isFilterMetadataLoading">{{ matchingProfessionals.length }} {{ matchingProfessionals.length === 1 ? 'profissional' : 'profissionais' }}<span *ngIf="cityFilter"> em {{ cityFilter }}</span></ng-container></h2>
+          <div class="resultsTools">
+            <app-select-menu class="sortPicker" ariaLabel="Ordenar por" [options]="sortOptions" [value]="sortOrder" (valueChange)="sortOrder = $event">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 6h10M4 12h7M4 18h4M17 5v14m0 0-3-3m3 3 3-3"></path></svg>
+            </app-select-menu>
+            <div class="viewSwitch" role="group" aria-label="Visualização dos resultados"><button type="button" [class.selected]="mobileView === 'list'" [attr.aria-pressed]="mobileView === 'list'" (click)="mobileView = 'list'">Lista</button><button type="button" [class.selected]="mobileView === 'map'" [attr.aria-pressed]="mobileView === 'map'" (click)="mobileView = 'map'">Mapa</button></div>
+          </div>
+        </header>
+
         <app-loading-state *ngIf="isFilterMetadataLoading" message="Buscando profissionais..."></app-loading-state>
         <app-action-feedback *ngIf="hasMetadataLoadError" type="error" message="Alguns profissionais não puderam ser carregados."></app-action-feedback>
         <button class="button-secondary" *ngIf="hasMetadataLoadError && !hasCatalogLoadError" (click)="loadServiceCategories()">Tentar novamente</button>
-        <div class="professional-grid" *ngIf="!isFilterMetadataLoading">
-          <article class="professional-card" *ngFor="let professional of matchingProfessionals">
-            <div class="professional-card-header"><img *ngIf="professional.professionalPhoto" [src]="professional.professionalPhoto" [alt]="professional.professionalName" (error)="hideUnavailableProfessionalPhoto(professional)"><span class="professional-initial" *ngIf="!professional.professionalPhoto" aria-hidden="true">{{ getProfessionalInitial(professional.professionalName) }}</span><div><h3>{{ professional.professionalName }}</h3><p>{{ professional.serviceName }}</p><div class="professional-meta"><span class="professional-location"><app-page-icon name="location"></app-page-icon>{{ professional.city || 'Local a combinar' }}</span><span class="professional-rating" *ngIf="professional.ratingCount"><strong>★ {{ professional.averageRating | number:'1.1-1' }}</strong> ({{ professional.ratingCount }})</span><span class="professional-rating" *ngIf="!professional.ratingCount">Sem avaliações</span></div></div></div>
-            <p class="professional-description" *ngIf="professional.description">{{ professional.description }}</p>
-            <div class="professional-footer"><span *ngIf="hasProfessionalPrice(professional.price)"><small>A partir de</small><strong>{{ professional.price | currency:'BRL' }}</strong></span><a class="button-primary" [routerLink]="['/serviço', professional.serviceId, 'usuario', professional.professionalId]">Ver perfil <app-arrow-icon direction="chevron"></app-arrow-icon></a></div>
-          </article>
+
+        <div class="professional-grid" *ngIf="!isFilterMetadataLoading && mobileView === 'list'">
+          <a class="professional-card" *ngFor="let professional of sortedProfessionals" [routerLink]="['/serviço', professional.serviceId, 'usuario', professional.professionalId]" [attr.aria-label]="'Ver perfil de ' + professional.professionalName">
+            <div class="cardMedia">
+              <img *ngIf="professional.professionalPhoto" [src]="professional.professionalPhoto" alt="" loading="lazy" (error)="hideUnavailableProfessionalPhoto(professional)">
+              <span class="cardInitial" *ngIf="!professional.professionalPhoto" aria-hidden="true">{{ getProfessionalInitial(professional.professionalName) }}</span>
+              <span class="cardBadge" *ngIf="professional.ratingCount">★ {{ professional.averageRating | number:'1.1-1' }} <small>({{ professional.ratingCount }})</small></span>
+              <span class="cardBadge newBadge" *ngIf="!professional.ratingCount">Novo</span>
+            </div>
+            <div class="cardBody">
+              <h3>{{ professional.serviceName }}</h3>
+              <p class="cardWho">{{ professional.professionalName }}<ng-container *ngIf="professional.city"> · {{ professional.city }}</ng-container></p>
+              <p class="cardDescription" *ngIf="professional.description">{{ professional.description }}</p>
+              <p class="cardPrice" *ngIf="hasProfessionalPrice(professional.price)"><small>a partir de</small> {{ professional.price | currency:'BRL' }}</p>
+              <p class="cardPrice muted" *ngIf="!hasProfessionalPrice(professional.price)">Preço a combinar</p>
+            </div>
+          </a>
         </div>
+
+        <div class="mapView" *ngIf="mobileView === 'map'">
+          <app-regional-service-map *ngIf="!hasCatalogLoadError" [embedded]="true" [regions]="serviceRegions" [professionals]="matchingProfessionals" [isLoading]="isFilterMetadataLoading" (regionSelected)="openRegion($event)"></app-regional-service-map>
+        </div>
+
         <section class="empty-state" *ngIf="!hasCatalogLoadError && !isFilterMetadataLoading && !matchingProfessionals.length"><div><app-page-icon name="search"></app-page-icon><h3>Nenhum profissional encontrado</h3><p>Tente outro serviço ou amplie a região da busca.</p><button *ngIf="hasActiveFilters()" class="button-secondary" (click)="clearFilters()">Limpar filtros</button></div></section>
       </section>
-      <aside class="map-panel" aria-label="Profissionais por região"><app-regional-service-map *ngIf="!hasCatalogLoadError" [embedded]="true" [regions]="serviceRegions" [professionals]="matchingProfessionals" [isLoading]="isFilterMetadataLoading" (regionSelected)="openRegion($event)"></app-regional-service-map></aside>
     </div>
   </main>
   <app-floating-chat [authenticated]="entrarSair" [userId]="userId" [docked]="false"></app-floating-chat>

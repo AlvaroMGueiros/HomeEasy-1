@@ -1,0 +1,19 @@
+<div class="roleBackdrop" (click)="close()"></div>
+<section class="roleModal" role="dialog" aria-modal="true" aria-labelledby="roleTitle" aria-describedby="roleText">
+  <button class="roleClose" type="button" (click)="close()" aria-label="Fechar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+  </button>
+
+  <div class="roleArt" aria-hidden="true">
+    <span class="roleArtRing"></span>
+    <img src="assets/brand/homeeasy-symbol.svg" alt="">
+  </div>
+
+  <h2 id="roleTitle">Vamos começar?</h2>
+  <p id="roleText">Você gostaria de <strong>prestar serviços</strong> ou <strong>solicitar um serviço</strong>?</p>
+
+  <div class="roleActions">
+    <button #firstAction class="roleOption roleOptionPrimary" type="button" (click)="pick('provider')">Sou prestador de serviços</button>
+    <button class="roleOption" type="button" (click)="pick('client')">Quero encontrar um profissional</button>
+  </div>
+</section>

@@ -1,8 +1,8 @@
 <app-navbar [authenticated]="authenticated" [userId]="userId" (logout)="logout()"></app-navbar>
 <main class="app-page">
-  <div class="page-shell page-shell-narrow">
+  <div class="page-shell">
     <header class="page-heading"><span class="pageEmblem"><app-page-icon name="heart"></app-page-icon></span>
-      <div class="page-heading-copy"><span class="page-kicker">Sua seleção</span><h1>Profissionais favoritos</h1><p>Encontre novamente quem você salvou para comparar ou contratar depois.</p></div>
+      <div class="page-heading-copy"><h1>Profissionais favoritos</h1><p>Encontre novamente quem você salvou para comparar ou contratar depois.</p></div>
       <a class="button-primary" routerLink="/feed">Encontrar profissionais</a>
     </header>
     <app-action-feedback [message]="feedbackMessage" [type]="feedbackType"></app-action-feedback>
@@ -13,9 +13,9 @@
         <h2>{{ favorite.professional.name }}</h2>
         <p>{{ favorite.professional.bio }}</p>
         <p><strong>{{ favorite.professional.city }}, {{ favorite.professional.state }}</strong></p>
-        <p *ngIf="favorite.professional.metrics">{{ favorite.professional.metrics.averageRating || 'Novo' }} de avaliação · {{ favorite.professional.metrics.completedServices }} serviço(s) concluído(s)</p>
+        <p *ngIf="favorite.professional.metrics">{{ favorite.professional.metrics.averageRating || 'Novo' }} de avaliação, {{ favorite.professional.metrics.completedServices }} serviço(s) concluído(s)</p>
         <div class="card-actions">
-          <a class="button-primary" [routerLink]="['/usuario', favorite.professional.id]">Ver perfil</a>
+          <a class="button-secondary" [routerLink]="['/usuario', favorite.professional.id]">Ver perfil</a>
           <button class="button-secondary" type="button" [disabled]="!!removingProfessionalId" (click)="removeFavorite(favorite.professional.id)">{{ removingProfessionalId === favorite.professional.id ? 'Removendo...' : 'Remover' }}</button>
         </div>
       </article>

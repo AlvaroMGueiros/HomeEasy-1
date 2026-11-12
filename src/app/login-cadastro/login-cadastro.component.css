@@ -1,33 +1,63 @@
 :host { display: block; min-height: 100vh; background: var(--color-background); }
 .auth-page { display: grid; grid-template-columns: minmax(0, 1fr) minmax(420px, .95fr); align-items: stretch; width: min(1140px, calc(100% - 64px)); margin: 40px auto; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); box-shadow: none; }
 .auth-intro { display: flex; min-width: 0; flex-direction: column; align-items: start; padding: clamp(32px, 4vw, 52px); border-radius: 15px 0 0 15px; color: var(--color-surface); background: var(--color-primaryDark); }
-.auth-eyebrow { margin-bottom: 14px; color: var(--color-accentSoft); font-size: .82rem; font-weight: 500; letter-spacing: 0; }
+.auth-eyebrow { margin-bottom: 16px; color: var(--color-accentSoft); font-size: .82rem; font-weight: 500; letter-spacing: 0; }
 .auth-intro h1 { margin: 0 0 20px; color: var(--color-surface); font-size: clamp(1.9rem, 2.6vw, 2.55rem); line-height: 1.22; letter-spacing: -.04em; }
 .auth-intro > p { margin: 0; color: var(--color-accentSoft); font-size: .94rem; line-height: 1.8; }
 .auth-benefits { display: grid; gap: 24px; margin: 36px 0; }
-.auth-benefits > div { display: flex; align-items: start; gap: 14px; }
+.auth-benefits > div { display: flex; align-items: start; gap: 16px; }
 .auth-benefits app-page-icon { width: 21px; height: 21px; margin-top: 2px; color: var(--color-accentSoft); }
 .auth-benefits strong, .auth-benefits small { display: block; }
 .auth-benefits strong { color: var(--color-surface); font-size: .86rem; font-weight: 600; }
 .auth-benefits small { margin-top: 4px; color: var(--color-accentSoft); font-size: .82rem; line-height: 1.6; }
-.auth-explore { display: inline-flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 24px; border-top: 1px solid var(--color-primary); color: var(--color-accentSoft); font-size: .82rem; line-height: 1.7; }
+.auth-explore { display: inline-flex; align-items: center; gap: 12px; margin-top: auto; padding-top: 24px; border-top: 1px solid var(--color-primary); color: var(--color-accentSoft); font-size: .82rem; line-height: 1.7; }
 .auth-explore:hover { color: var(--color-surface); }
 .login-wrap { min-width: 0; width: 100%; }
 .login-html { width: 100%; padding: clamp(28px, 4vw, 48px); }
 .auth-heading { margin-bottom: 24px; }
 .auth-heading .page-kicker { margin-bottom: 8px; font-size: .8rem; }
-.auth-heading h2 { margin: 0 0 9px; font-size: 1.65rem; }
+.auth-heading h2 { margin: 0 0 8px; font-size: 1.65rem; }
 .auth-heading p { margin: 0; font-size: .85rem; }
-.auth-tabs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; padding: 4px; margin-bottom: 26px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surfaceMuted); }
+.auth-tabs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; padding: 4px; margin-bottom: 28px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surfaceMuted); }
 .auth-tabs button { min-height: 40px; border: 1px solid transparent; border-radius: 8px; color: var(--color-textMuted); background: transparent; font-size: .84rem; font-weight: 600; }
 .auth-tabs button.active { color: var(--color-primary); border-color: var(--color-border); background: var(--color-surface); box-shadow: 0 2px 6px var(--color-shadow); }
 .password-label { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .recovery-link { font-size: .82rem; font-weight: 600; }
 .auth-submit { width: 100%; min-height: 48px; }
-.auth-divider { display: flex; align-items: center; gap: 14px; margin-top: 24px; color: var(--color-textMuted); font-size: .8rem; }
+.auth-divider { display: flex; align-items: center; gap: 16px; margin-top: 24px; color: var(--color-textMuted); font-size: .8rem; }
 .auth-divider::before, .auth-divider::after { content: ''; height: 1px; flex: 1; background: var(--color-border); }
 .auth-google-hint { margin: 12px 0 0; font-size: .82rem; }
-.auth-page app-google-auth-button { display: block; margin-top: 18px; }
-@media (max-width: 850px) { .auth-page { grid-template-columns: minmax(0, 1fr) minmax(360px, 1fr); width: calc(100% - 40px); margin: 28px auto; } .auth-intro { padding: 32px 26px; } .login-html { padding: 32px 26px; } .auth-intro h1 { font-size: 1.95rem; } }
+.auth-page app-google-auth-button { display: block; margin-top: 20px; }
+@media (max-width: 850px) { .auth-page { grid-template-columns: minmax(0, 1fr) minmax(360px, 1fr); width: calc(100% - 40px); margin: 28px auto; } .auth-intro { padding: 32px 28px; } .login-html { padding: 32px 28px; } .auth-intro h1 { font-size: 1.95rem; } }
 @media (max-width: 700px) { .auth-page { grid-template-columns: 1fr; max-width: 520px; margin: 24px auto; } .auth-intro { padding: 24px; border-radius: 15px 15px 0 0; } .auth-benefits, .auth-explore { display: none; } .auth-intro h1 { margin-bottom: 12px; font-size: 1.7rem; } .auth-intro > p { font-size: .875rem; } .auth-eyebrow { margin-bottom: 8px; } .login-html { padding: 28px 24px; } }
 @media (max-width: 400px) { .auth-page { width: calc(100% - 28px); } .auth-intro, .login-html { padding: 24px 20px; } .auth-heading h2 { font-size: 1.5rem; } }
+
+/* Tela dividida: painel da marca em tela cheia à esquerda, formulário enxuto à direita */
+.auth-page { width: auto; min-height: calc(100vh - 72px); margin: 0; padding: 16px; gap: 16px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); border: 0; border-radius: 0; background: #FAFBFB; }
+.auth-intro { position: relative; overflow: hidden; justify-content: flex-end; padding: clamp(32px, 5vw, 64px); border-radius: 28px; background: radial-gradient(120% 90% at 100% 0%, var(--color-accent) 0%, var(--color-primary) 42%, var(--color-primaryDark) 100%); }
+.auth-intro::after { content: ''; position: absolute; right: -60px; bottom: -60px; width: 320px; height: 320px; background: url('/assets/brand/homeeasy-symbol-white.svg') center / contain no-repeat; opacity: .12; pointer-events: none; }
+.auth-intro h1 { max-width: 560px; font-size: clamp(2.4rem, 4.4vw, 3.75rem); font-weight: 800; line-height: 1.02; letter-spacing: -.045em; }
+.auth-intro > p { max-width: 440px; color: rgba(255, 255, 255, .82); font-size: 1.0625rem; line-height: 1.6; }
+.auth-eyebrow { margin-bottom: auto !important; }
+.auth-benefits { margin-top: 32px; }
+.login-wrap { display: grid; place-items: center; }
+.login-html { max-width: 420px; padding: 32px 8px; }
+.auth-heading h2 { font-size: 2rem; font-weight: 800; letter-spacing: -.03em; }
+.auth-submit { width: 100%; min-height: 50px; border-radius: 999px !important; font-weight: 700 !important; }
+@media (max-width: 900px) {
+  .auth-page { grid-template-columns: 1fr; min-height: 0; }
+  .auth-intro { min-height: 280px; }
+  .auth-intro h1 { font-size: 2.2rem; }
+  .login-html { max-width: 520px; padding: 24px 8px 40px; }
+}
+
+/* Altura fixa da tela: a página não cresce; só a coluna do formulário rola quando o cadastro é maior */
+@media (min-width: 901px) {
+  .auth-page { height: calc(100vh - 72px); min-height: 0; overflow: hidden; }
+  .auth-intro { height: 100%; }
+  .login-wrap { height: 100%; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+  .login-html { margin: auto 0; padding-block: 24px; }
+  .login-wrap { place-items: safe center; }
+  .form-stack { gap: 12px; }
+  .auth-heading { margin-bottom: 16px; }
+}

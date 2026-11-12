@@ -1,6 +1,6 @@
 :host { display: block; min-height: 100vh; background: var(--color-background); }
 .service-request-cta { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
-.service-request-cta h2 { margin: 0 0 6px; }
+.service-request-cta h2 { margin: 0 0 8px; }
 .service-request-cta p { margin: 0; }
 
 @media (max-width: 640px) {

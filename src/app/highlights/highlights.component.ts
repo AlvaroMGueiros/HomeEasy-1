@@ -8,6 +8,7 @@ import { ServicosService } from '../Servicos/servicos.service';
 import { UsuarioService } from '../Servicos/usuario.service';
 import { Highlight } from '../shared/models/highlight';
 import { Servico } from '../Usuarios/servico';
+import { Usuario } from '../Usuarios/usuario';
 import { getCurrentUser } from '../shared/utils/session-user.utils';
 import { resolveHttpErrorMessage } from '../shared/utils/http-error.utils';
 import { environment } from '../../environments/environment';
@@ -20,6 +21,8 @@ export class HighlightsComponent implements OnInit, OnDestroy {
   filters = { city: '', state: '', search: '', serviceId: '' };
   filtersExpanded = window.matchMedia('(min-width: 801px)').matches;
   favoriteIds = new Set<string>();
+  me: Usuario | null = null;
+  expandedIds = new Set<string>();
   favoriteReady = false;
   savingFavoriteId = '';
   page = 0; hasMore = false; isLoading = false; error = ''; feedback = '';
@@ -27,7 +30,8 @@ export class HighlightsComponent implements OnInit, OnDestroy {
   constructor(private highlights: HighlightsService, private favorites: FavoritesService, private catalog: ServicosService,
     private login: LoginServiceService, private router: Router, private users: UsuarioService) {}
   ngOnInit() {
-    void firstValueFrom(this.users.getUsuario(this.userId)).then(user => {
+    void firstValueFrom(this.users.getUserWithProfilePhoto(this.userId)).then(user => {
+      this.me = user;
       this.filters.city = user.cidade || ''; this.filters.state = user.estado || '';
       if (this.filters.city && this.filters.state) void this.load();
       else this.feedback = 'Informe a cidade e o estado para ver os trabalhos da região.';
@@ -36,6 +40,8 @@ export class HighlightsComponent implements OnInit, OnDestroy {
     void firstValueFrom(this.favorites.findFavorites()).then(favorites => { this.favoriteIds = new Set(favorites.map(favorite => favorite.professional.id)); this.favoriteReady = true; }).catch(() => { this.feedback = 'Favoritos indisponíveis. Atualize a página para tentar novamente.'; });
   }
   ngOnDestroy() { this.loadVersion += 1; }
+  toggleExpanded(id: string) { this.expandedIds.has(id) ? this.expandedIds.delete(id) : this.expandedIds.add(id); }
+  get myInitial() { return (this.me?.nome || '?').charAt(0).toUpperCase(); }
   mediaUrl(mediaId: string) { return environment.apiUrl + '/media/' + mediaId + '/public'; }
   async load(append = false) {
     if (append && this.isLoading) return;
