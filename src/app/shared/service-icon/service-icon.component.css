@@ -15,3 +15,11 @@
 .service-icon-solar, .service-icon-pestControl, .service-icon-locksmith { color: var(--color-categoryAmber); background: var(--color-categoryAmberSoft); }
 .service-icon-furnitureAssembly, .service-icon-drywall, .service-icon-architecture { color: var(--color-categoryPurple); background: var(--color-categoryPurpleSoft); }
 .service-icon-cameras, .service-icon-appliances, .service-icon-postConstruction { color: var(--color-categoryBlue); background: var(--color-categoryBlueSoft); }
+
+/* Home: ícone direto no círculo/bloco, sem caixa interna (evita caixa dentro de caixa) */
+:host-context(.specialtyCircle) .service-icon,
+:host-context(.exploreTile) .service-icon,
+:host-context(.bentoPhoto) .service-icon { width: auto; height: auto; flex-basis: auto; border-radius: 0; background: transparent !important; color: var(--color-primaryDark); }
+:host-context(.specialtyCircle) .service-icon svg { width: 36px; height: 36px; stroke-width: 1.5; }
+:host-context(.exploreTile) .service-icon svg { width: 44px; height: 44px; stroke-width: 1.5; }
+:host-context(.bentoPhoto) .service-icon svg { width: 72px; height: 72px; stroke-width: 1.25; }
